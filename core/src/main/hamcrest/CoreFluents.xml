@@ -1,0 +1,10 @@
+<matchers>
+
+    <factory class="org.cthul.matchers.fluent.builder.FluentAssertBuilder"/>
+    <!--<factory class="org.cthul.matchers.fluent.builder.FluentMatcherBuilder"/>-->
+    
+    <factory class="org.cthul.matchers.fluent.adapters.EachOfAdapter"/>
+    <factory class="org.cthul.matchers.fluent.adapters.AnyOfAdapter"/>
+    <factory class="org.cthul.matchers.fluent.adapters.IdentityValue"/>
+
+</matchers>
