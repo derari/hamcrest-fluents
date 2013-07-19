@@ -21,7 +21,7 @@ import org.hamcrest.Matcher;
  */
 public class FluentMatcherBuilder
                 <Value, Match, This extends FluentMatcherBuilder<Value, Match, This>>
-                extends AbstractMatcherPropertyBuilder<Value, Value, Match, This, This>
+                extends AbstractPropertyMatcherBuilder<Value, Value, Match, This, This>
                 implements FluentMatcher<Value, Match> {
     
     @Factory

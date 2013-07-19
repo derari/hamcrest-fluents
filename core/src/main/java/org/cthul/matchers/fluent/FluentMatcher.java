@@ -1,7 +1,6 @@
 package org.cthul.matchers.fluent;
 
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
-import org.cthul.matchers.fluent.property.FluentMatcherProperty;
 import org.hamcrest.Matcher;
 
 /**
@@ -10,7 +9,7 @@ import org.hamcrest.Matcher;
  */
 public interface FluentMatcher<Value, Match> 
                 extends Fluent<Value>, 
-                        FluentMatcherProperty<Value, Value, Match>,
+                        FluentPropertyMatcher<Value, Value, Match>,
                         QuickDiagnosingMatcher<Match> {
     
     QuickDiagnosingMatcher<Match> getMatcher();
@@ -88,7 +87,7 @@ public interface FluentMatcher<Value, Match>
     <Value2 extends Value> IsA<Value2, Match> isA(Class<Value2> clazz);
     
     interface IsA<Value, Match> 
-                    extends FluentMatcherProperty.IsA<Value, Value, Match>,
+                    extends FluentPropertyMatcher.IsA<Value, Value, Match>,
                             Fluent.IsA<Value> {
 
         @Override

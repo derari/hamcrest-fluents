@@ -5,7 +5,7 @@ import org.cthul.matchers.InstanceOf;
 import org.cthul.matchers.chain.AndChainMatcher;
 import org.cthul.matchers.chain.OrChainMatcher;
 import org.cthul.matchers.fluent.Fluent;
-import org.cthul.matchers.fluent.property.FluentProperty;
+import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 

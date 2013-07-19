@@ -1,6 +1,5 @@
 package org.cthul.matchers.fluent;
 
-import org.cthul.matchers.fluent.property.FluentAssertProperty;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -11,7 +10,7 @@ import org.hamcrest.Matcher;
  */
 public interface FluentAssert<Value> 
                 extends Fluent<Value>, 
-                        FluentAssertProperty<Value, Value> {
+                        FluentPropertyAssert<Value, Value> {
     
     @Override
     FluentAssert<Value> as(String reason);
@@ -64,20 +63,20 @@ public interface FluentAssert<Value>
     FluentAssert<Value> none(Matcher<? super Value>... matcher);
     
     @Override
-    <P> FluentAssertProperty<Value, P> _(MatchValueAdapter<? super Value, P> matcher);
+    <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Value, P> matcher);
     
     @Override
-    <P> FluentAssertProperty<Value, P> has(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyAssert<Value, P> has(MatchValueAdapter<? super Value, P> adapter);
     
     @Override
-    <P> FluentAssertProperty<Value, P> not(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyAssert<Value, P> not(MatchValueAdapter<? super Value, P> adapter);
     
     @Override
-    <P> FluentAssertProperty<Value, P> hasNot(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyAssert<Value, P> hasNot(MatchValueAdapter<? super Value, P> adapter);
     
-    <P> FluentAssertProperty<Value, P> and(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyAssert<Value, P> and(MatchValueAdapter<? super Value, P> adapter);
     
-    <P> FluentAssertProperty<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter);
     
     @Override
     <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
@@ -86,7 +85,7 @@ public interface FluentAssert<Value>
     <Value2 extends Value> IsA<Value2> isA(Class<Value2> clazz);
     
     interface IsA<Value> 
-                    extends FluentAssertProperty.IsA<Value, Value>,
+                    extends FluentPropertyAssert.IsA<Value, Value>,
                             Fluent.IsA<Value> {
 
         @Override

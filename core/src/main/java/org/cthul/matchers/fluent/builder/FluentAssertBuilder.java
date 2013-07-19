@@ -2,7 +2,7 @@ package org.cthul.matchers.fluent.builder;
 
 import static org.cthul.matchers.fluent.AssertUtils.ASSERT;
 import org.cthul.matchers.fluent.FluentAssert;
-import org.cthul.matchers.fluent.property.FluentAssertProperty;
+import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
@@ -14,7 +14,7 @@ import org.hamcrest.Matcher;
  * Implements {@link FluentAssert}.
  */
 public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, This>> 
-                extends AbstractAssertPropertyBuilder<Value, Value, This, This>
+                extends AbstractPropertyAssertBuilder<Value, Value, This, This>
                 implements FluentAssert<Value> {
     
     @Factory
@@ -88,13 +88,13 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <P> FluentAssertProperty<Value, P> and(MatchValueAdapter<? super Value, P> adapter) {
+    public <P> FluentPropertyAssert<Value, P> and(MatchValueAdapter<? super Value, P> adapter) {
         _and();
         return _newProperty(adapter, null, false);
     }
 
     @Override
-    public <P> FluentAssertProperty<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter) {
+    public <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter) {
         _and();
         _not();
         return _newProperty(adapter, null, false);

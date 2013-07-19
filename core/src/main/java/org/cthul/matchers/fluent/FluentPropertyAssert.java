@@ -1,6 +1,5 @@
-package org.cthul.matchers.fluent.property;
+package org.cthul.matchers.fluent;
 
-import org.cthul.matchers.fluent.*;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -10,22 +9,22 @@ import org.hamcrest.Matcher;
  * 
  * @param <Value, Property> 
  */
-public interface FluentAssertProperty<Value, Property> extends FluentProperty<Value, Property> {
+public interface FluentPropertyAssert<Value, Property> extends FluentProperty<Value, Property> {
 
     @Override
-    FluentAssertProperty<Value, Property> as(String reason);
+    FluentPropertyAssert<Value, Property> as(String reason);
 
     @Override
-    FluentAssertProperty<Value, Property> as(String reason, Object... args);
+    FluentPropertyAssert<Value, Property> as(String reason, Object... args);
 
     @Override
-    FluentAssertProperty<Value, Property> is();
+    FluentPropertyAssert<Value, Property> is();
 
     @Override
-    FluentAssertProperty<Value, Property> has();
+    FluentPropertyAssert<Value, Property> has();
 
     @Override
-    FluentAssertProperty<Value, Property> not();
+    FluentPropertyAssert<Value, Property> not();
     
     @Override
     FluentAssert<Value> _(Matcher<? super Property> matcher);
@@ -55,16 +54,16 @@ public interface FluentAssertProperty<Value, Property> extends FluentProperty<Va
     FluentAssert<Value> none(Matcher<? super Property>... matcher);
     
     @Override
-    <P> FluentAssertProperty<Value, P> _(MatchValueAdapter<? super Property, P> matcher);
+    <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Property, P> matcher);
     
     @Override
-    <P> FluentAssertProperty<Value, P> has(MatchValueAdapter<? super Property, P> adapter);
+    <P> FluentPropertyAssert<Value, P> has(MatchValueAdapter<? super Property, P> adapter);
     
     @Override
-    <P> FluentAssertProperty<Value, P> not(MatchValueAdapter<? super Property, P> adapter);
+    <P> FluentPropertyAssert<Value, P> not(MatchValueAdapter<? super Property, P> adapter);
     
     @Override
-    <P> FluentAssertProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
+    <P> FluentPropertyAssert<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
     
     @Override
     <Property2 extends Property> FluentAssert<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
@@ -77,10 +76,10 @@ public interface FluentAssertProperty<Value, Property> extends FluentProperty<Va
                             FluentAssert<Value> {
 
         @Override
-        FluentAssertProperty<Value, Property> that();
+        FluentPropertyAssert<Value, Property> that();
         
         @Override
-        FluentAssertProperty<Value, Property> thatIs();
+        FluentPropertyAssert<Value, Property> thatIs();
 
         @Override
         FluentAssert<Value> that(Matcher<? super Property> matcher);

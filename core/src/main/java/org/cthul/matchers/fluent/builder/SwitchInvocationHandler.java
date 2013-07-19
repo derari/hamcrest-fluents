@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import org.cthul.matchers.fluent.Fluent;
-import org.cthul.matchers.fluent.property.FluentProperty;
+import org.cthul.matchers.fluent.FluentProperty;
 
 /**
  *
