@@ -76,6 +76,9 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Value, P> adapter);
     
     @Override
+    Both<Value, Value> both(Matcher<? super Value> matcher);
+    
+    @Override
     <Value2 extends Value> Fluent<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
     
     @Override

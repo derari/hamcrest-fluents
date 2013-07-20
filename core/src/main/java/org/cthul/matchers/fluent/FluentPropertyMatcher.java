@@ -67,6 +67,36 @@ public interface FluentPropertyMatcher<Value, Property, Match>
     <P> FluentPropertyMatcher<Value, P, Match> hasNot(MatchValueAdapter<? super Property, P> adapter);
     
     @Override
+    Both<Value, Property, Match> both(Matcher<? super Property> matcher);
+    
+    interface Both<Value, Property, Match> extends FluentProperty.Both<Value, Property> {
+        
+        @Override
+        FluentMatcher<Value, Match> and(Matcher<? super Property> matcher);
+    }
+    
+    @Override
+    Either<Value, Property, Match> either(Matcher<? super Property>... matchers);
+    
+    interface Either<Value, Property, Match> extends FluentProperty.Either<Value, Property> {
+        
+        @Override
+        FluentMatcher<Value, Match> or(Matcher<? super Property> matcher);
+        
+        @Override
+        FluentMatcher<Value, Match> xor(Matcher<? super Property> matcher);
+    }
+    
+    @Override
+    Neither<Value, Property, Match> neither(Matcher<? super Property>... matchers);
+    
+    interface Neither<Value, Property, Match> extends FluentProperty.Neither<Value, Property> {
+        
+        @Override
+        FluentMatcher<Value, Match> nor(Matcher<? super Property> matcher);
+    }
+    
+    @Override
     <Property2 extends Property> FluentMatcher<? extends Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
     
     @Override

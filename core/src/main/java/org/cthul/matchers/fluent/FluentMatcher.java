@@ -81,6 +81,12 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> none(Matcher<? super Value>... matcher);
     
     @Override
+    FluentPropertyMatcher.Both<Value, Value, Match> both(Matcher<? super Value> matcher);
+    
+    @Override
+    FluentPropertyMatcher.Either<Value, Value, Match> either(Matcher<? super Value>... matchers);
+    
+    @Override
     <Value2 extends Value> FluentMatcher<Value2, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
     
     @Override

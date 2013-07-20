@@ -41,6 +41,51 @@ public abstract class AbstractPropertyMatcherBuilder
     }
     
     @Override
+    public Both<Value, Property, Match, ThisFluent> both(Matcher<? super Property> matcher) {
+        return new Both<>(this, matcher);
+    }
+    
+    protected static class Both<Value, Property, Match,
+                                ThisFluent extends FluentMatcher<Value, Match>>
+                        extends AbstractFluentPropertyBuilder.Both<Value, Property, ThisFluent>
+                        implements FluentPropertyMatcher.Both<Value, Property, Match> {
+
+        public Both(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property> first) {
+            super(property, first);
+        }
+    }
+    
+    @Override
+    public Either<Value, Property, Match, ThisFluent> either(Matcher<? super Property>... matchers) {
+        return new Either<>(this, matchers);
+    }
+    
+    protected static class Either<Value, Property, Match,
+                                ThisFluent extends FluentMatcher<Value, Match>>
+                        extends AbstractFluentPropertyBuilder.Either<Value, Property, ThisFluent>
+                        implements FluentPropertyMatcher.Either<Value, Property, Match> {
+
+        public Either(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+            super(property, matchers);
+        }
+    }
+    
+    @Override
+    public Neither<Value, Property, Match, ThisFluent> neither(Matcher<? super Property>... matchers) {
+        return new Neither<>(this, matchers);
+    }
+    
+    protected static class Neither<Value, Property, Match,
+                                ThisFluent extends FluentMatcher<Value, Match>>
+                        extends AbstractFluentPropertyBuilder.Neither<Value, Property, ThisFluent>
+                        implements FluentPropertyMatcher.Neither<Value, Property, Match> {
+
+        public Neither(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+            super(property, matchers);
+        }
+    }
+    
+    @Override
     public <Property2 extends Property> FluentMatcher<? extends Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return (FluentMatcher) super.isA(clazz, matcher);
     }

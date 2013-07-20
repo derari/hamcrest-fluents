@@ -48,17 +48,15 @@ public interface FluentProperty<Value, Property> {
     
     <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
     
-    // Both<Value, Propert> both(Matcher<? super Property> matcher);
-    
-    // Either<Value, Propert> either(Matcher<? super Property>... matchers);
-    
-    // Neither<Value, Propert> neither(Matcher<? super Property>... matchers);
+    Both<Value, Property> both(Matcher<? super Property> matcher);
     
     interface Both<Value, Property> {
         
         Fluent<Value> and(Matcher<? super Property> matcher);
         
     }
+    
+    Either<Value, Property> either(Matcher<? super Property>... matchers);
     
     interface Either<Value, Property> {
         
@@ -67,6 +65,8 @@ public interface FluentProperty<Value, Property> {
         Fluent<Value> xor(Matcher<? super Property> matcher);
         
     }
+    
+    Neither<Value, Property> neither(Matcher<? super Property>... matchers);
     
     interface Neither<Value, Property> {
         

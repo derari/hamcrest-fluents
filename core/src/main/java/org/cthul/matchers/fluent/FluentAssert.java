@@ -79,6 +79,12 @@ public interface FluentAssert<Value>
     <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter);
     
     @Override
+    FluentPropertyAssert.Both<Value, Value> both(Matcher<? super Value> matcher);
+    
+    @Override
+    FluentPropertyAssert.Either<Value, Value> either(Matcher<? super Value>... matchers);
+    
+    @Override
     <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
     
     @Override

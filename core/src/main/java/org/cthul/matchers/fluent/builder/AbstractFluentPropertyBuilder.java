@@ -1,9 +1,12 @@
 package org.cthul.matchers.fluent.builder;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import org.cthul.matchers.InstanceOf;
 import org.cthul.matchers.chain.AndChainMatcher;
+import org.cthul.matchers.chain.NOrChainMatcher;
 import org.cthul.matchers.chain.OrChainMatcher;
+import org.cthul.matchers.chain.XOrChainMatcher;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
@@ -168,6 +171,77 @@ public abstract class AbstractFluentPropertyBuilder
         return _newProperty(adapter, null, false);
     }
 
+    @Override
+    public abstract FluentProperty.Both<Value, Property> both(Matcher<? super Property> matcher);
+    
+    protected static class Both<Value, Property, 
+                                ThisFluent extends Fluent<Value>>
+                        implements FluentProperty.Both<Value, Property> {
+
+        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final Matcher<? super Property> first;
+
+        public Both(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property> first) {
+            this.property = property;
+            this.first = first;
+        }
+        
+        @Override
+        public ThisFluent and(Matcher<? super Property> matcher) {
+            return property._(AndChainMatcher.both(first, matcher));
+        }
+    }
+
+    @Override
+    public abstract FluentProperty.Either<Value, Property> either(Matcher<? super Property>... matchers);
+
+    protected static class Either<Value, Property, 
+                                ThisFluent extends Fluent<Value>>
+                        implements FluentProperty.Either<Value, Property> {
+
+        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final Matcher<? super Property>[] matchers;
+
+        public Either(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+            this.property = property;
+            this.matchers = Arrays.copyOf(matchers, matchers.length+1);
+        }
+        
+        @Override
+        public ThisFluent or(Matcher<? super Property> matcher) {
+            matchers[matchers.length-1] = matcher;
+            return property._(OrChainMatcher.or(matchers));
+        }
+        
+        @Override
+        public ThisFluent xor(Matcher<? super Property> matcher) {
+            matchers[matchers.length-1] = matcher;
+            return property._(XOrChainMatcher.xor(matchers));
+        }
+    }
+    
+    @Override
+    public abstract FluentProperty.Neither<Value, Property> neither(Matcher<? super Property>... matchers);
+
+    protected static class Neither<Value, Property, 
+                                ThisFluent extends Fluent<Value>>
+                        implements FluentProperty.Neither<Value, Property> {
+
+        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final Matcher<? super Property>[] matchers;
+
+        public Neither(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+            this.property = property;
+            this.matchers = Arrays.copyOf(matchers, matchers.length+1);
+        }
+        
+        @Override
+        public ThisFluent nor(Matcher<? super Property> matcher) {
+            matchers[matchers.length-1] = matcher;
+            return property._(NOrChainMatcher.nor(matchers));
+        }
+    }
+    
     @Override
     public <Property2 extends Property> Fluent<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         _is();
