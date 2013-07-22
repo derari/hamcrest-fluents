@@ -1,51 +1,34 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.FluentAssert;
-import org.cthul.matchers.fluent.FluentTestBase;
+import org.cthul.matchers.fluent.Fluent;
 import org.junit.Test;
 import static org.hamcrest.Matchers.*;
+import org.cthul.matchers.fluent.value.MatchValue;
 
 /**
  *
  */
-public class FluentAssertBuilderTest extends FluentTestBase {
-    
-    @Test
-    public void test_simple_match() {
-        test_assertThat(3)._(lessThan(2));
-        assertMismatch("greater than <2>");
-    }
-    
-    @Test
-    public void test_chained_match() {
-        test_assertThat(3)
-                ._(lessThan(5))
-                ._(lessThan(2));
-        assertMismatch("greater than <2>");
-    }
-    
-    @Test
-    public void test_negated_match() {
-        test_assertThat(3)
-                .not(lessThan(5))
-                ._(lessThan(2));
-        assertMismatch("less than <5>");
+public class FluentAssertBuilderTest extends FluentBuilderTestBase {
+
+    @Override
+    protected <T> Fluent<T> newFluent(MatchValue<T> t) {
+        return test_assertThat(t);
     }
     
     @Test
     public void test_message() {
         test_assertThat(3).is(equalTo(1));
-        assertMismatch("was <3>");
+        assertMismatch(
+                "value is <1>",
+                "but was <3>");
     }
     
     @Test
     public void test_message_not() {
         test_assertThat(3).isNot(equalTo(3));
-        assertMismatch("was <3>");
-    }
-    
-    protected <T> FluentAssert<T> test_assertThat(T object) {
-        return new FluentAssertBuilder<>(TEST_HANDLER, object);
+        assertMismatch(
+                "value is not <3>",
+                "but <3> was <3>");
     }
     
 }

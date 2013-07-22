@@ -120,5 +120,11 @@ public abstract class AbstractPropertyMatcherBuilder
             Matcher<? super Property> m = new AdaptingMatcher<>(adapter, matcher, prefix, not);
             return AbstractPropertyMatcherBuilder.this._applyMatcher(m, flPrefix, flNot);
         }
+
+        @Override
+        protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
+            Matcher<? super Property> m = new AdaptingMatcher<>(adapter, matcher, prefix, not);
+            return AbstractPropertyMatcherBuilder.this._updateMatcher(m, flPrefix, flNot);
+        }
     }
 }

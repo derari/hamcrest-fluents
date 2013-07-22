@@ -62,6 +62,7 @@ public class ConceptTest {
         assertThat(list)
                 ._(each(Object.class)).isA(Integer.class).thatIs(lessThan(10))
                 .and().isNot(empty());
+                
     }
     
     public static MatchValue<Integer> sizeOf(Collection<?> c) {

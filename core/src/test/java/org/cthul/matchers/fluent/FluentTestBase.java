@@ -24,7 +24,10 @@ public class FluentTestBase {
     }
     
     protected void assertSuccess() {
-        assertThat("expected success", success);
+        if (!success) {
+            assertThat("expected success", 
+                    mismatch, is((Object) true));
+        }
     }
     
     protected void assertFail() {

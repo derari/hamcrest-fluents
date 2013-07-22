@@ -120,25 +120,11 @@ public abstract class AbstractPropertyAssertBuilder
             Matcher<? super Property> m = new AdaptingMatcher<>(adapter, matcher, prefix, not);
             return AbstractPropertyAssertBuilder.this._applyMatcher(m, flPrefix, flNot);
         }      
+        
+        @Override
+        protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
+            Matcher<? super Property> m = new AdaptingMatcher<>(adapter, matcher, prefix, not);
+            return AbstractPropertyAssertBuilder.this._updateMatcher(m, flPrefix, flNot);
+        }
     }
-    
-//    protected static class IsA<Value, Property,
-//                        ThisFluent extends FluentAssert<Value>,
-//                        ThisProperty extends FluentAssertProperty<Value, Property>> 
-//                    extends AbstractAssertPropertyBuilder<Value, Value, ThisFluent, ThisFluent>
-//                    implements FluentAssertProperty.IsA<Value, Property> {
-//
-//        
-//        @Override
-//        public <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
-//            return (FluentAssert<Value2>) super.isA(clazz, matcher);
-//        }
-//
-//        @Override
-//        public <Value2 extends Value> FluentAssert.IsA<Value2> isA(Class<Value2> clazz) {
-//            return null; 
-//        }
-//        
-//    }
-    
 }

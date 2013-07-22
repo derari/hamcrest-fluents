@@ -1,37 +1,31 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.FluentAssert;
+import java.util.Arrays;
+import java.util.List;
+import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentMatcher;
-import org.cthul.matchers.fluent.FluentTestBase;
+import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachObject;
+import org.cthul.matchers.fluent.value.MatchValue;
 import org.junit.Test;
 import static org.hamcrest.Matchers.*;
 
 /**
  *
  */
-public class FluentMatcherBuilderTest extends FluentTestBase {
+public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
+
+    private FluentMatcher<?,?> current;
     
-    @Test
-    public void test_simple_match() {
-        test_assertThat(3, matcherI()._(lessThan(2)));
-        
-        assertMismatch("greater than <2>");
+    @Override
+    protected <T> Fluent<T> newFluent(MatchValue<T> t) {
+        FluentMatcher<T,T> m = FluentMatcherBuilder.match();
+        current = m;
+        return m;
     }
-    
-    @Test
-    public void test_chained_match() {
-        test_assertThat(3, matcherI()
-                ._(lessThan(5))
-                .and(lessThan(2)));
-        assertMismatch("greater than <2>");
-    }
-    
-    @Test
-    public void test_negated_match() {
-        test_assertThat(3, matcherI()
-                .not(lessThan(5))
-                .and(lessThan(2)));
-        assertMismatch("less than <5>");
+
+    @Override
+    protected void apply(MatchValue value) {
+        test_assertThat(value)._(current);
     }
     
     @Test
@@ -39,6 +33,19 @@ public class FluentMatcherBuilderTest extends FluentTestBase {
         test_assertThat(3, matcherI()
                 .is(lessThan(2)));
         assertMismatch("greater than <2>");
+    }
+    
+    @Test
+    public void test_property_isA_message() {
+        List<Object> list = Arrays.asList((Object) 1, 3, 5);
+        fluent(list)
+                ._(eachObject()).isA(Integer.class)
+                        .that().is(lessThan(2))
+                .isNot(empty());
+        apply();
+        assertMismatch(
+                "each is an instance of java.lang.Integer and is a value less than <2>",
+                "#1 <3> was greater than <2>");
     }
     
     @Test

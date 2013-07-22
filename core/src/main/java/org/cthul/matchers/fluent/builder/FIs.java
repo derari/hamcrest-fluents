@@ -77,7 +77,7 @@ public class FIs<T> extends NestedMatcher<T> {
         }
     }
     
-    public static <T> Matcher<? super T> wrap(String prefix, boolean not, Matcher<? super T> matcher) {
+    public static <T> Matcher<T> wrap(String prefix, boolean not, Matcher<T> matcher) {
         if (prefix == null && !not) {
             return matcher;
         } else {

@@ -94,6 +94,12 @@ public class FluentMatcherBuilder
     }
 
     @Override
+    protected This _updateMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
+        // ignore, matcher is in stored in list already
+        return _this();
+    }
+
+    @Override
     public This and() {
         _and();
         return _this();

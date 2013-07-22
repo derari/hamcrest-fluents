@@ -7,9 +7,11 @@ import org.cthul.matchers.chain.AndChainMatcher;
 import org.cthul.matchers.chain.NOrChainMatcher;
 import org.cthul.matchers.chain.OrChainMatcher;
 import org.cthul.matchers.chain.XOrChainMatcher;
+import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 /**
@@ -23,7 +25,9 @@ public abstract class AbstractFluentPropertyBuilder
     private boolean negate = false;
     private String prefix = null;
     private String reason = null;
-
+    
+    private IsAMatcher isAMatcher = null;
+    
     public AbstractFluentPropertyBuilder() {
     }
 
@@ -52,10 +56,20 @@ public abstract class AbstractFluentPropertyBuilder
         prefix = null;
         boolean n = negate;
         negate = false;
-        return _applyMatcher(matcher, p, n);
+        if (isAMatcher == null) {
+            return _applyMatcher(matcher, p, n);
+        } else {
+            Matcher<Object> m = isAMatcher.that(matcher, p, n);
+            isAMatcher = null;
+//            matcher = new IsAMatcher<>(matcher, isAClass, p, n);
+//            isAClass = null;
+            return _updateMatcher(m, null, false);
+        }
     }
     
     protected abstract ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
+    
+    protected abstract ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
     
     @SuppressWarnings("unchecked")
     protected This _this() {
@@ -244,15 +258,13 @@ public abstract class AbstractFluentPropertyBuilder
     
     @Override
     public <Property2 extends Property> Fluent<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
-        _is();
         return _match(InstanceOf.isA(clazz).that(matcher));
     }
 
     @Override
     public <Property2 extends Property> FluentProperty.IsA<? extends Value, Property2> isA(Class<Property2> clazz) {
-        _is();
-        ThisFluent fluent = _match(InstanceOf.instanceOf(clazz));
-        IsAImpl<Property> isA = new IsAImpl<>(this);
+        IsAImpl<Property> isA = new IsAImpl<>(clazz, this);
+        ThisFluent fluent = _match(isA.getMatcher());
         Class[] actualIface = { getIsAInterface() };
         return (FluentProperty.IsA) Proxy.newProxyInstance(
                 IsAImpl.class.getClassLoader(), actualIface,
@@ -269,26 +281,94 @@ public abstract class AbstractFluentPropertyBuilder
     
     protected static class IsAImpl<Property> {
         
-        private final FluentProperty<?, Property> property;
+        private final IsAMatcher isAMatcher;
+        private final AbstractFluentPropertyBuilder<?, Property, ?, ?> property;
 
-        public IsAImpl(FluentProperty<?, Property> property) {
+        public IsAImpl(Class<?> clazz, AbstractFluentPropertyBuilder<?, Property, ?, ?> property) {
+            this.isAMatcher = new IsAMatcher<>(clazz);
             this.property = property;
+        }
+        
+        public <T> IsAMatcher<T> getMatcher() {
+            return isAMatcher;
         }
 
         public FluentProperty<?, Property> that() {
+            property.isAMatcher = isAMatcher;
             return property;
         }
 
         public FluentProperty<?, Property> thatIs() {
-            return property.is();
+            return that().is();
         }
 
         public Fluent<?> that(Matcher<? super Property> matcher) {
-            return property._(matcher);
+            return that()._(matcher);
         }
         
         public Fluent<?> thatIs(Matcher<? super Property> matcher) {
-            return property.is(matcher);
+            return that().is(matcher);
         }
+    }
+    
+    /**
+     * Used after {@code  isA(clazz).that()}.
+     * The instance-of matcher was already applied, 
+     * so there is no need to repeat the message;
+     * but the type check has to be done again to ensure the correct
+     * state of the property's match value.
+     */
+    protected static class IsAMatcher<T> extends QuickDiagnosingMatcherBase<Object> {
+
+        private final InstanceOf<T> isA;
+        Matcher<Object> isA_that = null;
+
+        public IsAMatcher(Class<T> expectedType) {
+            isA = InstanceOf.isA(expectedType);
+        }
+        
+        public Matcher<Object> that(Matcher<T> nested, String prefix, boolean not) {
+            nested = FIs.wrap(prefix, not, nested);
+            this.isA_that = isA.that(nested);
+            return this;
+        }
+
+        @Override
+        public boolean matches(Object item, Description mismatch) {
+            if (isA_that != null) {
+                return quickMatch(isA_that, item, mismatch);
+            } else {
+                return quickMatch(isA, item, mismatch);
+            }
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            if (isA_that != null) {
+                return isA_that.matches(item);
+            } else {
+                return isA.matches(item);
+            }
+        }
+
+        @Override
+        public void describeMismatch(Object item, Description mismatch) {
+            if (isA_that != null) {
+                isA_that.describeMismatch(item, mismatch);
+            } else {
+                isA.describeMismatch(item, mismatch);
+            }
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            if (isA_that != null) {
+                isA_that.describeTo(description);
+            } else {
+                description.appendText("is ");
+                isA.describeTo(description);
+            }
+        }
+        
     }
 }

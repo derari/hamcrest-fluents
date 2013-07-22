@@ -71,6 +71,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
         }
         return _this();
     }
+
+    @Override
+    protected This _updateMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
+        // just apply again
+        return _applyMatcher(matcher, prefix, not);
+    }
     
     @Override
     public This and() {
