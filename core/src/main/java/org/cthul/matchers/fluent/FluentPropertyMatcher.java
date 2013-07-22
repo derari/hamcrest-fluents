@@ -12,11 +12,11 @@ import org.hamcrest.Matcher;
 public interface FluentPropertyMatcher<Value, Property, Match> 
                 extends FluentProperty<Value, Property> {
 
-    @Override
-    FluentPropertyMatcher<Value, Property, Match> as(String reason);
-
-    @Override
-    FluentPropertyMatcher<Value, Property, Match> as(String reason, Object... args);
+//    @Override
+//    FluentPropertyMatcher<Value, Property, Match> as(String reason);
+//
+//    @Override
+//    FluentPropertyMatcher<Value, Property, Match> as(String reason, Object... args);
 
     @Override
     FluentPropertyMatcher<Value, Property, Match> is();

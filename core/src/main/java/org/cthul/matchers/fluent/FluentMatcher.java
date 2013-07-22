@@ -14,11 +14,11 @@ public interface FluentMatcher<Value, Match>
     
     QuickDiagnosingMatcher<Match> getMatcher();
 
-    @Override
-    FluentMatcher<Value, Match> as(String reason);
-
-    @Override
-    FluentMatcher<Value, Match> as(String reason, Object... args);
+//    @Override
+//    FluentMatcher<Value, Match> as(String reason);
+//
+//    @Override
+//    FluentMatcher<Value, Match> as(String reason, Object... args);
 
     @Override
     FluentMatcher<Value, Match> is();

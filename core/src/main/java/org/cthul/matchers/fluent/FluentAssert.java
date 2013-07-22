@@ -12,11 +12,11 @@ public interface FluentAssert<Value>
                 extends Fluent<Value>, 
                         FluentPropertyAssert<Value, Value> {
     
-    @Override
-    FluentAssert<Value> as(String reason);
-
-    @Override
-    FluentAssert<Value> as(String reason, Object... args);
+//    @Override
+//    FluentAssert<Value> as(String reason);
+//
+//    @Override
+//    FluentAssert<Value> as(String reason, Object... args);
 
     @Override
     FluentAssert<Value> is();

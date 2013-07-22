@@ -11,11 +11,11 @@ import org.hamcrest.Matcher;
  */
 public interface FluentPropertyAssert<Value, Property> extends FluentProperty<Value, Property> {
 
-    @Override
-    FluentPropertyAssert<Value, Property> as(String reason);
-
-    @Override
-    FluentPropertyAssert<Value, Property> as(String reason, Object... args);
+//    @Override
+//    FluentPropertyAssert<Value, Property> as(String reason);
+//
+//    @Override
+//    FluentPropertyAssert<Value, Property> as(String reason, Object... args);
 
     @Override
     FluentPropertyAssert<Value, Property> is();

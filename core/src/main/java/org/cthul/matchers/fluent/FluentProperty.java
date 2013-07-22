@@ -11,10 +11,10 @@ import org.hamcrest.Matcher;
  * @param <Value, Property> 
  */
 public interface FluentProperty<Value, Property> {
-
-    FluentProperty<Value, Property> as(String reason);
-
-    FluentProperty<Value, Property> as(String reason, Object... args);
+//
+//    FluentProperty<Value, Property> as(String reason);
+//
+//    FluentProperty<Value, Property> as(String reason, Object... args);
 
     FluentProperty<Value, Property> is();
 

@@ -64,17 +64,17 @@ public abstract class AbstractFluentPropertyBuilder
     
     protected abstract <P> FluentProperty<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not);
     
-    @Override
-    public This as(String reason) {
-        _as(reason);
-        return _this();
-    }
-
-    @Override
-    public This as(String reason, Object... args) {
-        _as(String.format(reason, args));
-        return _this();
-    }
+//    @Override
+//    public This as(String reason) {
+//        _as(reason);
+//        return _this();
+//    }
+//
+//    @Override
+//    public This as(String reason, Object... args) {
+//        _as(String.format(reason, args));
+//        return _this();
+//    }
 
     @Override
     public This is() {
@@ -250,7 +250,8 @@ public abstract class AbstractFluentPropertyBuilder
 
     @Override
     public <Property2 extends Property> FluentProperty.IsA<? extends Value, Property2> isA(Class<Property2> clazz) {
-        ThisFluent fluent = _match(InstanceOf.isA(clazz));
+        _is();
+        ThisFluent fluent = _match(InstanceOf.instanceOf(clazz));
         IsAImpl<Property> isA = new IsAImpl<>(this);
         Class[] actualIface = { getIsAInterface() };
         return (FluentProperty.IsA) Proxy.newProxyInstance(

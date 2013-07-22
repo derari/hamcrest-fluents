@@ -29,12 +29,14 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, T object) {
-        return assertThat(object).as(reason);
+//        return assertThat(object).as(reason);
+        return new FluentAssertBuilder<>(reason, ASSERT, object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, MatchValue<T> object) {
-        return assertThat(object).as(reason);
+//        return assertThat(object).as(reason);
+        return new FluentAssertBuilder<>(reason, ASSERT, object);
     }
     
     private final MatchValue<Value> matchValue;
@@ -46,8 +48,17 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     public FluentAssertBuilder(FailureHandler failureHandler, Value item) {
-        this.matchValue = IdentityValue.value(item);
-        this.failureHandler = failureHandler;
+        this(failureHandler, IdentityValue.value(item));
+    }
+    
+    public FluentAssertBuilder(String reason, FailureHandler failureHandler, MatchValue<Value> matchValues) {
+        this(failureHandler, matchValues);
+        _as(reason);
+    }
+
+    public FluentAssertBuilder(String reason, FailureHandler failureHandler, Value item) {
+        this(failureHandler, IdentityValue.value(item));
+        _as(reason);
     }
     
     protected void _and() {}
