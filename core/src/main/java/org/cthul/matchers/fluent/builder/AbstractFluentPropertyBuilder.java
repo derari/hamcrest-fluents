@@ -67,6 +67,11 @@ public abstract class AbstractFluentPropertyBuilder
         }
     }
     
+    protected <FP> FP _adapt(MatchValueAdapter<? super Property, ?> adapter) {
+        // FIXME prefix, negate
+        return (FP) _newProperty(adapter, null, false);
+    }
+    
     protected abstract ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
     
     protected abstract ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
@@ -163,26 +168,26 @@ public abstract class AbstractFluentPropertyBuilder
 
     @Override
     public <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Property, P> adapter) {
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
     
     @Override
     public <P> FluentProperty<Value, P> not(MatchValueAdapter<? super Property, P> adapter) {
         _not();
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
     
     @Override
     public <P> FluentProperty<Value, P> has(MatchValueAdapter<? super Property, P> adapter) {
         _has();
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
     
     @Override
     public <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter) {
         _has();
         _not();
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
 
     @Override

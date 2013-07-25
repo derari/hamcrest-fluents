@@ -85,6 +85,13 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
+    public FluentAssert<Value> andIs() {
+        _and();
+        _is();
+        return _this();
+    }
+
+    @Override
     public This andNot() {
         _and();
         _not();
@@ -98,6 +105,13 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
+    public FluentAssert<Value> andIs(Matcher<? super Value> matcher) {
+        _and();
+        _is();
+        return _match(matcher);
+    }
+
+    @Override
     public This andNot(Matcher<? super Value> matcher) {
         _and();
         _not();
@@ -107,14 +121,14 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     @Override
     public <P> FluentPropertyAssert<Value, P> and(MatchValueAdapter<? super Value, P> adapter) {
         _and();
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
 
     @Override
     public <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter) {
         _and();
         _not();
-        return _newProperty(adapter, null, false);
+        return _adapt(adapter);
     }
 
     @Override
@@ -123,12 +137,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <Value2 extends Value> FluentAssert.IsA<Value2> isA(Class<Value2> clazz) {
-        return (FluentAssert.IsA<Value2>) super.isA(clazz);
+    public <Value2 extends Value> FluentPropertyAssert.IsA<Value2, Value2> isA(Class<Value2> clazz) {
+        return (FluentPropertyAssert.IsA) super.isA(clazz);
     }
-    
+
     @Override
-    protected Class<?> getIsAInterface() {
-        return FluentAssert.IsA.class;
+    public String toString() {
+        return matchValue.toString();
     }
 }

@@ -26,7 +26,7 @@ public abstract class AbstractMatchValueAdapter<Value, Item> implements MatchVal
     public abstract MatchValue<Item> adapt(MatchValue<Value> v);
 
     @Override
-    public <Item2> MatchValueAdapter<Value, Item2> adapt(MatchValueAdapter<Item, Item2> adapter) {
+    public <Value0> MatchValueAdapter<Value0, Item> adapt(MatchValueAdapter<Value0, Value> adapter) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

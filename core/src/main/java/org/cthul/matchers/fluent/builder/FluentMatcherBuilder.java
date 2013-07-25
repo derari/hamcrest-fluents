@@ -9,6 +9,7 @@ import org.cthul.matchers.chain.XOrChainMatcher;
 import org.cthul.matchers.diagnose.MatcherDescription;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
 import org.cthul.matchers.fluent.FluentMatcher;
+import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.matchers.fluent.value.AdaptingMatcher;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
@@ -178,18 +179,26 @@ public class FluentMatcherBuilder
     }
 
     @Override
+    public <P> FluentPropertyMatcher<Value, P, Match> and(MatchValueAdapter<? super Value, P> adapter) {
+        _and();
+        return _adapt(adapter);
+    }
+
+    @Override
+    public <P> FluentPropertyMatcher<Value, P, Match> andNot(MatchValueAdapter<? super Value, P> adapter) {
+        _and();
+        _not();
+        return _adapt(adapter);
+    }
+
+    @Override
     public <Value2 extends Value> FluentMatcher<Value2, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
         return (FluentMatcher) super.isA(clazz, matcher);
     }
 
     @Override
-    public <Value2 extends Value> FluentMatcher.IsA<Value2, Match> isA(Class<Value2> clazz) {
-        return (FluentMatcher.IsA) super.isA(clazz);
-    }
-
-    @Override
-    protected Class<?> getIsAInterface() {
-        return FluentMatcher.IsA.class;
+    public <Value2 extends Value> FluentPropertyMatcher.IsA<Value2, Value2, Match> isA(Class<Value2> clazz) {
+        return (FluentPropertyMatcher.IsA) super.isA(clazz);
     }
 
     @Override

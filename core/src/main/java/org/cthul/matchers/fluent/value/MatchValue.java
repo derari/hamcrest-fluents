@@ -5,42 +5,95 @@ import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
- * A value that can be matched.
+ * A value that can be matched. 
  * <p>
- * Has an internal state that changes 
- * after calls to {@link #matches(ElementMatcher)};
- * 
- * @param <Item> 
+ * Can consist of multiple elements that will be matched individually.
+ * The MatchValue tracks which elements matched successfully and is
+ * able to provide messages that describe its state.
+ * @param <Value> element type
  */
-public interface MatchValue<Item> extends SelfDescribing {
+public interface MatchValue<Value> extends SelfDescribing {
     
-    boolean matches(ElementMatcher<Item> matcher);
+    /**
+     * Applies the matcher.
+     * @param matcher the matcher
+     * @return true iff value is valid
+     */
+    boolean matches(ElementMatcher<Value> matcher);
     
+    /**
+     * Returns whether the value is valid.
+     * @return true iff value is valid
+     */
     boolean matched();
     
+    /**
+     * Describes the value.
+     * @param description 
+     */
     @Override
     void describeTo(Description description);
     
+    /**
+     * Describes the value's type.
+     * @param description 
+     */
     void describeValueType(Description description);
 
+    /**
+     * Describes what was expected of the value.
+     * Assumes the match value is in an invalid state.
+     * @param description 
+     */
     void describeExpected(ExpectationDescription description);
     
+    /**
+     * Describes how the match failed.
+     * Assumes the match value is in an invalid state.
+     * @param description 
+     */
     void describeMismatch(Description description);
     
-    interface Element<Item> {
+    
+    /**
+     * A single element of a {@link MatchValue}.
+     * <p>
+     * If two elements are equal, they represent the same underlying value.
+     * @param <Value> value type
+     */
+    interface Element<Value> {
         
-        Item value();
+        Value value();
         
     }
     
-    interface ElementMatcher<Item> extends Matcher<Element<Item>> {
+    /**
+     * A Hamcrest Matcher that accepts {@link Element}s of a type.
+     * @param <Value> value type
+     * @see org.cthul.matchers.fluent.value.ElementMatcher
+     */
+    interface ElementMatcher<Value> extends Matcher<Element<Value>> {
         
-        void describeExpected(Element<Item> e, ExpectationDescription description);
+        /**
+         * Generates a description that explains what would have been expected
+         * of an element to be matched successfully.
+         * @param e element that was rejected
+         * @param description the description to append to
+         */
+        void describeExpected(Element<Value> e, ExpectationDescription description);
         
     }
     
+    /**
+     * A description that consists of multiple expectation descriptions,
+     * which will be combined for the end result.
+     * Can be expected to remove duplicates.
+     */
     interface ExpectationDescription extends Description {
         
+        /**
+         * To be called when a single expectation was fully described.
+         */
         void addedExpectation();
         
     }
