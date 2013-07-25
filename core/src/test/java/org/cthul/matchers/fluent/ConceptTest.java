@@ -72,7 +72,7 @@ public class ConceptTest {
     public static MatchValueAdapter<Collection<?>, Integer> size() {
         return new SimpleAdapter<Collection<?>, Integer>("size") {
             @Override
-            protected Integer getValue(Collection<?> v) {
+            protected Integer adaptValue(Collection<?> v) {
                 return v.size();
             }
         };

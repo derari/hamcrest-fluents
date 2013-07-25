@@ -10,17 +10,17 @@ import org.hamcrest.Matcher;
  * <p>
  * Example: ´length-of-string is less than 3´.matches("xa")
  */
-public class AdaptingMatcher<Value, Item> extends NestedMatcher<Value> {
+public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
     
-    private final ElementMatcher<Item> matcher;
-    private final MatchValueAdapter<Value, Item> adapter;
+    private final ElementMatcher<Property> matcher;
+    private final MatchValueAdapter<Value, Property> adapter;
 
-    public AdaptingMatcher(MatchValueAdapter<Value, Item> adapter, Matcher<? super Item> matcher, String prefix, boolean not) {
+    public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
         this.adapter = adapter;
         this.matcher = new ElementMatcher<>(matcher, prefix, not);
     }
-    
-    public AdaptingMatcher(MatchValueAdapter<Value, Item> adapter, Matcher<? super Item> matcher) {
+
+    public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher) {
         this.adapter = adapter;
         this.matcher = new ElementMatcher<>(matcher);
     }
@@ -34,7 +34,7 @@ public class AdaptingMatcher<Value, Item> extends NestedMatcher<Value> {
     @Override
     public boolean matches(Object item, Description mismatch) {
         Value v = (Value) item;
-        MatchValue<Item> mv = adapter.adapt(v);
+        MatchValue<Property> mv = adapter.adapt(v);
         if (mv.matches(matcher)) {
             return true;
         }
@@ -44,14 +44,14 @@ public class AdaptingMatcher<Value, Item> extends NestedMatcher<Value> {
 
     @Override
     public void describeTo(Description description) {
-        adapter.describeMatcher(matcher.getActualMatcher(), description);
+        adapter.describeConsumer(matcher, description);
     }
 
     @Override
     public void describeMismatch(Object item, Description description) {
         matches(item, description);
     }
-    
+
     @Override
     public int getPrecedence() {
         return precedenceOf(matcher);

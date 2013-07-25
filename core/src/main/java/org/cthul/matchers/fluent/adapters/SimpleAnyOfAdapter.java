@@ -7,36 +7,56 @@ import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
  *
  */
-public abstract class SimpleAnyOfAdapter<Value, Item> extends 
-                AbstractMatchValueAdapter<Value, Item> {
+public abstract class SimpleAnyOfAdapter<Value, Item> 
+                extends AbstractMatchValueAdapter<Value, Item> {
 
+    protected static final ReflectiveTypeFinder ADAPTED_TYPE_FINDER = new ReflectiveTypeFinder("getElements", 1, 0);
+    
+    private final Class<?> valueType;
     private final String name;
 
     public SimpleAnyOfAdapter() {
-        name = null;
+        this(null, ADAPTED_TYPE_FINDER);
     }
 
     public SimpleAnyOfAdapter(String name) {
+        this(name, ADAPTED_TYPE_FINDER);
+    }
+
+    public SimpleAnyOfAdapter(Class<?> valueType) {
+        this(null, valueType);
+    }
+    
+    public SimpleAnyOfAdapter(ReflectiveTypeFinder typeFinder) {
+        this(null, typeFinder);
+    }
+    
+    public SimpleAnyOfAdapter(String name, Class<?> valueType) {
         this.name = name;
+        this.valueType = valueType;
+    }
+    
+    public SimpleAnyOfAdapter(String name, ReflectiveTypeFinder typeFinder) {
+        this.name = name;
+        this.valueType = typeFinder.findExpectedType(getClass());
     }
     
     @Override
-    public MatchValue<Item> adapt(MatchValue<Value> v) {
-        return new AnyOfValues(v);
+    public MatchValue<Item> adapt(MatchValue<Value> value) {
+        return new AnyOfValues(valueType, value);
     }
 
     @Override
-    public void describeMatcher(Matcher<? super Item> matcher, Description description) {
-        description.appendText("any ");
+    public void describeTo(Description description) {
+        description.appendText("any");
         if (name != null) {
-            description.appendText(name).appendText(" ");
+            description.appendText(" ").appendText(name);
         }
-        description.appendDescriptionOf(matcher);
     }
     
     protected abstract Iterable<? extends Item> getElements(Value value);
@@ -62,8 +82,8 @@ public abstract class SimpleAnyOfAdapter<Value, Item> extends
         private final LinkedList<ElementMatcher<Item>> previousSuccessful = new LinkedList<>();
         private final LinkedList<ElementMatcher<Item>> previousFailed = new LinkedList<>();
 
-        public AnyOfValues(MatchValue<Value> actualValue) {
-            super(actualValue);
+        public AnyOfValues(Class<?> valueType, MatchValue<Value> actualValue) {
+            super(valueType, actualValue);
         }
 
         @Override
@@ -72,7 +92,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item> extends
         }
 
         @Override
-        protected boolean matches(Element<Value> element, ElementMatcher<Item> matcher) {
+        protected boolean matchSafely(Element<Value> element, ElementMatcher<Item> matcher) {
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.firstValid();
             if (e == null) return false;
@@ -113,26 +133,16 @@ public abstract class SimpleAnyOfAdapter<Value, Item> extends
 
         @Override
         public void describeTo(Description description) {
-            describeSelfOf(description);
-            getActualValue().describeTo(description);
+            SimpleAnyOfAdapter.this.describeValue(getActualValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            describeSelfOf(description);
-            getActualValue().describeValueType(description);
+            SimpleAnyOfAdapter.this.describeValueType(getActualValue(), description);
         }
 
-        protected void describeSelfOf(Description description) {
-            description.appendText("any ");
-            if (name != null) {
-                description.appendText(name).appendText(" ");
-            }
-            description.appendText("of ");
-        }
-        
         @Override
-        protected void describeExpected(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
+        protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> first = it.first();
             E<Item> e = first;
@@ -143,7 +153,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item> extends
         }
 
         @Override
-        protected void describeMismatch(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
+        protected void describeMismatchSafely(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> first = it.first();
             E<Item> e = first;

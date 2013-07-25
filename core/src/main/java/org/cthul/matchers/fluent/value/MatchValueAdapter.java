@@ -1,7 +1,7 @@
 package org.cthul.matchers.fluent.value;
 
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.SelfDescribing;
 
 /**
  * Creates {@link MatchValue} from a plain value.
@@ -11,19 +11,19 @@ import org.hamcrest.Matcher;
  * It can then be used to create {@link MatchValue}s that represent
  * this aspect of a concrete value.
  */
-public interface MatchValueAdapter<Value, Property> {
+public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
     
     /**
      * Converts a plain value into a match value.
-     * @param value the value
+     * @param value source value
      * @return match value
      */
-    MatchValue<Property> adapt(Value value);
+    MatchValue<Property> adapt(Object value);
     
     /**
      * Creates a match value that will have its elements derived from
      * the elements of the source match value.
-     * @param value the value
+     * @param value source value
      * @return match value
      */
     MatchValue<Property> adapt(MatchValue<Value> value);
@@ -37,6 +37,18 @@ public interface MatchValueAdapter<Value, Property> {
      */
     <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, Value> adapter);
     
-    void describeMatcher(Matcher<? super Property> matcher, Description description);
+    /**
+     * Describes a producer that will have its output adapted by this adapter.
+     * @param producer producer to be described
+     * @param description description to append to
+     */
+    void describeProducer(SelfDescribing producer, Description description);
+    
+    /**
+     * Describes a consumer that will receive the output of this adapter.
+     * @param consumer consumer to be described
+     * @param description description to append to
+     */
+    void describeConsumer(SelfDescribing consumer, Description description);
     
 }

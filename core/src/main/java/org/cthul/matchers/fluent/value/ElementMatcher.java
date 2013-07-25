@@ -10,21 +10,22 @@ import org.hamcrest.TypeSafeMatcher;
 /**
  *
  */
-public class ElementMatcher<Item> extends TypeSafeMatcher<Element<Item>> 
+public class ElementMatcher<Item> extends TypeSafeMatcher<Element<?>> 
                 implements MatchValue.ElementMatcher<Item> {
     
     private final Matcher<? super Item> matcher;
 
     public ElementMatcher(Matcher<? super Item> matcher, String prefix, boolean not) {
-        this.matcher = FIs.wrap(prefix, not, matcher);
+        this(FIs.wrap(prefix, not, matcher));
     }
     
     public ElementMatcher(Matcher<? super Item> matcher) {
+        super(Element.class);
         this.matcher = matcher;
     }
 
     @Override
-    protected boolean matchesSafely(Element<Item> item) {
+    protected boolean matchesSafely(Element<?> item) {
         return matcher.matches(item.value());
     }
 
@@ -34,13 +35,13 @@ public class ElementMatcher<Item> extends TypeSafeMatcher<Element<Item>>
     }
 
     @Override
-    public void describeExpected(Element<Item> e, ExpectationDescription description) {
+    public void describeExpected(Element<?> e, ExpectationDescription description) {
         matcher.describeTo(description);
         description.addedExpectation();
     }
 
     @Override
-    protected void describeMismatchSafely(Element<Item> item, Description mismatchDescription) {
+    protected void describeMismatchSafely(Element<?> item, Description mismatchDescription) {
         matcher.describeMismatch(item.value(), mismatchDescription);
     }
 

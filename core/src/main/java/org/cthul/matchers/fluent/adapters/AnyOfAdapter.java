@@ -53,8 +53,8 @@ public class AnyOfAdapter<Item> extends
     }
     
     @Factory
-    public static <I> MatchValue<I> any(MatchValue<? extends Iterable<? extends I>> mo) {
-        return anyOf(mo);
+    public static <I> MatchValue<I> any(MatchValue<? extends Iterable<? extends I>> value) {
+        return anyOf(value);
     }
     
     @Factory
@@ -63,11 +63,11 @@ public class AnyOfAdapter<Item> extends
     }
     
     public AnyOfAdapter() {
-        super();
+        super(Iterable.class);
     }
 
     public AnyOfAdapter(String name) {
-        super(name);
+        super(name, Iterable.class);
     }
 
     @Override

@@ -1,64 +1,48 @@
 package org.cthul.matchers.fluent.adapters;
 
-import org.cthul.matchers.fluent.value.MatchValue;
-import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
-import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
  *
  */
 public abstract class SimpleAdapter<Value, Item> extends ConvertingAdapter<Value, Item> {
     
-    private String name;
+    private final String name;
 
     public SimpleAdapter(String name) {
         this.name = name;
     }
 
-    @Override
-    protected abstract Item getValue(Value v);
+    public SimpleAdapter(String name, Class<Value> valueType) {
+        super(valueType);
+        this.name = name;
+    }
 
-    @Override
-    public void describeMatcher(Matcher<? super Item> matcher, Description description) {
-        describeSelf(description);
-        description.appendDescriptionOf(matcher);
+    protected SimpleAdapter(String name, ReflectiveTypeFinder typeFinder) {
+        super(typeFinder);
+        this.name = name;
     }
 
     @Override
-    protected void describeTo(MatchValue<Value> actual, Description description) {
-        describeSelfOf(description);
-        actual.describeTo(description);
+    protected boolean hasDescription() {
+        return name != null;
     }
 
     @Override
-    protected void describeValueType(MatchValue<Value> actual, Description description) {
-        describeSelfOf(description);
-        actual.describeValueType(description);
-    }
-
-    @Override
-    protected void describeExpected(MatchValue.Element<Value> value, MatchValue.Element<Item> item, ElementMatcher<Item> matcher, ExpectationDescription description) {
-        describeSelf(description);
-        matcher.describeExpected(item, description);
-    }
-
-    @Override
-    protected void describeMismatch(MatchValue.Element<Value> value, MatchValue.Element<Item> item, ElementMatcher<Item> matcher, Description description) {
-        describeSelf(description);
-        matcher.describeMismatch(item, description);
-    }
-
-    protected void describeSelf(Description description) {
+    public void describeTo(Description description) {
         if (name != null) {
-            description.appendText(name).appendText(" ");
+            description.appendText(name);
+            return;
         }
-    }
-    
-    protected void describeSelfOf(Description description) {
-        if (name != null) {
-            description.appendText(name).appendText(" of ");
+        Class<?> c = getClass();
+        String n = c.getSimpleName();
+        if (!n.isEmpty()) {
+            description.appendText(n);
+            return;
         }
+        description.appendText(c.getName())
+                   .appendText("@")
+                   .appendText(String.valueOf(hashCode()));
     }
 }

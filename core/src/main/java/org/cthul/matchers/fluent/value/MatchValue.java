@@ -72,7 +72,7 @@ public interface MatchValue<Value> extends SelfDescribing {
      * @param <Value> value type
      * @see org.cthul.matchers.fluent.value.ElementMatcher
      */
-    interface ElementMatcher<Value> extends Matcher<Element<Value>> {
+    interface ElementMatcher<Value> extends Matcher<Element<?>> {
         
         /**
          * Generates a description that explains what would have been expected
@@ -80,7 +80,7 @@ public interface MatchValue<Value> extends SelfDescribing {
          * @param e element that was rejected
          * @param description the description to append to
          */
-        void describeExpected(Element<Value> e, ExpectationDescription description);
+        void describeExpected(Element<?> e, ExpectationDescription description);
         
     }
     

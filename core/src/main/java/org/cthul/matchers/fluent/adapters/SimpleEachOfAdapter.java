@@ -6,36 +6,56 @@ import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
  *
  */
-public abstract class SimpleEachOfAdapter<Value, Item> extends 
-                AbstractMatchValueAdapter<Value, Item> {
+public abstract class SimpleEachOfAdapter<Value, Item> 
+                extends AbstractMatchValueAdapter<Value, Item> {
 
-    protected final String name;
+    protected static final ReflectiveTypeFinder ADAPTED_TYPE_FINDER = new ReflectiveTypeFinder("getElements", 1, 0);
+    
+    private final Class<?> valueType;
+    private final String name;
 
     public SimpleEachOfAdapter() {
-        this(null);
+        this(null, ADAPTED_TYPE_FINDER);
     }
 
     public SimpleEachOfAdapter(String name) {
+        this(name, ADAPTED_TYPE_FINDER);
+    }
+
+    public SimpleEachOfAdapter(Class<?> valueType) {
+        this(null, valueType);
+    }
+    
+    public SimpleEachOfAdapter(ReflectiveTypeFinder typeFinder) {
+        this(null, typeFinder);
+    }
+    
+    public SimpleEachOfAdapter(String name, Class<?> valueType) {
         this.name = name;
+        this.valueType = valueType;
+    }
+    
+    public SimpleEachOfAdapter(String name, ReflectiveTypeFinder typeFinder) {
+        this.name = name;
+        this.valueType = typeFinder.findExpectedType(getClass());
     }
     
     @Override
-    public MatchValue<Item> adapt(MatchValue<Value> v) {
-        return new EachOfValues(v);
+    public MatchValue<Item> adapt(MatchValue<Value> value) {
+        return new EachOfValues(valueType, value);
     }
 
     @Override
-    public void describeMatcher(Matcher<? super Item> matcher, Description description) {
-        description.appendText("each ");
+    public void describeTo(Description description) {
+        description.appendText("each");
         if (name != null) {
-            description.appendText(name).appendText(" ");
+            description.appendText(" ").appendText(name);
         }
-        description.appendDescriptionOf(matcher);
     }
     
     protected abstract Iterable<? extends Item> getElements(Value value);
@@ -52,8 +72,8 @@ public abstract class SimpleEachOfAdapter<Value, Item> extends
 
     protected class EachOfValues extends AbstractAdaptedValue<Value, Item> {
 
-        public EachOfValues(MatchValue<Value> actualValue) {
-            super(actualValue);
+        public EachOfValues(Class<?> valueType, MatchValue<Value> actualValue) {
+            super(valueType, actualValue);
         }
 
         @Override
@@ -62,7 +82,7 @@ public abstract class SimpleEachOfAdapter<Value, Item> extends
         }
 
         @Override
-        protected boolean matches(Element<Value> element, ElementMatcher<Item> matcher) {
+        protected boolean matchSafely(Element<Value> element, ElementMatcher<Item> matcher) {
             EachItemIterable<Item> it = cachedItem(element);
             if (it.invalid != null) return false;
             E<Item> e = it.first();
@@ -79,26 +99,16 @@ public abstract class SimpleEachOfAdapter<Value, Item> extends
 
         @Override
         public void describeTo(Description description) {
-            describeSelfOf(description);
-            getActualValue().describeTo(description);
+            SimpleEachOfAdapter.this.describeValue(getActualValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            describeSelfOf(description);
-            getActualValue().describeValueType(description);
-        }
-        
-        protected void describeSelfOf(Description description) {
-            description.appendText("each ");
-            if (name != null) {
-                description.appendText(name).appendText(" ");
-            }
-            description.appendText("of ");
+            SimpleEachOfAdapter.this.describeValueType(getActualValue(), description);
         }
 
         @Override
-        protected void describeExpected(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
+        protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
             EachItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.invalid;
 //          do we even care?
@@ -109,7 +119,7 @@ public abstract class SimpleEachOfAdapter<Value, Item> extends
         }
 
         @Override
-        protected void describeMismatch(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
+        protected void describeMismatchSafely(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
             EachItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.invalid;
 //          do we even care?            
