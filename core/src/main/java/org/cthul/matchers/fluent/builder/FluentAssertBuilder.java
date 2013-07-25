@@ -1,6 +1,5 @@
 package org.cthul.matchers.fluent.builder;
 
-import static org.cthul.matchers.fluent.AssertUtils.ASSERT;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
@@ -19,24 +18,24 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     
     @Factory
     public static <T> FluentAssert<T> assertThat(T object) {
-        return new FluentAssertBuilder<>(ASSERT, object);
+        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(MatchValue<T> object) {
-        return new FluentAssertBuilder<>(ASSERT, object);
+        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, T object) {
 //        return assertThat(object).as(reason);
-        return new FluentAssertBuilder<>(reason, ASSERT, object);
+        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.INSTANCE, object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, MatchValue<T> object) {
 //        return assertThat(object).as(reason);
-        return new FluentAssertBuilder<>(reason, ASSERT, object);
+        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.INSTANCE, object);
     }
     
     private final MatchValue<Value> matchValue;
