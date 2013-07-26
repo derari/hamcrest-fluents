@@ -9,7 +9,8 @@ import org.hamcrest.Description;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
- *
+ * Base class for adapters that return muliple items from a source value,
+ * and require all to be matched.
  */
 public abstract class SimpleEachOfAdapter<Value, Item> 
                 extends AbstractMatchValueAdapter<Value, Item> {

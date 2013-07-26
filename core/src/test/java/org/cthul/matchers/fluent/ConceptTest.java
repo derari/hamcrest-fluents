@@ -24,10 +24,10 @@ public class ConceptTest {
                 .is(lessThan(3))
                 .and(greaterThan(0));
         
-        Matcher<Integer> between_5_and_10 = match(Integer.class)
-                .is(lessThan(10))
-                .and(greaterThan(5));
-        assertThat(1).isNot(between_5_and_10);
+        Matcher<Integer> negative_or_gt_10 = match(Integer.class)
+                .is(lessThan(0))
+                .or(greaterThan(10));
+        assertThat(1).isNot(negative_or_gt_10);
         
         assertThat(eachOf(list)).is(lessThan(10));
         
@@ -51,17 +51,19 @@ public class ConceptTest {
                 .andNot(hasItem(7));
         
         assertThat((Object) 1)
-                .isA(Integer.class).that()
-                .is(lessThan(3))
+                .isA(Integer.class)
+                .that().is(lessThan(3))
                 .and(greaterThan(0));
         
-        assertThat(1)
+        assertThat((Object) 1)
                 .isA(Integer.class, lessThan(3))
-                .and().is(equalTo((Number) 1)); // <? super ? extends Integer>
+                .and().is(equalTo((Number) 1));
         
         assertThat(list)
-                ._(each(Object.class)).isA(Integer.class).thatIs(lessThan(10))
-                .and().isNot(empty());
+                .isNot(empty())
+                .and(eachObject()).isA(Integer.class).thatIs(lessThan(10))
+                .and(anyObject()).isA(Integer.class, greaterThan(4))
+                .and(hasItem(3));
                 
     }
     

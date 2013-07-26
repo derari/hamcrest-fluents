@@ -4,7 +4,8 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
 /**
- * Fluent that matches a value.
+ * Base interface for fluent matcher chains.
+ * See {@link FluentMatcher} and {@link FluentAssert} for concrete use-cases.
  * <p>
  * As a {@linkplain FluentProperty property}, it matches against the
  * value itself.

@@ -9,7 +9,7 @@ import org.hamcrest.Description;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
- * 
+ * Base class for adapters that get a single value from the source value.
  */
 public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchValueAdapter<Value, Property> {
 

@@ -61,15 +61,16 @@ public abstract class AbstractFluentPropertyBuilder
         } else {
             Matcher<Object> m = isAMatcher.that(matcher, p, n);
             isAMatcher = null;
-//            matcher = new IsAMatcher<>(matcher, isAClass, p, n);
-//            isAClass = null;
             return _updateMatcher(m, null, false);
         }
     }
     
     protected <FP> FP _adapt(MatchValueAdapter<? super Property, ?> adapter) {
-        // FIXME prefix, negate
-        return (FP) _newProperty(adapter, null, false);
+        String p = prefix;
+        prefix = null;
+        boolean n = negate;
+        negate = false;
+        return (FP) _newProperty(adapter, p, n);
     }
     
     protected abstract ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
@@ -317,11 +318,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
     
     /**
-     * Used after {@code  isA(clazz).that()}.
-     * The instance-of matcher was already applied, 
-     * so there is no need to repeat the message;
-     * but the type check has to be done again to ensure the correct
-     * state of the property's match value.
+     * Used by {@link AbstractFluentPropertyBuilder#isA(java.lang.Class)}.
      */
     protected static class IsAMatcher<T> extends QuickDiagnosingMatcherBase<Object> {
 

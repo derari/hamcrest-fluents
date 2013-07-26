@@ -58,6 +58,11 @@ public class AnyOfAdapter<Item> extends
     }
     
     @Factory
+    public static AnyOfAdapter<Object> anyObject() {
+        return any();
+    }
+    
+    @Factory
     public static AnyOfAdapter<Integer> anyInt() {
         return any();
     }

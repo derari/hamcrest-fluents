@@ -1,7 +1,6 @@
 package org.cthul.matchers.fluent.adapters;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
@@ -10,7 +9,8 @@ import org.hamcrest.Description;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
- *
+ * Base class for adapters that return muliple items from a source value,
+ * but require only one to be matched.
  */
 public abstract class SimpleAnyOfAdapter<Value, Item> 
                 extends AbstractMatchValueAdapter<Value, Item> {
@@ -79,9 +79,9 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
 
     protected class AnyOfValues extends AbstractAdaptedValue<Value, Item> {
 
-        private final LinkedList<ElementMatcher<Item>> previousSuccessful = new LinkedList<>();
-        private final LinkedList<ElementMatcher<Item>> previousFailed = new LinkedList<>();
-
+        private PreviousMatcher<Item> matchers = null;
+        private PreviousMatcher<Item> matchersEnd = null;
+        
         public AnyOfValues(Class<?> valueType, MatchValue<Value> actualValue) {
             super(valueType, actualValue);
         }
@@ -93,14 +93,20 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
 
         @Override
         protected boolean matchSafely(Element<Value> element, ElementMatcher<Item> matcher) {
+            PreviousMatcher<Item> pm = new PreviousMatcher<>(matcher);
+            if (matchers == null) {
+                matchersEnd = matchers = pm;
+            } else {
+                matchersEnd.next = pm;
+                matchersEnd = pm;
+            }
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.firstValid();
             if (e == null) return false;
             if (matcher.matches(e)) {
-                previousSuccessful.add(matcher);
                 return true;
             }
-            previousFailed.add(matcher);
+            pm.success = false;
             e.mismatch = matcher;
             e = it.nextValid(e);
             while (e != null) {
@@ -112,19 +118,20 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
         
         protected boolean matchAgainstPrevious(E<Item> e) {
-            for (ElementMatcher<Item> m: previousFailed) {
-                if (!m.matches(e)) {
-                    e.mismatch = m;
+            // first, try only matchers that have already failed
+            for (PreviousMatcher<Item> pm = matchers; pm != null; pm = pm.next) {
+                if (pm.success) continue;
+                if (!pm.matcher.matches(e)) {
+                    e.mismatch = pm.matcher;
                     return false;
                 }
             }
-            Iterator<ElementMatcher<Item>> prev = previousSuccessful.iterator();
-            while (prev.hasNext()) {
-                ElementMatcher<Item> m = prev.next();
-                if (!m.matches(e)) {
-                    prev.remove();
-                    previousFailed.add(m);
-                    e.mismatch = m;
+            // now, try the previously successful matchers, too
+            for (PreviousMatcher<Item> pm = matchers; pm != null; pm = pm.next) {
+                if (!pm.success) continue;
+                if (!pm.matcher.matches(e)) {
+                    pm.success = false;
+                    e.mismatch = pm.matcher;
                     return false;
                 }
             }
@@ -144,11 +151,8 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         @Override
         protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
             AnyItemIterable<Item> it = cachedItem(element);
-            E<Item> first = it.first();
-            E<Item> e = first;
-            while (e != null) {
+            for (E<Item> e = it.first(); e != null; e = it.next(e)) {
                 e.mismatch.describeExpected(e, description);
-                e = it.next(e);
             }
         }
 
@@ -230,6 +234,17 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         @Override
         public Item value() {
             return value;
+        }
+    }
+    
+    protected static class PreviousMatcher<Value> {
+        
+        final ElementMatcher<Value> matcher;
+        boolean success = true;
+        PreviousMatcher next = null;
+
+        public PreviousMatcher(ElementMatcher<Value> matcher) {
+            this.matcher = matcher;
         }
     }
 }

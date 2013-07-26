@@ -11,7 +11,7 @@ import org.hamcrest.Matcher;
  * chain type once it is set causes an {@link IllegalStateException}.
  * <p>
  * Once the fluent was used as a matcher, or {@link #getMatcher() getMatcher()}
- * was called, the matcher will be frozen. 
+ * was called, it will be frozen. 
  * Any further modification causes an {@link IllegalStateException}.
  * @param <Value> value type of the fluent
  * @param <Match> type of the matcher that is built

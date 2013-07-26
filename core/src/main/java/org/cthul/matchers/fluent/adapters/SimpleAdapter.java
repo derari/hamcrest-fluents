@@ -4,7 +4,9 @@ import org.hamcrest.Description;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
- *
+ * A value adapter intended for easy subclassing.
+ * Only one method has to be implemented, and a name should be provided
+ * to the constructor.
  */
 public abstract class SimpleAdapter<Value, Item> extends ConvertingAdapter<Value, Item> {
     
