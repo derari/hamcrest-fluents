@@ -13,7 +13,7 @@
     <name>Cthul Hamcrest Fluents POM</name>
     <url>http://cthul.org/</url>
     <description>
-        Fluents for Hamcrest
+        Fluents for Hamcrest -- Parent POM
     </description>
     <modules>
         <module>core</module>
@@ -30,10 +30,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <!--<scm>
-        <url>https://github.com/derari/cthul.git</url>
-        <connection>scm:git:git://github.com/derari/cthul.git</connection>
-    </scm>-->
+    <scm>
+        <url>https://github.com/derari/hamcrest-fluents.git</url>
+        <connection>scm:git:git://github.com/derari/hamcrest-fluents.git</connection>
+    </scm>
     <distributionManagement>
         <site>
             <id>cthul-maven-docs</id>
@@ -98,7 +98,6 @@
                     </executions>
                 </plugin> 
                 <plugin>
-                    
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.3</version>
