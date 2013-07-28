@@ -66,6 +66,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <attach>false</attach>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>

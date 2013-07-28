@@ -32,8 +32,7 @@ public interface FluentAssert<Value>
     FluentAssert<Value> not();
 
     /**
-     * Exists only to improve to improve the readability of fluent chains,
-     * does nothing.
+     * Exists only to improve the readability of fluent chains, does nothing.
      * @return this
      */
     FluentAssert<Value> and();

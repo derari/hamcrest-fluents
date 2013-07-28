@@ -8,7 +8,7 @@ You can look at [an example](https://github.com/derari/hamcrest-fluents/blob/mas
 If you want to try it yourself, you can download it [here (without hamcrest)](https://dl.dropboxusercontent.com/u/10830039/hamcrest-fluent/cthul-fluent-matchers-core-1.0-SNAPSHOT-wo-hamcrest.jar)
  or [here (with hamcrest)](https://dl.dropboxusercontent.com/u/10830039/hamcrest-fluent/cthul-fluent-matchers-core-1.0-SNAPSHOT-jar-with-dependencies.jar)
 
-or get it with Maven from
+or get it with Maven from https://oss.sonatype.org/content/repositories/snapshots/
 
     <dependency>
         <groupId>org.cthul.matchers.fluent</groupId>
