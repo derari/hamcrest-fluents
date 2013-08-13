@@ -75,6 +75,8 @@ public class ConceptTest {
         assertThat(anyOf(metaList).get(size()))
                 .is(equalTo(3));
         
+        assertThat(list)
+                .has(size(), lessThan(10));        
     }
     
     public static <T> MatchValue<Integer> sizeOf(MatchValue<? extends Collection<?>> value) {

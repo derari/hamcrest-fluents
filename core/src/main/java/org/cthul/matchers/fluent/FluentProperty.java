@@ -134,6 +134,24 @@ public interface FluentProperty<Value, Property> {
     <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
 
     /**
+     * Equivalent to {@link #_(Matcher) _(adapter.adapt(matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return fluent
+     */
+    <P> Fluent<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+
+    /**
+     * Equivalent to {@link #has() has()}{@link #_(Matcher) \u2024_(adapter.adapt(matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return property fluent
+     */
+    <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+
+    /**
      * Returns a {@link Both} that applies the conjunction of 
      * the given and another matcher to the current fluent.
      * <p>

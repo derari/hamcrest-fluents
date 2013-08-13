@@ -227,6 +227,18 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
+    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     FluentPropertyMatcher.Both<Value, Value, Match> both(Matcher<? super Value> matcher);
     
     /**

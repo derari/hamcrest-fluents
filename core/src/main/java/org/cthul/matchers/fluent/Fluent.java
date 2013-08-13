@@ -126,6 +126,20 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     
     /**
      * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    <P> Fluent<Value> _(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    <P> Fluent<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * {@inheritDoc}
      */
     @Override
     Both<Value, Value> both(Matcher<? super Value> matcher);

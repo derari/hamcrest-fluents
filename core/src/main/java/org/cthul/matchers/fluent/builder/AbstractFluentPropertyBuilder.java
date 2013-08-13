@@ -67,6 +67,10 @@ public abstract class AbstractFluentPropertyBuilder
         }
     }
     
+    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+        return _match(adapter.adapt(matcher));
+    }
+    
     protected <FP> FP _adapt(MatchValueAdapter<? super Property, ?> adapter) {
         String p = prefix;
         prefix = null;
@@ -193,6 +197,17 @@ public abstract class AbstractFluentPropertyBuilder
         return _adapt(adapter);
     }
 
+    @Override
+    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+        return _match(adapter, matcher);
+    }
+
+    @Override
+    public <P> ThisFluent has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+        _has();
+        return _match(adapter, matcher);
+    }
+    
     @Override
     public abstract FluentProperty.Both<Value, Property> both(Matcher<? super Property> matcher);
     
