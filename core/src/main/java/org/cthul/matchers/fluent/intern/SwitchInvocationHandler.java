@@ -1,4 +1,4 @@
-package org.cthul.matchers.fluent.builder;
+package org.cthul.matchers.fluent.intern;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

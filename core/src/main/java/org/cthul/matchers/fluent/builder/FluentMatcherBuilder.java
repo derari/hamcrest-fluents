@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent.builder;
 
+import org.cthul.matchers.fluent.intern.FIs;
 import java.util.ArrayList;
 import java.util.List;
 import org.cthul.matchers.chain.AndChainMatcher;

@@ -1,5 +1,7 @@
 package org.cthul.matchers.fluent.builder;
 
+import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
+import org.cthul.matchers.fluent.intern.FIs;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import org.cthul.matchers.InstanceOf;
