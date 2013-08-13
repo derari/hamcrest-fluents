@@ -19,6 +19,7 @@ public class ConceptTest {
     @Test
     public void dsl() {
         List<Integer> list = Arrays.asList(1, 3, 5);
+        List<List<Integer>> metaList = Arrays.asList(list, Arrays.asList(1, 2, 3, 4));
         
         assertThat(1)
                 .is(lessThan(3))
@@ -61,10 +62,23 @@ public class ConceptTest {
         
         assertThat(list)
                 .isNot(empty())
-                .and(eachObject()).isA(Integer.class).thatIs(lessThan(10))
-                .and(anyObject()).isA(Integer.class, greaterThan(4))
+                .and(each()).isA(Integer.class).thatIs(lessThan(10))
+                .and(any()).isA(Integer.class, greaterThan(4))
                 .and(hasItem(3));
-                
+        
+        assertThat(eachOf(metaList))
+                .has(size())._(greaterThan(2));
+        
+        assertThat(sizeOf(eachOf(metaList)))
+                .is(greaterThan(2));
+        
+        assertThat(anyOf(metaList).get(size()))
+                .is(equalTo(3));
+        
+    }
+    
+    public static <T> MatchValue<Integer> sizeOf(MatchValue<? extends Collection<?>> value) {
+        return size().adapt(value);
     }
     
     public static MatchValue<Integer> sizeOf(Collection<?> c) {

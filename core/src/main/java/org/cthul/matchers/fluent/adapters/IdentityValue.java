@@ -23,9 +23,9 @@ public class IdentityValue<Value> extends ConvertingAdapter<Value, Value> {
     }
 
     @Override
-    public MatchValue<Value> adapt(MatchValue<Value> value) {
+    public MatchValue<Value> adapt(MatchValue<? extends Value> value) {
         // shortcut, this adapter adds nothing
-        return value;
+        return (MatchValue) value;
     }
 
     @Override

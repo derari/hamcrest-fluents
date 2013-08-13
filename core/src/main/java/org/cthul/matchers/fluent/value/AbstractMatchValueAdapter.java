@@ -20,13 +20,13 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     }
     
     @Override
-    public abstract MatchValue<Property> adapt(MatchValue<Value> value);
+    public abstract MatchValue<Property> adapt(MatchValue<? extends Value> value);
     
-    protected void describeValue(MatchValue<Value> actual, Description description) {
+    protected void describeValue(MatchValue<? extends Value> actual, Description description) {
         describeProducer(actual, description);
     }
     
-    protected void describeValueType(final MatchValue<Value> actual, Description description) {
+    protected void describeValueType(final MatchValue<? extends Value> actual, Description description) {
         SelfDescribing actualDescriptor = new SelfDescribingBase() {
             @Override
             public void describeTo(Description description) {
@@ -36,7 +36,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         describeProducer(actualDescriptor, description);
     }
     
-    protected void describeExpected(Element<Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, ExpectationDescription description) {
+    protected void describeExpected(Element<? extends Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, ExpectationDescription description) {
         SelfDescribing expectedDescriptor = new SelfDescribingBase() {
             @Override
             public void describeTo(Description description) {
@@ -47,7 +47,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         describeConsumer(expectedDescriptor, description);
     }
     
-    protected void describeMismatch(Element<Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, Description description) {
+    protected void describeMismatch(Element<? extends Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, Description description) {
         SelfDescribing mismatchDescriptor = new SelfDescribingBase() {
             @Override
             public void describeTo(Description description) {

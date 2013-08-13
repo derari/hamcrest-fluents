@@ -47,8 +47,8 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
     }
     
     @Override
-    public MatchValue<Item> adapt(MatchValue<Value> value) {
-        return new AnyOfValues(valueType, value);
+    public MatchValue<Item> adapt(MatchValue<? extends Value> value) {
+        return new AnyOfValues<>(valueType, value);
     }
 
     @Override
@@ -77,22 +77,22 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
                    .appendText(" ");
     }
 
-    protected class AnyOfValues extends AbstractAdaptedValue<Value, Item> {
+    protected class AnyOfValues<V extends Value> extends AbstractAdaptedValue<V, Item> {
 
         private PreviousMatcher<Item> matchers = null;
         private PreviousMatcher<Item> matchersEnd = null;
         
-        public AnyOfValues(Class<?> valueType, MatchValue<Value> actualValue) {
+        public AnyOfValues(Class<?> valueType, MatchValue<V> actualValue) {
             super(valueType, actualValue);
         }
 
         @Override
-        protected Object createItem(Element<Value> key) {
+        protected Object createItem(Element<V> key) {
             return new AnyItemIterable<>(getElements(key.value()));
         }
 
         @Override
-        protected boolean matchSafely(Element<Value> element, ElementMatcher<Item> matcher) {
+        protected boolean matchSafely(Element<V> element, ElementMatcher<Item> matcher) {
             PreviousMatcher<Item> pm = new PreviousMatcher<>(matcher);
             if (matchers == null) {
                 matchersEnd = matchers = pm;
@@ -149,7 +149,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
 
         @Override
-        protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
+        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
             AnyItemIterable<Item> it = cachedItem(element);
             for (E<Item> e = it.first(); e != null; e = it.next(e)) {
                 e.mismatch.describeExpected(e, description);
@@ -157,7 +157,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
 
         @Override
-        protected void describeMismatchSafely(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
+        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> first = it.first();
             E<Item> e = first;

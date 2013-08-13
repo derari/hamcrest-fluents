@@ -47,8 +47,8 @@ public abstract class SimpleEachOfAdapter<Value, Item>
     }
     
     @Override
-    public MatchValue<Item> adapt(MatchValue<Value> value) {
-        return new EachOfValues(valueType, value);
+    public MatchValue<Item> adapt(MatchValue<? extends Value> value) {
+        return new EachOfValues<>(valueType, value);
     }
 
     @Override
@@ -71,19 +71,19 @@ public abstract class SimpleEachOfAdapter<Value, Item>
                    .appendText(" ");
     }
 
-    protected class EachOfValues extends AbstractAdaptedValue<Value, Item> {
+    protected class EachOfValues<V extends Value> extends AbstractAdaptedValue<V, Item> {
 
-        public EachOfValues(Class<?> valueType, MatchValue<Value> actualValue) {
+        public EachOfValues(Class<?> valueType, MatchValue<V> actualValue) {
             super(valueType, actualValue);
         }
 
         @Override
-        protected Object createItem(Element<Value> key) {
+        protected Object createItem(Element<V> key) {
             return new EachItemIterable<>(getElements(key.value()));
         }
 
         @Override
-        protected boolean matchSafely(Element<Value> element, ElementMatcher<Item> matcher) {
+        protected boolean matchSafely(Element<V> element, ElementMatcher<Item> matcher) {
             EachItemIterable<Item> it = cachedItem(element);
             if (it.invalid != null) return false;
             E<Item> e = it.first();
@@ -109,7 +109,7 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         }
 
         @Override
-        protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
+        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
             EachItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.invalid;
 //          do we even care?
@@ -120,7 +120,7 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         }
 
         @Override
-        protected void describeMismatchSafely(Element<Value> element, ElementMatcher<Item> matcher, Description description) {
+        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
             EachItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.invalid;
 //          do we even care?            

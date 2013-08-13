@@ -16,8 +16,13 @@ public abstract class MatchValueAdapterBase<Value, Property>
                 implements MatchValueAdapter<Value, Property> {
 
     @Override
-    public <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, Value> adapter) {
+    public <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, ? extends Value> adapter) {
         return new CombinedMatchValueAdapter<>(adapter, this);
+    }
+
+    @Override
+    public <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter) {
+        return adapter.adapt(this);
     }
     
     protected boolean hasDescription() {
@@ -44,10 +49,10 @@ public abstract class MatchValueAdapterBase<Value, Property>
     
     protected static class CombinedMatchValueAdapter<Value, Tmp, Property> extends MatchValueAdapterBase<Value, Property> {
         
-        private final MatchValueAdapter<Value, Tmp> mva1;
+        private final MatchValueAdapter<Value, ? extends Tmp> mva1;
         private final MatchValueAdapter<Tmp, Property> mva2;
 
-        public CombinedMatchValueAdapter(MatchValueAdapter<Value, Tmp> mva1, MatchValueAdapter<Tmp, Property> mva2) {
+        public CombinedMatchValueAdapter(MatchValueAdapter<Value, ? extends Tmp> mva1, MatchValueAdapter<Tmp, Property> mva2) {
             this.mva1 = mva1;
             this.mva2 = mva2;
         }
@@ -58,7 +63,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
         }
 
         @Override
-        public MatchValue<Property> adapt(MatchValue<Value> value) {
+        public MatchValue<Property> adapt(MatchValue<? extends Value> value) {
             return mva2.adapt(mva1.adapt(value));
         }
 

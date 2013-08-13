@@ -26,7 +26,7 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * @param value source value
      * @return match value
      */
-    MatchValue<Property> adapt(MatchValue<Value> value);
+    MatchValue<Property> adapt(MatchValue<? extends Value> value);
     
     /**
      * Creates a match value adapter that takes the match values from another
@@ -35,7 +35,15 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * @param adapter source adapter
      * @return match value adapter
      */
-    <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, Value> adapter);
+    <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, ? extends Value> adapter);
+    
+    /**
+     * Equivalent to {@code adapter.adapt(this)};
+     * @param <Property2>
+     * @param adapter
+     * @return 
+     */
+    <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter);
     
     /**
      * Describes a producer that will have its output adapted by this adapter.

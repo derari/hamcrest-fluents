@@ -13,9 +13,7 @@
     <name>Cthul Fluent Matchers</name>
     <url>http://cthul.org</url>
     <description>
-        Provides hamcrest.org matchers for strings and exceptions,
-        allows matching code blocks, and provides several utilities for
-        combining matchers.
+        Provides a fluent API for hamcrest.org matchers.
     </description>
     <distributionManagement>
         <site>

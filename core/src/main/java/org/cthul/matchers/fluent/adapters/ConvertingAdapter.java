@@ -30,26 +30,26 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
     }
     
     @Override
-    public MatchValue<Property> adapt(MatchValue<Value> v) {
-        return new ConvertedMatchValue(valueType, v);
+    public MatchValue<Property> adapt(MatchValue<? extends Value> v) {
+        return new ConvertedMatchValue<>(valueType, v);
     }
     
     protected abstract Property adaptValue(Value v);
     
-    protected class ConvertedMatchValue extends AbstractAdaptedValue<Value, Property> {
+    protected class ConvertedMatchValue<V extends Value> extends AbstractAdaptedValue<V, Property> {
 
-        public ConvertedMatchValue(Class<?> valueType, MatchValue<Value> actualValue) {
+        public ConvertedMatchValue(Class<?> valueType, MatchValue<V> actualValue) {
             super(valueType, actualValue);
         }
 
         @Override
-        protected Converted<Property> createItem(Element<Value> key) {
+        protected Converted<Property> createItem(Element<V> key) {
             Property i = adaptValue(key.value());
             return new Converted<>(i);
         }
 
         @Override
-        protected boolean matchSafely(Element<Value> element, ElementMatcher<Property> matcher) {
+        protected boolean matchSafely(Element<V> element, ElementMatcher<Property> matcher) {
             return matcher.matches(cachedItem(element));
         }
 
@@ -64,29 +64,29 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
         }
 
         @Override
-        protected void describeExpectedSafely(Element<Value> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
+        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
             Element<Property> item = cachedItem(element);
             ConvertingAdapter.this.describeExpected(element, item, matcher, description);
         }
 
         @Override
-        protected void describeMismatchSafely(Element<Value> element, ElementMatcher<Property> matcher, Description description) {
+        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Property> matcher, Description description) {
             Element<Property> item = cachedItem(element);
             ConvertingAdapter.this.describeMismatch(element, item, matcher, description);
         }
     }
     
-    protected static class Converted<Item> implements Element<Item> {
+    protected static class Converted<Value> implements Element<Value> {
         
-        private final Item item;
+        private final Value value;
 
-        public Converted(Item item) {
-            this.item = item;
+        public Converted(Value value) {
+            this.value = value;
         }
 
         @Override
-        public Item value() {
-            return item;
+        public Value value() {
+            return value;
         }
     }
 }

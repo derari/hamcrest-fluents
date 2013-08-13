@@ -34,12 +34,7 @@ public class AnyOfAdapter<Item> extends
     
     @Factory
     public static <I> AnyOfAdapter<I> any() {
-        return INSTANCE;
-    }
-    
-    @Factory
-    public static <I> AnyOfAdapter<I> any(Class<I> c) {
-        return any();
+        return anyOf();
     }
     
     @Factory
@@ -58,6 +53,11 @@ public class AnyOfAdapter<Item> extends
     }
     
     @Factory
+    public static <I> AnyOfAdapter<I> any(Class<I> c) {
+        return any();
+    }
+    
+    @Factory
     public static AnyOfAdapter<Object> anyObject() {
         return any();
     }
@@ -73,6 +73,10 @@ public class AnyOfAdapter<Item> extends
 
     public AnyOfAdapter(String name) {
         super(name, Iterable.class);
+    }
+    
+    public <T extends Item> MatchValue<T> of(Iterable<? extends T> value) {
+        return (MatchValue) adapt(value);
     }
 
     @Override
