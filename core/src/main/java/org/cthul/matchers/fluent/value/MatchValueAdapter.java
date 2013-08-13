@@ -1,6 +1,7 @@
 package org.cthul.matchers.fluent.value;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
@@ -36,6 +37,14 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * @return match value adapter
      */
     <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, ? extends Value> adapter);
+    
+    /**
+     * Returns a matcher that builds a {@link MatchValue} using this adapter,
+     * and verifies it with the given matcher.
+     * @param matcher the matcher
+     * @return matcher
+     */
+    Matcher<Value> adapt(Matcher<? super Property> matcher);
     
     /**
      * Equivalent to {@code adapter.adapt(this)};

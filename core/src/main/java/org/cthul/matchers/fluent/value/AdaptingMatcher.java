@@ -27,14 +27,12 @@ public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
 
     @Override
     public boolean matches(Object item) {
-        Value v = (Value) item;
-        return adapter.adapt(v).matches(matcher);
+        return adapter.adapt(item).matches(matcher);
     }
 
     @Override
     public boolean matches(Object item, Description mismatch) {
-        Value v = (Value) item;
-        MatchValue<Property> mv = adapter.adapt(v);
+        MatchValue<Property> mv = adapter.adapt(item);
         if (mv.matches(matcher)) {
             return true;
         }

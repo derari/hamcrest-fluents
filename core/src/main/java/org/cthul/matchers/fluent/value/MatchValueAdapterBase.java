@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import org.cthul.proc.Proc;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
@@ -20,6 +21,11 @@ public abstract class MatchValueAdapterBase<Value, Property>
         return new CombinedMatchValueAdapter<>(adapter, this);
     }
 
+    @Override
+    public Matcher<Value> adapt(Matcher<? super Property> matcher) {
+        return new AdaptingMatcher<>(this, matcher);
+    }
+    
     @Override
     public <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter) {
         return adapter.adapt(this);
