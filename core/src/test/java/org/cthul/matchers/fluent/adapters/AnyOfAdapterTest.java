@@ -75,12 +75,23 @@ public class AnyOfAdapterTest extends FluentTestBase {
     }
     
     @Test
-    public void test_assert_description_not(){
+    public void test_assert_description_not() {
         test_assertThat(anyOf(1, 3, 4)).isNot(greaterThan(0));
         
         assertMismatch(
                 "any of list is not a value greater than <0>",
                 "#0 <1> was a value greater than <0>, #1 <3> was a value greater than <0>, and #2 <4> was a value greater than <0>");
+    }
+    
+    @Test
+    public void test_assert_description_chained_order() {
+        test_assertThat(anyOf(1, 4))
+                .is(lessThan(4))
+                .and(greaterThan(1));
+        
+        assertMismatch(
+                "any of list is a value less than <4>, and a value greater than <1>",
+                "#0 <1> was equal to <1>, and #1 <4> was equal to <4>");
     }
     
     MatchValueAdapter<Iterable<? extends Integer>, Integer> anyInt() {

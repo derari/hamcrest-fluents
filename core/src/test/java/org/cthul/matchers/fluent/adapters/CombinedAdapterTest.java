@@ -36,7 +36,7 @@ public class CombinedAdapterTest extends FluentTestBase {
                 .and().isNot(equalTo(0))
                 .and().isNot(equalTo(2));
         assertMismatch(
-                "each of any of list is not <2>, and is a value less than <3>",
+                "each of any of list is a value less than <3>, and is not <2>",
                 "#0 #1 <2> was <2>, and #1 #2 <5> was greater than <3>");
     }
     

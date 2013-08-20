@@ -38,6 +38,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
         return new FluentAssertBuilder<>(reason, AssertionErrorHandler.INSTANCE, object);
     }
     
+    @Factory
+    public static <V, T> FluentAssert<T> assertThat(MatchValueAdapter<V, T> adapter, V object) {
+        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+    }
+    
+    private int matcherCounter = 0;
     private final MatchValue<Value> matchValue;
     private final FailureHandler failureHandler;
 
@@ -64,7 +70,7 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
 
     @Override
     protected This _applyMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
-        MatchValue.ElementMatcher<Value> m = new ElementMatcher<>(matcher, prefix, not);
+        MatchValue.ElementMatcher<Value> m = new ElementMatcher<>(matcherCounter++, matcher, prefix, not);
         if (!matchValue.matches(m)) {
             failureHandler.mismatch(getReason(), matchValue, m);
         }

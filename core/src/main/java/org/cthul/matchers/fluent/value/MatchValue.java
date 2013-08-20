@@ -100,9 +100,11 @@ public interface MatchValue<Value> extends SelfDescribing {
     interface ExpectationDescription extends Description {
         
         /**
-         * To be called when a single expectation was fully described.
+         * 
+         * @param index
+         * @param expected 
          */
-        void addedExpectation();
+        void addExpected(int index, SelfDescribing expected);
         
     }
 }

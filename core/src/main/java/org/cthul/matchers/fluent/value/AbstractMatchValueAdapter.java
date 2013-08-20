@@ -75,10 +75,9 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             return valueType.isInstance(value);
         }
         
-        protected void describeExpectedToAccept(Object value, ExpectationDescription description) {
+        protected void describeExpectedToAccept(Object value, Description description) {
             description.appendText("an instance of ")
                        .appendText(valueType.getCanonicalName());
-            description.addedExpectation();
         }
         
         protected void describeMismatchOfUnaccapted(Object value, Description description) {
@@ -134,11 +133,17 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
         protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<Property> matcher);
         
-        protected void describeExpected(Element<?> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
+        protected void describeExpected(final Element<?> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
             if (acceptValue(element.value())) {
                 describeExpectedSafely((Element) element, matcher, description);
             } else {
-                describeExpectedToAccept(element.value(), description);
+                SelfDescribing sd = new SelfDescribingBase() {
+                    @Override
+                    public void describeTo(Description description) {
+                        describeExpectedToAccept(element.value(), description);
+                    }
+                };
+                description.addExpected(-1, sd);
             }
         }
         

@@ -76,7 +76,15 @@ public class ConceptTest {
                 .is(equalTo(3));
         
         assertThat(list)
-                .has(size(), lessThan(10));        
+                .has(size(), lessThan(10));
+        
+        assertThat(sizeOf(), list)
+                .is(lessThan(10));  
+        
+        // assertThat(list, size())
+        
+        // assertThat(metaList, each(), size())
+        //      .is(lessThan(10));
     }
     
     public static <T> MatchValue<Integer> sizeOf(MatchValue<? extends Collection<?>> value) {
@@ -85,6 +93,10 @@ public class ConceptTest {
     
     public static MatchValue<Integer> sizeOf(Collection<?> c) {
         return size().adapt(c);
+    }
+    
+    public static MatchValueAdapter<Collection<?>, Integer> sizeOf() {
+        return size();
     }
     
     public static MatchValueAdapter<Collection<?>, Integer> size() {

@@ -1,7 +1,8 @@
 package org.cthul.matchers.fluent.value;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
@@ -9,9 +10,12 @@ import org.hamcrest.StringDescription;
 /**
  *
  */
-public class Expectation implements MatchValue.ExpectationDescription, SelfDescribing {
+public class Expectation 
+                extends SelfDescribingBase
+                implements MatchValue.ExpectationDescription {
     
-    private final Set<String> expected = new LinkedHashSet<>();
+    private ArrayList<SelfDescribing> sorted = null;
+    private ArrayList<SelfDescribing> unsorted = null;
     private StringDescription current = null;
 
     protected StringDescription current() {
@@ -22,8 +26,16 @@ public class Expectation implements MatchValue.ExpectationDescription, SelfDescr
     }
 
     @Override
-    public void addedExpectation() {
-        expected.add(current().toString());
+    public void addExpected(int index, SelfDescribing expected) {
+        if (index < 0) {
+            if (unsorted == null) unsorted = new ArrayList<>();
+            unsorted.add(expected);
+        } else {
+            if (sorted == null) sorted = new ArrayList<>();
+            sorted.ensureCapacity(index);
+            while (sorted.size() <= index) sorted.add(null);
+            sorted.set(index, expected);
+        }
         current = null;
     }
 
@@ -59,6 +71,15 @@ public class Expectation implements MatchValue.ExpectationDescription, SelfDescr
 
     @Override
     public void describeTo(Description description) {
+        if (current != null) {
+            description.appendText(current.toString());
+            description.appendText(" ");
+        }
+        
+        LinkedHashSet<String> expected = new LinkedHashSet<>();
+        describeAll(expected, unsorted);
+        describeAll(expected, sorted);
+        
         final int last = expected.size() - 1;
         int i = 0;
         for (String s : expected) {
@@ -74,11 +95,16 @@ public class Expectation implements MatchValue.ExpectationDescription, SelfDescr
         }
     }
 
-    @Override
-    public String toString() {
-        StringDescription d = new StringDescription();
-        describeTo(d);
-        return d.toString();
+    private void describeAll(Collection<String> target, Iterable<SelfDescribing> source) {
+        if (source != null) {
+            for (SelfDescribing s: source) {
+                if (s != null) {
+                    StringDescription sd = new StringDescription();
+                    sd.appendDescriptionOf(s);
+                    target.add(sd.toString());
+                }
+            }
+        }
     }
     
 }

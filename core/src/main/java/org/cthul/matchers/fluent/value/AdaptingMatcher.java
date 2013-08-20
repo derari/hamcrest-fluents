@@ -17,12 +17,12 @@ public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
 
     public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
         this.adapter = adapter;
-        this.matcher = new ElementMatcher<>(matcher, prefix, not);
+        this.matcher = new ElementMatcher<>(-1, matcher, prefix, not);
     }
 
     public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher) {
         this.adapter = adapter;
-        this.matcher = new ElementMatcher<>(matcher);
+        this.matcher = new ElementMatcher<>(-1, matcher);
     }
 
     @Override

@@ -13,14 +13,16 @@ import org.hamcrest.TypeSafeMatcher;
 public class ElementMatcher<Item> extends TypeSafeMatcher<Element<?>> 
                 implements MatchValue.ElementMatcher<Item> {
     
+    private final int index;
     private final Matcher<? super Item> matcher;
 
-    public ElementMatcher(Matcher<? super Item> matcher, String prefix, boolean not) {
-        this(FIs.wrap(prefix, not, matcher));
+    public ElementMatcher(int index, Matcher<? super Item> matcher, String prefix, boolean not) {
+        this(index, FIs.wrap(prefix, not, matcher));
     }
     
-    public ElementMatcher(Matcher<? super Item> matcher) {
+    public ElementMatcher(int index, Matcher<? super Item> matcher) {
         super(Element.class);
+        this.index = index;
         this.matcher = matcher;
     }
 
@@ -36,8 +38,7 @@ public class ElementMatcher<Item> extends TypeSafeMatcher<Element<?>>
 
     @Override
     public void describeExpected(Element<?> e, ExpectationDescription description) {
-        matcher.describeTo(description);
-        description.addedExpectation();
+        description.addExpected(index, this);
     }
 
     @Override
