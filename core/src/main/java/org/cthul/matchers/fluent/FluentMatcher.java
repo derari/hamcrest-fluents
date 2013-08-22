@@ -54,12 +54,6 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> and();
 
     /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}.
-     * @return this
-     */
-    FluentMatcher<Value, Match> andNot();
-    
-    /**
      * Defines this fluent to build a disjunction of matchers.
      * @return this
      * @throws IllegalStateException if {@link #and() and()} or 
@@ -68,12 +62,6 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> or();
 
     /**
-     * Equivalent to {@link #or() or()}{@link #not() \u2024not()}.
-     * @return this
-     */
-    FluentMatcher<Value, Match> orNot();
-    
-    /**
      * Defines this fluent to build an exclusive disjunction of matchers.
      * @return this
      * @throws IllegalStateException if {@link #and() and()} or 
@@ -81,12 +69,6 @@ public interface FluentMatcher<Value, Match>
      */
     FluentMatcher<Value, Match> xor();
 
-    /**
-     * Equivalent to {@link #xor() xor()}{@link #not() \u2024not()}.
-     * @return this
-     */
-    FluentMatcher<Value, Match> xorNot();
-    
     /**
      * {@inheritDoc}
      * @throws IllegalStateException if the fluent was frozen by using it as 
@@ -133,13 +115,6 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> and(Matcher<? super Value> matcher);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}{@link #_(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
-     * @return this
-     */
-    FluentMatcher<Value, Match> andNot(Matcher<? super Value> matcher);
-    
-    /**
      * Equivalent to {@link #or() or()}{@link #_(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this
@@ -147,26 +122,12 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> or(Matcher<? super Value> matcher);
 
     /**
-     * Equivalent to {@link #or() or()}{@link #not() \u2024not()}{@link #_(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
-     * @return this
-     */
-    FluentMatcher<Value, Match> orNot(Matcher<? super Value> matcher);
-    
-    /**
      * Equivalent to {@link #xor() xor()}{@link #_(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this
      */
     FluentMatcher<Value, Match> xor(Matcher<? super Value> matcher);
 
-    /**
-     * Equivalent to {@link #xor() xor()}{@link #not() \u2024not()}{@link #_(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
-     * @return this
-     */
-    FluentMatcher<Value, Match> xorNot(Matcher<? super Value> matcher);
-    
     /**
      * {@inheritDoc}
      */
@@ -217,11 +178,19 @@ public interface FluentMatcher<Value, Match>
     <P> FluentPropertyMatcher<Value, P, Match> and(MatchValueAdapter<? super Value, P> adapter);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #or() or()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * @param <P> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyMatcher<Value, P, Match> andNot(MatchValueAdapter<? super Value, P> adapter);
+    <P> FluentPropertyMatcher<Value, P, Match> or(MatchValueAdapter<? super Value, P> adapter);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * @param adapter the adapter
+     * @return property fluent
+     */
+    <P> FluentPropertyMatcher<Value, P, Match> xor(MatchValueAdapter<? super Value, P> adapter);
 
     /**
      * {@inheritDoc}
@@ -235,6 +204,33 @@ public interface FluentMatcher<Value, Match>
     @Override
     <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
 
+    /**
+     * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * Equivalent to {@link #or() or()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
     /**
      * {@inheritDoc}
      */

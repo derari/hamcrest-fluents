@@ -38,18 +38,6 @@ public interface FluentAssert<Value>
     FluentAssert<Value> and();
 
     /**
-     * Equivalent to {@link #and() and()}{@link #is() \u2024is()}.
-     * @return this
-     */
-    FluentAssert<Value> andIs();
-
-    /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}.
-     * @return this
-     */
-    FluentAssert<Value> andNot();
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -91,20 +79,6 @@ public interface FluentAssert<Value>
      * @return this
      */
     FluentAssert<Value> and(Matcher<? super Value> matcher);
-
-    /**
-     * Equivalent to {@link #and() and()}{@link #is() \u2024is()}{@link #_(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
-     * @return this
-     */
-    FluentAssert<Value> andIs(Matcher<? super Value> matcher);
-
-    /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}{@link #_(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
-     * @return this
-     */
-    FluentAssert<Value> andNot(Matcher<? super Value> matcher);
 
     /**
      * {@inheritDoc}
@@ -173,6 +147,15 @@ public interface FluentAssert<Value>
      */
     @Override
     <P> FluentAssert<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    
+    /**
+     * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * @param <P> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
 
     /**
      * {@inheritDoc}
@@ -185,6 +168,12 @@ public interface FluentAssert<Value>
      */
     @Override
     FluentPropertyAssert.Either<Value, Value> either(Matcher<? super Value>... matchers);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentPropertyAssert.Neither<Value, Value> neither(Matcher<? super Value>... matchers);
 
     /**
      * {@inheritDoc}

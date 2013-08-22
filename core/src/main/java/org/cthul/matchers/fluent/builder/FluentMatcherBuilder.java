@@ -120,27 +120,6 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public This andNot() {
-        _and();
-        _not();
-        return _this();
-    }
-    
-    @Override
-    public This orNot() {
-        _or();
-        _not();
-        return _this();
-    }
-
-    @Override
-    public This xorNot() {
-        _xor();
-        _not();
-        return _this();
-    }
-
-    @Override
     public This and(Matcher<? super Value> matcher) {
         _and();
         return _match(matcher);
@@ -159,37 +138,39 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public This andNot(Matcher<? super Value> matcher) {
-        _and();
-        _not();
-        return _match(matcher);
-    }
-
-    @Override
-    public This orNot(Matcher<? super Value> matcher) {
-        _or();
-        _not();
-        return _match(matcher);
-    }
-
-    @Override
-    public This xorNot(Matcher<? super Value> matcher) {
-        _xor();
-        _not();
-        return _match(matcher);
-    }
-
-    @Override
     public <P> FluentPropertyMatcher<Value, P, Match> and(MatchValueAdapter<? super Value, P> adapter) {
         _and();
         return _adapt(adapter);
     }
 
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> andNot(MatchValueAdapter<? super Value, P> adapter) {
-        _and();
-        _not();
+    public <P> FluentPropertyMatcher<Value, P, Match> or(MatchValueAdapter<? super Value, P> adapter) {
+        _or();
         return _adapt(adapter);
+    }
+
+    @Override
+    public <P> FluentPropertyMatcher<Value, P, Match> xor(MatchValueAdapter<? super Value, P> adapter) {
+        _xor();
+        return _adapt(adapter);
+    }
+
+    @Override
+    public <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+        _and();
+        return _match(adapter, matcher);
+    }
+
+    @Override
+    public <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+        _or();
+        return _match(adapter, matcher);
+    }
+
+    @Override
+    public <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+        _xor();
+        return _match(adapter, matcher);
     }
 
     @Override

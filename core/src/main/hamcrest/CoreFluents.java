@@ -20,5 +20,5 @@ public class CoreFluents extends CoreFluentsBase {
     public static <V, M> FluentMatcher<V, M> match(MatchValueAdapter<M, V> adapter) {
         return FluentMatcherBuilder.match(adapter);
     }
-    
+ 
 }

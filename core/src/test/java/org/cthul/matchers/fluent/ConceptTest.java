@@ -49,7 +49,7 @@ public class ConceptTest {
                 .isNot(empty())
                 .and(size()).is(lessThan(5))
                 .and(eachInt()).is(lessThan(10))
-                .andNot(hasItem(7));
+                .and().not(hasItem(7));
         
         assertThat((Object) 1)
                 .isA(Integer.class)

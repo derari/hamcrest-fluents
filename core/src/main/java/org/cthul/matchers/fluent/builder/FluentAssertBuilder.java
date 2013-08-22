@@ -46,10 +46,14 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     private int matcherCounter = 0;
     private final MatchValue<Value> matchValue;
     private final FailureHandler failureHandler;
+    
+    public final FluentAssertBuilder<Value, This> and;
 
+    @SuppressWarnings("LeakingThisInConstructor")
     public FluentAssertBuilder(FailureHandler failureHandler, MatchValue<Value> matchValues) {
         this.matchValue = matchValues;
         this.failureHandler = failureHandler;
+        this.and = this;
     }
 
     public FluentAssertBuilder(FailureHandler failureHandler, Value item) {
@@ -90,36 +94,8 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public FluentAssert<Value> andIs() {
-        _and();
-        _is();
-        return _this();
-    }
-
-    @Override
-    public This andNot() {
-        _and();
-        _not();
-        return _this();
-    }
-    
-    @Override
     public This and(Matcher<? super Value> matcher) {
         _and();
-        return _match(matcher);
-    }
-
-    @Override
-    public FluentAssert<Value> andIs(Matcher<? super Value> matcher) {
-        _and();
-        _is();
-        return _match(matcher);
-    }
-
-    @Override
-    public This andNot(Matcher<? super Value> matcher) {
-        _and();
-        _not();
         return _match(matcher);
     }
 
@@ -134,6 +110,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
         _and();
         _not();
         return _adapt(adapter);
+    }
+
+    @Override
+    public <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+        _and();
+        return _match(adapter, matcher);
     }
 
     @Override
