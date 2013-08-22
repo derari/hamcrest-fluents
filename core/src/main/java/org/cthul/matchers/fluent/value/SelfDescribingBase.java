@@ -15,7 +15,7 @@ public abstract class SelfDescribingBase implements SelfDescribing {
     /**
      * Calls {@link #describeTo(org.hamcrest.Description)} with a 
      * {@code StringDescription}, and returns its value.
-     * @return 
+     * @return description string
      */
     @Override
     public String toString() {

@@ -55,7 +55,7 @@ public interface MatchValue<Value> extends SelfDescribing {
     void describeMismatch(Description description);
     
     /**
-     * Equivalent to {@çode adapter.adapt(this)}.
+     * Equivalent to {@code adapter.adapt(this)}.
      * @param <Property>
      * @param adapter
      * @return adapted match value

@@ -42,7 +42,7 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * Returns a matcher that builds a {@link MatchValue} using this adapter,
      * and verifies it with the given matcher.
      * @param matcher the matcher
-     * @return matcher
+     * @return adapted matcher
      */
     Matcher<Value> adapt(Matcher<? super Property> matcher);
     
@@ -50,7 +50,7 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * Equivalent to {@code adapter.adapt(this)};
      * @param <Property2>
      * @param adapter
-     * @return 
+     * @return match value adapter
      */
     <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter);
     
