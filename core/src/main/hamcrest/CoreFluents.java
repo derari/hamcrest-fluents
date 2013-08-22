@@ -2,6 +2,7 @@ package org.cthul.matchers;
 
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.builder.FluentMatcherBuilder;
+import org.cthul.matchers.fluent.intern.CoreFluentsBase;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 
 /**

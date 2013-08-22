@@ -145,7 +145,7 @@
                                     <arguments>
                                         <argument>${project.build.sourceDirectory}/../hamcrest/CoreFluents.xml</argument>
                                         <argument>${project.build.sourceDirectory}</argument>
-                                        <argument>org.cthul.matchers.CoreFluentsBase</argument>
+                                        <argument>org.cthul.matchers.fluent.intern.CoreFluentsBase</argument>
                                         <argument>${generated-matcher-dir}</argument>
                                     </arguments>
                                     <sourceRoot>${generated-matcher-dir}</sourceRoot>
