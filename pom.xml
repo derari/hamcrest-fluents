@@ -17,6 +17,7 @@
     </description>
     <modules>
         <module>core</module>
+        <module>lib</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
