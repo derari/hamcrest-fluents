@@ -8,7 +8,7 @@ import org.hamcrest.internal.ReflectiveTypeFinder;
  * Only one method has to be implemented, and a name should be provided
  * to the constructor.
  */
-public abstract class SimpleAdapter<Value, Item> extends ConvertingAdapter<Value, Item> {
+public abstract class SimpleAdapter<Value, Property> extends ConvertingAdapter<Value, Property> {
     
     private final String name;
 
