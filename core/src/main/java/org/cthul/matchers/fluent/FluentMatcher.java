@@ -108,6 +108,30 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> hasNot(Matcher<? super Value> matcher);
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> _(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> is(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> not(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> isNot(Value value);
+
+    /**
      * Equivalent to {@link #and() and()}{@link #_(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this

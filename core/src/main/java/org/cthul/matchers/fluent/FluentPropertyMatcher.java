@@ -67,6 +67,30 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      */
     @Override
     FluentMatcher<Value, Match> hasNot(Matcher<? super Property> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> _(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> is(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> not(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentMatcher<Value, Match> isNot(Property value);
 
     /**
      * {@inheritDoc}

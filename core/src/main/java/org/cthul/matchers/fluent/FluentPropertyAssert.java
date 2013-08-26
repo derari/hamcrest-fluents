@@ -70,6 +70,30 @@ public interface FluentPropertyAssert<Value, Property>
      */
     @Override
     FluentAssert<Value> hasNot(Matcher<? super Property> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> _(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> is(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> not(Property value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> isNot(Property value);
 
     /**
      * {@inheritDoc}

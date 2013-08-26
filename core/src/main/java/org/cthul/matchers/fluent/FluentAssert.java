@@ -74,6 +74,30 @@ public interface FluentAssert<Value>
     FluentAssert<Value> hasNot(Matcher<? super Value> matcher);
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> _(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> is(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> not(Value value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> isNot(Value value);
+
+    /**
      * Equivalent to {@link #and() and()}{@link #_(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this

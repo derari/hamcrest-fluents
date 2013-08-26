@@ -75,6 +75,35 @@ public interface FluentProperty<Value, Property> {
      * @return fluent
      */
     Fluent<Value> hasNot(Matcher<? super Property> matcher);
+    
+    /**
+     * Adds a matcher that checks if the property is {@code equalTo}
+     * the given value.
+     * @param value the value
+     * @return fluent
+     */
+    Fluent<Value> _(Property value);
+    
+    /**
+     * Equivalent to {@link #is() is()}{@link #_(Object) \u2024_(value)}. 
+     * @param value the value
+     * @return fluent
+     */
+    Fluent<Value> is(Property value);
+    
+    /**
+     * Equivalent to {@link #not() not()}{@link #_(Object) \u2024_(value)}.
+     * @param value the value
+     * @return fluent
+     */
+    Fluent<Value> not(Property value);
+    
+    /**
+     * Equivalent to {@link #is() is()}{@link #not() \u2024not()}{@link #_(Object) \u2024_(value)}.
+     * @param value the value
+     * @return fluent
+     */
+    Fluent<Value> isNot(Property value);
 
     /**
      * Equivalent to calling {@link #_(org.hamcrest.Matcher) _(matcher)}

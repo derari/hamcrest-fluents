@@ -81,6 +81,34 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
 
     /**
      * {@inheritDoc}
+     * @return fluent
+     */
+    @Override
+    Fluent<Value> _(Value value);
+    
+    /**
+     * {@inheritDoc}
+     * @return fluent
+     */
+    @Override
+    Fluent<Value> is(Value value);
+    
+    /**
+     * {@inheritDoc}
+     * @return fluent
+     */
+    @Override
+    Fluent<Value> not(Value value);
+    
+    /**
+     * {@inheritDoc}
+     * @return fluent
+     */
+    @Override
+    Fluent<Value> isNot(Value value);
+
+    /**
+     * {@inheritDoc}
      * @return this
      */
     @Override
