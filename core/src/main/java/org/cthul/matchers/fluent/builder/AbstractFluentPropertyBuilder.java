@@ -15,6 +15,7 @@ import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.core.IsEqual;
 
 /**
  *
@@ -65,6 +66,10 @@ public abstract class AbstractFluentPropertyBuilder
             isAMatcher = null;
             return _updateMatcher(m, null, false);
         }
+    }
+    
+    protected ThisFluent _match(Property value) {
+        return _match(IsEqual.equalTo(value));
     }
     
     protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
@@ -155,6 +160,30 @@ public abstract class AbstractFluentPropertyBuilder
         _has();
         _not();
         return _match(matcher);
+    }
+
+    @Override
+    public ThisFluent _(Property value) {
+        return _match(value);
+    }
+
+    @Override
+    public ThisFluent is(Property value) {
+        _is();
+        return _match(value);
+    }
+
+    @Override
+    public ThisFluent not(Property value) {
+        _not();
+        return _match(value);
+    }
+
+    @Override
+    public ThisFluent isNot(Property value) {
+        _is();
+        _not();
+        return _match(value);
     }
 
     @Override
