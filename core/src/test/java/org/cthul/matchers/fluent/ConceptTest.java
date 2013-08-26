@@ -41,9 +41,9 @@ public class ConceptTest {
                 .is(greaterThan(1));
         assertThat(list).not(each_is_gt_1);
         
-        assertThat(anyOf(list)).is(equalTo(3));  
+        assertThat(anyOf(list)).is(3);  
         
-        assertThat(sizeOf(list)).is(equalTo(3));  
+        assertThat(sizeOf(list)).is(3);  
         
         assertThat(list)
                 .isNot(empty())
