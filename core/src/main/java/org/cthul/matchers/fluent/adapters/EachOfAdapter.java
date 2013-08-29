@@ -63,7 +63,47 @@ public class EachOfAdapter<Item> extends
     }
     
     @Factory
+    public static EachOfAdapter<String> eachString() {
+        return each();
+    }
+    
+    @Factory
+    public static EachOfAdapter<Byte> eachByte() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Boolean> eachBoolean() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Character> eachChar() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Double> eachDouble() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Float> eachFloat() {
+        return each();
+    }
+
+    @Factory
     public static EachOfAdapter<Integer> eachInt() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Long> eachLong() {
+        return each();
+    }
+
+    @Factory
+    public static EachOfAdapter<Short> eachShort() {
         return each();
     }
 

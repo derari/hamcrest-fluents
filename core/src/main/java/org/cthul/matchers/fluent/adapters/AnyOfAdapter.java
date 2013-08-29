@@ -63,7 +63,47 @@ public class AnyOfAdapter<Item> extends
     }
     
     @Factory
+    public static AnyOfAdapter<String> anyString() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Byte> anyByte() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Boolean> anyBoolean() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Character> anyChar() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Double> anyDouble() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Float> anyFloat() {
+        return any();
+    }
+    
+    @Factory
     public static AnyOfAdapter<Integer> anyInt() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Long> anyLong() {
+        return any();
+    }
+    
+    @Factory
+    public static AnyOfAdapter<Short> anyShort() {
         return any();
     }
     
