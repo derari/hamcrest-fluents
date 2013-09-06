@@ -85,7 +85,8 @@ public class Expectation
         for (String s : expected) {
             if (i > 0) {
                 if (i == last) {
-                    description.appendText(", and ");
+                    description.appendText(i == 1 ? " " : ", ");
+                    description.appendText("and ");
                 } else {
                     description.appendText(", ");
                 }

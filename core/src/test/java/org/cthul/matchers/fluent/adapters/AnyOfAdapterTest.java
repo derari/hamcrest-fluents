@@ -70,7 +70,7 @@ public class AnyOfAdapterTest extends FluentTestBase {
                 .and(greaterThan(4));
         
         assertMismatch(
-                "any of list is a value greater than <1>, and a value greater than <4>",
+                "any of list is a value greater than <1> and a value greater than <4>",
                 "#0 <1> was equal to <1>, #1 <4> was equal to <4>, and #2 <3> was less than <4>");
     }
     
@@ -90,8 +90,8 @@ public class AnyOfAdapterTest extends FluentTestBase {
                 .and(greaterThan(1));
         
         assertMismatch(
-                "any of list is a value less than <4>, and a value greater than <1>",
-                "#0 <1> was equal to <1>, and #1 <4> was equal to <4>");
+                "any of list is a value less than <4> and a value greater than <1>",
+                "#0 <1> was equal to <1> and #1 <4> was equal to <4>");
     }
     
     MatchValueAdapter<Iterable<? extends Integer>, Integer> anyInt() {

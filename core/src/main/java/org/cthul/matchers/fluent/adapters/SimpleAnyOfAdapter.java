@@ -164,7 +164,8 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             while (e != null) {
                 if (e != first) {
                     if (e.next == null) {
-                        description.appendText(", and ");
+                        description.appendText(e == first.next ? " " : ", ");
+                        description.appendText("and ");
                     } else {
                         description.appendText(", ");
                     }

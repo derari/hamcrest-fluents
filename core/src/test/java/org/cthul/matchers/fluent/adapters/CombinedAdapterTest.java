@@ -36,8 +36,8 @@ public class CombinedAdapterTest extends FluentTestBase {
                 .and().isNot(equalTo(0))
                 .and().isNot(equalTo(2));
         assertMismatch(
-                "each of any of list is a value less than <3>, and is not <2>",
-                "#0 #1 <2> was <2>, and #1 #2 <5> was greater than <3>");
+                "each of any of list is a value less than <3> and is not <2>",
+                "#0 #1 <2> was <2> and #1 #2 <5> was greater than <3>");
     }
     
     @Test
@@ -48,8 +48,8 @@ public class CombinedAdapterTest extends FluentTestBase {
                 .and().isNot(equalTo(0))
                 .and().isNot(equalTo(2));
         assertMismatch(
-                "any of each of list is a value less than <3>, and is not <2>",
-                "#1 #0 <5> was greater than <3>, and #1 <2> was <2>");
+                "any of each of list is a value less than <3> and is not <2>",
+                "#1 #0 <5> was greater than <3> and #1 <2> was <2>");
     }
     
     @Test
@@ -60,8 +60,8 @@ public class CombinedAdapterTest extends FluentTestBase {
                 .and().isNot(equalTo(4))
                 .and().isNot(equalTo(1));
         assertMismatch(
-                "any of any of list is a value less than <3>, and is not <1>",
-                "#0 #0 <5> was greater than <3>, and #1 <1> was <1>, and #1 #0 <3> was equal to <3>, and #1 <4> was greater than <3>");
+                "any of any of list is a value less than <3> and is not <1>",
+                "#0 #0 <5> was greater than <3> and #1 <1> was <1> and #1 #0 <3> was equal to <3> and #1 <4> was greater than <3>");
     }
     
 }
