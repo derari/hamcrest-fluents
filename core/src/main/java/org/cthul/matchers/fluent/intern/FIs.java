@@ -1,15 +1,15 @@
 package org.cthul.matchers.fluent.intern;
 
-import org.cthul.matchers.diagnose.NestedMatcher;
+import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-public class FIs<T> extends NestedMatcher<T> {
+public class FIs<T> extends NestedResultMatcher<T> {
 
     private final Matcher<? super T> nested;
     private final String prefix;
     private final boolean not;
-    private int p = -1;
 
     public FIs(Matcher<? super T> nested, String prefix, boolean not) {
         this.nested = nested;
@@ -45,21 +45,40 @@ public class FIs<T> extends NestedMatcher<T> {
     }
 
     @Override
-    public void describeMismatch(Object item, Description description) {
-//        pastPrefix(prefix, description);
-        if (not) {
-            description.appendValue(item).appendText(" ");
-            pastPrefix(prefix, description);
-            nested.describeTo(description);
-        } else {
-            nested.describeMismatch(item, description);
-        }
+    public int getDescriptionPrecedence() {
+        return P_UNARY;
     }
 
     @Override
-    public int getPrecedence() {
-        if (p < 0) p = precedenceOf(nested);
-        return p;
+    public <I> MatchResult<I> matchResult(I item) {
+        final MatchResult<I> result = quickMatchResult(nested, item);
+        return new NestedResult<I, FIs<T>>(item, this, not ^ result.isSuccess()) {
+            @Override
+            public void describeMatch(Description d) {
+                if (prefix != null) {
+                    d.appendText(prefix).appendText(" ");
+                }
+                if (not) {
+                    d.appendText("not ");
+                }
+                nestedDescribeTo(getMatchPrecedence(), result, d);
+            }
+            @Override
+            public void describeExpected(Description d) {
+                if (not) {
+                    d.appendText("not ");
+                }
+                nestedDescribeTo(getExpectedPrecedence(), result, d);
+            }
+            @Override
+            public void describeMismatch(Description d) {
+                if (not) {
+                    d.appendValue(getValue()).appendText(" ");
+                    pastPrefix(prefix, d);
+                } 
+                nestedDescribeTo(getMismatchPrecedence(), result, d);
+            }
+        };
     }
 
     public static void pastPrefix(String prefix, Description description) {

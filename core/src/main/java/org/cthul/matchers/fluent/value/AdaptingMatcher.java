@@ -1,6 +1,7 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.diagnose.NestedMatcher;
+import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.nested.NestedMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
@@ -51,7 +52,7 @@ public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
     }
 
     @Override
-    public int getPrecedence() {
-        return precedenceOf(matcher);
+    public int getDescriptionPrecedence() {
+        return Nested.precedenceOf(matcher);
     }
 }

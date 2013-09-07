@@ -7,8 +7,9 @@ import org.cthul.matchers.chain.AndChainMatcher;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.chain.OrChainMatcher;
 import org.cthul.matchers.chain.XOrChainMatcher;
-import org.cthul.matchers.diagnose.MatcherDescription;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
+import org.cthul.matchers.diagnose.nested.MatcherDescription;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
@@ -222,6 +223,11 @@ public class FluentMatcherBuilder
     @Override
     public void describeTo(Description description) {
         getMatcher().describeTo(description);
+    }
+
+    @Override
+    public <I> MatchResult<I> matchResult(I item) {
+        return getMatcher().matchResult(item);
     }
     
     @Deprecated

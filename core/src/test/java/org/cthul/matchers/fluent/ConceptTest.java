@@ -78,8 +78,8 @@ public class ConceptTest {
         assertThat(list)
                 .has(size(), lessThan(10));
         
-        assertThat(sizeOf(), list)
-                .is(lessThan(10));  
+//        assertThat(sizeOf(), list)
+//                .is(lessThan(10));  
         
         // assertThat(list, size())
         
