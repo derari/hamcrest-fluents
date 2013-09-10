@@ -18,11 +18,11 @@ public abstract class FailureHandlerBase implements FailureHandler {
         actual.describeValueType(description);
         description.appendText(" ");
         Expectation e = new Expectation();
-        actual.describeExpected(e);
+        actual.getMismatch().describeExpected(e);
         description.appendDescriptionOf(e);
         
         description.appendText("\n     but ");
-        actual.describeMismatch(description);
+        actual.getMismatch().describeMismatch(description);
         
         return description.toString();
     }

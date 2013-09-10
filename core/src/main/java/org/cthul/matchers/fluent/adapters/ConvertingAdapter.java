@@ -1,11 +1,15 @@
 package org.cthul.matchers.fluent.adapters;
 
+import org.cthul.matchers.diagnose.QuickDiagnose;
+import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
@@ -54,13 +58,38 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
         }
 
         @Override
-        public void describeTo(Description description) {
+        public void describeValue(Description description) {
             ConvertingAdapter.this.describeValue(getActualValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
             ConvertingAdapter.this.describeValueType(getActualValue(), description);
+        }
+
+        @Override
+        protected <I extends Element<V>> MatchResult<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<Property> matcher) {
+            final MatchResult<?> mr = QuickDiagnose.matchResult(matcher, cachedItem(element));
+            return new Nested.Result<I,Matcher<?>>(element, adaptedMatcher, mr.matched()) {
+                @Override
+                public void describeMatch(Description d) {
+                    mr.getMatch().describeMatch(d);
+                }
+                @Override
+                public void describeExpected(Description d) {
+                    mr.getMismatch().describeExpected(d);
+                }
+                @Override
+                public void describeMismatch(Description d) {
+                    mr.getMismatch().describeMismatch(d);
+                }
+            };
+            
+        }
+
+        @Override
+        protected void describeMatchSafely(Element<V> element, ElementMatcher<Property> matcher, Description description) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override

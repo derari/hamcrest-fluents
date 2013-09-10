@@ -1,5 +1,7 @@
 package org.cthul.matchers.fluent.value;
 
+import java.util.Collection;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
@@ -12,7 +14,10 @@ import org.hamcrest.SelfDescribing;
  * able to provide messages that describe its state.
  * @param <Value> element type
  */
-public interface MatchValue<Value> extends SelfDescribing {
+public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
+    
+    @Override
+    Mismatch<Value> getMismatch();
     
     /**
      * Applies the matcher.
@@ -21,38 +26,19 @@ public interface MatchValue<Value> extends SelfDescribing {
      */
     boolean matches(ElementMatcher<Value> matcher);
     
-    /**
-     * Returns whether the value is valid.
-     * @return true iff value is valid
-     */
-    boolean matched();
-    
+    MatchValue<Value> matchResult(ElementMatcher<Value> matcher);
+        
     /**
      * Describes the value.
      * @param description 
      */
-    @Override
-    void describeTo(Description description);
-    
+    void describeValue(Description description);
+        
     /**
      * Describes the value's type.
      * @param description 
      */
     void describeValueType(Description description);
-
-    /**
-     * Describes what was expected of the value.
-     * Assumes the match value is in an invalid state.
-     * @param description 
-     */
-    void describeExpected(ExpectationDescription description);
-    
-    /**
-     * Describes how the match failed.
-     * Assumes the match value is in an invalid state.
-     * @param description 
-     */
-    void describeMismatch(Description description);
     
     /**
      * Equivalent to {@code adapter.adapt(this)}.
@@ -62,6 +48,14 @@ public interface MatchValue<Value> extends SelfDescribing {
      */
     <Property> MatchValue<Property> get(MatchValueAdapter<? super Value, Property> adapter);
     
+    interface Mismatch<Value> extends MatchResult.Mismatch<MatchValue<Value>> {
+        
+        /**
+         * Describes what was expected of the value.
+         * @param description 
+         */
+        void describeExpected(ExpectationDescription description);
+    }
     
     /**
      * A single element of a {@link MatchValue}.

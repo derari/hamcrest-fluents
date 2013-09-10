@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.cthul.matchers.chain.AndChainMatcher;
+import org.cthul.matchers.diagnose.QuickDiagnose;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.proc.Proc;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -108,7 +111,9 @@ public abstract class MatchValueAdapterBase<Value, Property>
                     implements MatchValue.Element<Object> {
 
         private final Object value;
-        private MatchValue.ElementMatcher<Value> mismatch = null;
+        private MatchValue.ElementMatcher<Value> failed = null;
+        private MatchValue.ElementMatcher<Value> last = null;
+        private MatchResult<?> result = null;
         private String valueType = null;
 
         public SingleElementValue(Object value) {
@@ -117,21 +122,38 @@ public abstract class MatchValueAdapterBase<Value, Property>
 
         @Override
         public boolean matches(MatchValue.ElementMatcher<Value> matcher) {
-            if (mismatch != null) return false;
+            super.matches(matcher);
+            if (failed != null) return false;
+            result = null;
             if (matcher.matches(this)) {
+                last = matcher;
                 return true;
             }
-            mismatch = matcher;
+            last = null;
+            failed = matcher;
             return false;
         }
-
+        
+        private MatchResult<?> result() {
+            if (result == null) {
+                if (failed != null) {
+                    result = QuickDiagnose.matchResult(failed, this);
+                } else if (last != null) {
+                    result = QuickDiagnose.matchResult(last, this);
+                } else {
+                    result = AndChainMatcher.all().matchResult(this);
+                }
+            }
+            return result;
+        }
+        
         @Override
         public boolean matched() {
-            return mismatch == null;
+            return failed == null;
         }
 
         @Override
-        public void describeTo(Description description) {
+        public void describeValue(Description description) {
             description.appendValue(value);
         }
 
@@ -168,13 +190,18 @@ public abstract class MatchValueAdapterBase<Value, Property>
         }
 
         @Override
+        public void describeMatch(Description d) {
+            result().getMatch().describeMatch(d);
+        }
+
+        @Override
         public void describeExpected(MatchValue.ExpectationDescription description) {
-            mismatch.describeExpected(this, description);
+            result().getMismatch().describeExpected(description);
         }
 
         @Override
         public void describeMismatch(Description description) {
-            mismatch.describeMismatch(this, description);
+            result().getMismatch().describeMismatch(description);
         }
 
         @Override

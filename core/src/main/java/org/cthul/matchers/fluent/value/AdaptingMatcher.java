@@ -37,7 +37,7 @@ public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
         if (mv.matches(matcher)) {
             return true;
         }
-        mv.describeMismatch(mismatch);
+        mv.getMismatch().describeMismatch(mismatch);
         return false;
     }
 

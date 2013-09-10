@@ -52,15 +52,17 @@ public class FIs<T> extends NestedResultMatcher<T> {
     @Override
     public <I> MatchResult<I> matchResult(I item) {
         final MatchResult<I> result = quickMatchResult(nested, item);
-        return new NestedResult<I, FIs<T>>(item, this, not ^ result.isSuccess()) {
+        return new NestedResult<I, FIs<T>>(item, this, not ^ result.matched()) {
             @Override
             public void describeMatch(Description d) {
-                if (prefix != null) {
-                    d.appendText(prefix).appendText(" ");
-                }
-                if (not) {
-                    d.appendText("not ");
-                }
+//                if (prefix != null) {
+//                    d.appendText(prefix).appendText(" ");
+//                }
+//                if (not) {
+//                    d.appendText("not ");
+//                }
+                pastPrefix(prefix, d);
+                d.appendText(" ");
                 nestedDescribeTo(getMatchPrecedence(), result, d);
             }
             @Override

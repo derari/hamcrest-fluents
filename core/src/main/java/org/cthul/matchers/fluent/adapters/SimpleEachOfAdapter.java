@@ -1,11 +1,17 @@
 package org.cthul.matchers.fluent.adapters;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import org.cthul.matchers.diagnose.QuickDiagnose;
+import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
@@ -99,13 +105,74 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         }
 
         @Override
-        public void describeTo(Description description) {
+        protected <I extends Element<V>> MatchResult<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<Item> matcher) {
+            EachItemIterable<Item> it = cachedItem(element);
+            if (it.invalid != null) {
+                E<Item> invalid = it.invalid;
+                return failResult(element, adaptedMatcher, QuickDiagnose.matchResult(invalid.mismatch, invalid).getMismatch());
+            }
+            List<MatchResult.Match<E<Item>>> results = new ArrayList<>();
+            E<Item> e = it.first();
+            while (e != null) {
+                MatchResult<E<Item>> mr = QuickDiagnose.matchResult(matcher, e);
+                if (mr.matched()) {
+                    results.add(mr.getMatch());
+                } else {
+                    return failResult(element, adaptedMatcher, mr.getMismatch());
+                }
+                e = it.next(e);
+            }
+            return successResult(element, adaptedMatcher, results);
+        }
+        
+        protected <I extends Element<V>> MatchResult<I> successResult(I element, ElementMatcher<V> adaptedMatcher, final List<MatchResult.Match<E<Item>>> matches) {
+            return new Nested.Match<I, Matcher<?>>(element, adaptedMatcher) {
+                @Override
+                public void describeMatch(Description d) {
+                    V value = getValue().value();
+                    boolean first = true;
+                    for (MatchResult.Match<E<Item>> m: matches) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            d.appendText(", ");
+                        }
+                        E<Item> e = m.getValue();
+                        SimpleEachOfAdapter.this.describeElement(value, e.value(), e.i, d);
+                        m.describeMatch(d);
+                    }
+                }
+            };
+        }
+        
+        protected <I extends Element<V>> MatchResult<I> failResult(I element, ElementMatcher<V> adaptedMatcher, final MatchResult.Mismatch<E<Item>> mismatch) {
+            return new Nested.Mismatch<I, Matcher<?>>(element, adaptedMatcher) {
+                @Override
+                public void describeExpected(Description d) {
+                    mismatch.describeExpected(d);
+                }
+                @Override
+                public void describeMismatch(Description d) {
+                    E<Item> e = mismatch.getValue();
+                    SimpleEachOfAdapter.this.describeElement(getValue().value(), e.value(), e.i, d);
+                    mismatch.describeMismatch(d);
+                }
+            };
+        }
+
+        @Override
+        public void describeValue(Description description) {
             SimpleEachOfAdapter.this.describeValue(getActualValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
             SimpleEachOfAdapter.this.describeValueType(getActualValue(), description);
+        }
+
+        @Override
+        protected void describeMatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
+            description.appendText("each is valid");
         }
 
         @Override

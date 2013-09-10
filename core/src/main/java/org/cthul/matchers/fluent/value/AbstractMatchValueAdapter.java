@@ -2,11 +2,15 @@ package org.cthul.matchers.fluent.value;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.cthul.matchers.diagnose.QuickResultMatcherBase;
+import org.cthul.matchers.diagnose.result.AbstractMatchResult;
+import org.cthul.matchers.diagnose.result.MatchResult;
+import org.cthul.matchers.diagnose.result.MatchResultMismatch;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
@@ -107,15 +111,21 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
+        public void describeMatch(Description description) {
+            // will call #describeMatch(Element, ElementMatcher, Description)
+            actualValue.getMatch().describeMatch(description);
+        }
+
+        @Override
         public void describeExpected(ExpectationDescription description) {
             // will call #describeExpected(Element, ElementMatcher, Description)
-            actualValue.describeExpected(description);
+            actualValue.getMismatch().describeExpected(description);
         }
 
         @Override
         public void describeMismatch(Description description) {
             // will call #describeMismatch(Element, ElementMatcher, Description)
-            actualValue.describeMismatch(description);
+            actualValue.getMismatch().describeMismatch(description);
         }
         
         @Override
@@ -133,7 +143,39 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
         protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<Property> matcher);
         
+        protected <I extends Element<?>> MatchResult<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<Property> matcher) {
+            if (acceptValue(element.value())) {
+                return matchResultSafely((Element) element, adaptedMatcher, matcher);
+            } else {
+                return new MatchResultMismatch<I, Matcher<?>>(element, matcher) {
+                    @Override
+                    public void describeExpected(Description d) {
+                        ExpectationDescription ex = (ExpectationDescription) d;
+                        SelfDescribing sd = new SelfDescribingBase() {
+                            @Override
+                            public void describeTo(Description description) {
+                                describeExpectedToAccept(element.value(), description);
+                            }
+                        };
+                        ex.addExpected(-1, sd);
+                    }
+                };
+            }
+        }
+        
+        protected <I extends Element<Value>> MatchResult<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<Property> matcher) {
+            throw new UnsupportedOperationException("matchResultSafely");
+        }
+        
+        protected void describeMatch(final Element<?> element, ElementMatcher<Property> matcher, Description description) {
+            if (true) throw new UnsupportedOperationException("deprecated");
+            describeMatchSafely((Element) element, matcher, description);
+        }
+        
+        protected abstract void describeMatchSafely(Element<Value> element, ElementMatcher<Property> matcher, Description description);
+        
         protected void describeExpected(final Element<?> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
+            if (true) throw new UnsupportedOperationException("deprecated");
             if (acceptValue(element.value())) {
                 describeExpectedSafely((Element) element, matcher, description);
             } else {
@@ -150,6 +192,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         protected abstract void describeExpectedSafely(Element<Value> element, ElementMatcher<Property> matcher, ExpectationDescription description);
         
         protected void describeMismatch(Element<?> element, ElementMatcher<Property> matcher, Description description) {
+            if (true) throw new UnsupportedOperationException("deprecated");
             if (acceptValue(element.value())) {
                 describeMismatchSafely((Element) element, matcher, description);
             } else {
@@ -194,7 +237,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     }
     
     protected static class InternalAdaptingMatcher<Value, Property> 
-                    extends BaseMatcher<Element<?>> 
+                    extends QuickResultMatcherBase<Element<?>> 
                     implements ElementMatcher<Value> {
 
         private final AbstractAdaptedValue<Value, Property> adaptedValue;
@@ -219,8 +262,30 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
+        public <I> MatchResult<I> matchResult(I item) {
+            final Element<?> e = (Element) item;
+            return (MatchResult) adaptedValue.matchResult(e, this, itemMatcher);
+//            return new AbstractMatchResult<I, Matcher<?>>(item, this, matches(item)) {
+//                @Override
+//                public void describeMatch(Description d) {
+//                    adaptedValue.describeMatch(e, itemMatcher, d);
+//                }
+//                @Override
+//                public void describeExpected(Description d) {
+//                    ExpectationDescription ex = (ExpectationDescription) d;
+//                    adaptedValue.describeExpected(e, itemMatcher, ex);
+//                }
+//                @Override
+//                public void describeMismatch(Description d) {
+//                    adaptedValue.describeMismatch(e, itemMatcher, d);
+//                }
+//            };
+        }
+
+        @Override
         public void describeExpected(Element<?> e, ExpectationDescription description) {
-            adaptedValue.describeExpected(e, itemMatcher, description);
+            throw new UnsupportedOperationException("deprecated");
+            //adaptedValue.describeExpected(e, itemMatcher, description);
         }
         
         @Override
