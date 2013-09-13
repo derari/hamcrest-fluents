@@ -2,9 +2,9 @@ package org.cthul.matchers.fluent.adapters;
 
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
-import org.cthul.matchers.fluent.value.MatchValue.Element;
-import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
-import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
+import org.cthul.matchers.fluent.value.ElementMatcher;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.internal.ReflectiveTypeFinder;
@@ -75,8 +75,8 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
         }
 
         @Override
-        protected <I extends Element<V>> MatchValue.Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Property> matcher) {
-            final MatchValue.Result<?> mr = matcher.matchResult(cachedItem(element));
+        protected <I extends Element<V>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Property> matcher) {
+            final ElementMatcher.Result<?> mr = matcher.matchResult(cachedItem(element));
             return new ResultBase<I>(element, adaptedMatcher, mr.matched()) {
                 @Override
                 public void describeMatch(Description d) {

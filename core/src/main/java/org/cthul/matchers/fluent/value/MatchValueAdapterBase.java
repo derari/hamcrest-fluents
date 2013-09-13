@@ -9,6 +9,8 @@ import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultProxy;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.cthul.proc.Proc;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -110,12 +112,12 @@ public abstract class MatchValueAdapterBase<Value, Property>
     
     protected static class SingleElementValue<Value> 
                     extends MatchValueBase<Value>
-                    implements MatchValue.Element<Object> {
+                    implements Element<Object> {
 
         private final Object value;
-        private MatchValue.ElementMatcher<? super Value> failed = null;
-        private MatchValue.ElementMatcher<? super Value> last = null;
-        private MatchValue.Result<?> internResult = null;
+        private ElementMatcher<? super Value> failed = null;
+        private ElementMatcher<? super Value> last = null;
+        private ElementMatcher.Result<?> internResult = null;
         private Result matchResult = null;
         private String valueType = null;
 
@@ -178,7 +180,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
            return "value";
         }
 
-        private MatchValue.Result<?> result() {
+        private ElementMatcher.Result<?> result() {
             if (internResult == null) {
                 if (failed != null) {
                     internResult = failed.matchResult(this);
@@ -217,13 +219,13 @@ public abstract class MatchValueAdapterBase<Value, Property>
             }
 
             @Override
-            protected MatchValue.Result<?> result() {
+            protected ElementMatcher.Result<?> result() {
                 return SingleElementValue.this.result();
             }
 
             @Override
-            protected MatchValue.Mismatch<?> mismatch() {
-                return (MatchValue.Mismatch<?>) super.mismatch();
+            protected ElementMatcher.Mismatch<?> mismatch() {
+                return (ElementMatcher.Mismatch<?>) super.mismatch();
             }
 
             @Override
@@ -241,17 +243,17 @@ public abstract class MatchValueAdapterBase<Value, Property>
     
     protected static class AdaptingMatcher<Value, Property> extends NestedResultMatcher<Value> {
 
-        private final ElementMatcher<Property> matcher;
+        private final ElementMatcherWrapper<Property> matcher;
         private final MatchValueAdapterBase<Value, Property> adapter;
 
         public AdaptingMatcher(MatchValueAdapterBase<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
             this.adapter = adapter;
-            this.matcher = new ElementMatcher<>(-1, matcher, prefix, not);
+            this.matcher = new ElementMatcherWrapper<>(-1, matcher, prefix, not);
         }
 
         public AdaptingMatcher(MatchValueAdapterBase<Value, Property> adapter, Matcher<? super Property> matcher) {
             this.adapter = adapter;
-            this.matcher = new ElementMatcher<>(-1, matcher);
+            this.matcher = new ElementMatcherWrapper<>(-1, matcher);
         }
 
         @Override

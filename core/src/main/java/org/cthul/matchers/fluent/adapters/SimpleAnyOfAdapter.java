@@ -7,8 +7,10 @@ import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
-import org.cthul.matchers.fluent.value.MatchValue.Element;
-import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
+import org.cthul.matchers.fluent.value.ElementMatcher;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
+import org.cthul.matchers.fluent.value.ElementMatcher.Result;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.internal.ReflectiveTypeFinder;
@@ -341,7 +343,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         final int i;
         ElementMatcher<? super Item> mismatch = null;
         E<Item> next = null;
-        MatchValue.Mismatch<E<Item>> mismatchResult = null;
+        ElementMatcher.Mismatch<E<Item>> mismatchResult = null;
 
         public E(Item value, int i) {
             this.value = value;
@@ -353,7 +355,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             return value;
         }
         
-        public MatchValue.Mismatch<E<Item>> mismatchResult() {
+        public ElementMatcher.Mismatch<E<Item>> mismatchResult() {
             if (mismatchResult == null) {
                 mismatchResult = mismatch.matchResult(this).getMismatch();
             }

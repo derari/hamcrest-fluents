@@ -25,8 +25,8 @@ public class MatchValueTest {
     private MatchValue<Integer> any167 = AnyOfAdapter.anyOf(1, 6, 7);
     private MatchValue<Integer> size6 = sizeOf(1, 2, 3, 4, 5, 6);
     
-    private ElementMatcher<Integer> gt2_and_lt6 = new ElementMatcher<>(0, both(greaterThan(2)).and(lessThan(6)));
-    private ElementMatcher<Integer> gt3_or_lt1 = new ElementMatcher<>(0, either(greaterThan(3)).or(lessThan(1)));
+    private ElementMatcherWrapper<Integer> gt2_and_lt6 = new ElementMatcherWrapper<>(0, both(greaterThan(2)).and(lessThan(6)));
+    private ElementMatcherWrapper<Integer> gt3_or_lt1 = new ElementMatcherWrapper<>(0, either(greaterThan(3)).or(lessThan(1)));
 
     @Test
     public void test_getValue() {

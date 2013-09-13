@@ -6,6 +6,7 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.value.ElementMatcher;
+import org.cthul.matchers.fluent.value.ElementMatcherWrapper;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
@@ -74,7 +75,7 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
 
     @Override
     protected This _applyMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
-        MatchValue.ElementMatcher<Value> m = new ElementMatcher<>(matcherCounter++, matcher, prefix, not);
+        ElementMatcher<Value> m = new ElementMatcherWrapper<>(matcherCounter++, matcher, prefix, not);
         if (!matchValue.matches(m)) {
             failureHandler.mismatch(getReason(), matchValue, m);
         }

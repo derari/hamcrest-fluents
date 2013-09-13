@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
@@ -13,7 +14,7 @@ import org.hamcrest.StringDescription;
  */
 public class Expectation 
                 extends SelfDescribingBase
-                implements MatchValue.ExpectationDescription {
+                implements ExpectationDescription {
     
     private ArrayList<SelfDescribing> sorted = null;
     private ArrayList<SelfDescribing> unsorted = null;

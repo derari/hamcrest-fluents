@@ -14,17 +14,17 @@ import org.hamcrest.Matcher;
 @Deprecated
 public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
     
-    private final ElementMatcher<Property> matcher;
+    private final ElementMatcherWrapper<Property> matcher;
     private final MatchValueAdapter<Value, Property> adapter;
 
     private AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
         this.adapter = adapter;
-        this.matcher = new ElementMatcher<>(-1, matcher, prefix, not);
+        this.matcher = new ElementMatcherWrapper<>(-1, matcher, prefix, not);
     }
 
     private AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher) {
         this.adapter = adapter;
-        this.matcher = new ElementMatcher<>(-1, matcher);
+        this.matcher = new ElementMatcherWrapper<>(-1, matcher);
     }
 
     @Override

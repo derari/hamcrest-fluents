@@ -8,9 +8,8 @@ import org.cthul.matchers.diagnose.result.AbstractMatchResult;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultMismatch;
 import org.cthul.matchers.diagnose.result.MatchResultSuccess;
-import org.cthul.matchers.fluent.value.MatchValue.Element;
-import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
-import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
@@ -77,7 +76,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             description.appendValue(value);
         }
         
-        protected <I> MatchValue.Mismatch<I> matchResultOfUnaccepted(I element, final Object value, Matcher<?> m) {
+        protected <I> ElementMatcher.Mismatch<I> matchResultOfUnaccepted(I element, final Object value, Matcher<?> m) {
             return new MismatchBase<I>(element, m) {
                 @Override
                 public void describeExpected(ExpectationDescription description) {
@@ -135,7 +134,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
         protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<? super Property> matcher);
         
-        protected <I extends Element<?>> MatchValue.Result<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
+        protected <I extends Element<?>> ElementMatcher.Result<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
             if (acceptValue(element.value())) {
                 return matchResultSafely((Element) element, adaptedMatcher, matcher);
             } else {
@@ -143,7 +142,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             }
         }
         
-        protected <I extends Element<Value>> MatchValue.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
+        protected <I extends Element<Value>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
             throw new UnsupportedOperationException("matchResultSafely");
         }
         
@@ -183,14 +182,14 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     
     protected abstract static class MismatchBase<Value> 
                     extends MatchResultMismatch<Value, Matcher<?>>
-                    implements MatchValue.Mismatch<Value> {
+                    implements ElementMatcher.Mismatch<Value> {
 
         public MismatchBase(Value value, Matcher<?> matcher) {
             super(value, matcher);
         }
 
         @Override
-        public MatchValue.Mismatch<Value> getMismatch() {
+        public ElementMatcher.Mismatch<Value> getMismatch() {
             return this;
         }
 
@@ -203,14 +202,14 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     
     protected abstract static class MatchBase<Value> 
                     extends MatchResultSuccess<Value, Matcher<?>>
-                    implements MatchValue.Result<Value> {
+                    implements ElementMatcher.Result<Value> {
 
         public MatchBase(Value value, Matcher<?> matcher) {
             super(value, matcher);
         }
 
         @Override
-        public MatchValue.Mismatch<Value> getMismatch() {
+        public ElementMatcher.Mismatch<Value> getMismatch() {
             return null;
         }
         
@@ -218,7 +217,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     
     protected abstract static class ResultBase<Value> 
                     extends AbstractMatchResult<Value, Matcher<?>>
-                    implements MatchValue.Result<Value>, MatchValue.Mismatch<Value> {
+                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
 
         public ResultBase(Value value, Matcher<?> matcher) {
             super(value, matcher);
@@ -229,8 +228,8 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
-        public MatchValue.Mismatch<Value> getMismatch() {
-            return (MatchValue.Mismatch<Value>) super.getMismatch();
+        public ElementMatcher.Mismatch<Value> getMismatch() {
+            return (ElementMatcher.Mismatch<Value>) super.getMismatch();
         }
 
         @Override
@@ -266,9 +265,9 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
-        public <I> MatchValue.Result<I> matchResult(I item) {
+        public <I> ElementMatcher.Result<I> matchResult(I item) {
             final Element<?> e = (Element) item;
-            return (MatchValue.Result) adaptedValue.matchResult(e, this, itemMatcher);
+            return (ElementMatcher.Result) adaptedValue.matchResult(e, this, itemMatcher);
 //            return new AbstractMatchResult<I, Matcher<?>>(item, this, matches(item)) {
 //                @Override
 //                public void describeMatch(Description d) {
