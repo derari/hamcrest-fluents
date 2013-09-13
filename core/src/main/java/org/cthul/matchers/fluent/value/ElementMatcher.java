@@ -1,16 +1,14 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.result.MatchResult;
+import org.cthul.matchers.diagnose.result.MatchResultProxy;
 import org.cthul.matchers.diagnose.safe.TypesafeNestedResultMatcher;
-import org.cthul.matchers.diagnose.safe.TypesafeQuickResultMatcherBase;
 import org.cthul.matchers.fluent.intern.FIs;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 
 /**
  *
@@ -52,54 +50,35 @@ public class ElementMatcher<Item> extends TypesafeNestedResultMatcher<Element<?>
     }
 
     @Override
-    public void describeExpected(Element<?> e, ExpectationDescription description) {
-        description.addExpected(index, this);
-    }
-
-    @Override
-    protected void describeMismatchSafely(Element<?> item, Description mismatchDescription) {
-        matcher.describeMismatch(item.value(), mismatchDescription);
+    public <I> MatchValue.Result<I> matchResult(I item) {
+        return new EMMatchResult<>(super.matchResult(item), item, this);
     }
 
     @Override
     protected <I extends Element<?>> MatchResult<I> matchResultSafely(I item) {
-        final MatchResult<?> result = quickMatchResult(matcher, item.value());
-        return new NestedResult<I, ElementMatcher<?>>(item, this, result.matched()) {
-            @Override
-            public int getMatchPrecedence() {
-                return result.getMatch().getMatchPrecedence();
-            }
-            @Override
-            public void describeMatch(Description d) {
-                result.getMatch().describeMatch(d);
-            }
-            @Override
-            public int getExpectedPrecedence() {
-                return result.getMismatch().getExpectedPrecedence();
-            }
-            @Override
-            public void describeExpected(Description d) {
-                if (d instanceof ExpectationDescription) {
-                    ExpectationDescription ex = (ExpectationDescription) d;
-                    ex.addExpected(index, result.getMismatch().getExpectedDescription());
-                } else {
-                    throw new IllegalArgumentException("Expected ExpectationDescription, got " + d);
-                    //super.describeExpected(d);
-                }
-            }
-            @Override
-            public int getMismatchPrecedence() {
-                return result.getMismatch().getMismatchPrecedence();
-            }
-            @Override
-            public void describeMismatch(Description d) {
-                result.getMismatch().describeMismatch(d);
-            }
-        };
+        return (MatchResult) quickMatchResult(matcher, item.value());
     }
     
     public Matcher<? super Item> getActualMatcher() {
         return matcher;
     }
     
+    protected class EMMatchResult<I> 
+                    extends MatchResultProxy<I, ElementMatcher<?>> 
+                    implements MatchValue.Result<I>, MatchValue.Mismatch<I> {
+        
+        public EMMatchResult(MatchResult<?> result, I value, ElementMatcher<?> matcher) {
+            super(result, value, matcher);
+        }
+
+        @Override
+        public MatchValue.Mismatch<I> getMismatch() {
+            return (MatchValue.Mismatch<I>) super.getMismatch();
+        }
+
+        @Override
+        public void describeExpected(ExpectationDescription description) {
+            description.addExpected(index, getExpectedDescription());
+        }
+    }
 }

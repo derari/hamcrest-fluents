@@ -1,6 +1,5 @@
 package org.cthul.matchers.fluent.value;
 
-import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
@@ -54,18 +53,18 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      */
     <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter);
     
-    /**
-     * Describes a producer that will have its output adapted by this adapter.
-     * @param producer producer to be described
-     * @param description description to append to
-     */
-    void describeProducer(SelfDescribing producer, Description description);
-    
-    /**
-     * Describes a consumer that will receive the output of this adapter.
-     * @param consumer consumer to be described
-     * @param description description to append to
-     */
-    void describeConsumer(SelfDescribing consumer, Description description);
+//    /**
+//     * Describes a producer that will have its output adapted by this adapter.
+//     * @param producer producer to be described
+//     * @param description description to append to
+//     */
+//    void describeProducer(SelfDescribing producer, Description description);
+//    
+//    /**
+//     * Describes a consumer that will receive the output of this adapter.
+//     * @param consumer consumer to be described
+//     * @param description description to append to
+//     */
+//    void describeConsumer(SelfDescribing consumer, Description description);
     
 }

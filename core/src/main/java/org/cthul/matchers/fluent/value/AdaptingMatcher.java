@@ -11,17 +11,18 @@ import org.hamcrest.Matcher;
  * <p>
  * Example: ´length-of-string is less than 3´.matches("xa")
  */
+@Deprecated
 public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
     
     private final ElementMatcher<Property> matcher;
     private final MatchValueAdapter<Value, Property> adapter;
 
-    public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
+    private AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
         this.adapter = adapter;
         this.matcher = new ElementMatcher<>(-1, matcher, prefix, not);
     }
 
-    public AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher) {
+    private AdaptingMatcher(MatchValueAdapter<Value, Property> adapter, Matcher<? super Property> matcher) {
         this.adapter = adapter;
         this.matcher = new ElementMatcher<>(-1, matcher);
     }
@@ -37,13 +38,13 @@ public class AdaptingMatcher<Value, Property> extends NestedMatcher<Value> {
         if (mv.matches(matcher)) {
             return true;
         }
-        mv.getMismatch().describeMismatch(mismatch);
+//        mv.getMismatch().describeMismatch(mismatch);
         return false;
     }
 
     @Override
     public void describeTo(Description description) {
-        adapter.describeConsumer(matcher, description);
+//        adapter.describeConsumer(matcher, description);
     }
 
     @Override

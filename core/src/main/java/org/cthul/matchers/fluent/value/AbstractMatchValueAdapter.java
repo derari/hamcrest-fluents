@@ -3,9 +3,11 @@ package org.cthul.matchers.fluent.value;
 import java.util.HashMap;
 import java.util.Map;
 import org.cthul.matchers.diagnose.QuickResultMatcherBase;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
 import org.cthul.matchers.diagnose.result.AbstractMatchResult;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultMismatch;
+import org.cthul.matchers.diagnose.result.MatchResultSuccess;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
@@ -39,28 +41,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         };
         describeProducer(actualDescriptor, description);
     }
-    
-    protected void describeExpected(Element<? extends Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, ExpectationDescription description) {
-        SelfDescribing expectedDescriptor = new SelfDescribingBase() {
-            @Override
-            public void describeTo(Description description) {
-                ExpectationDescription ed = (ExpectationDescription) description;
-                matcher.describeExpected(item, ed);
-            }
-        };
-        describeConsumer(expectedDescriptor, description);
-    }
-    
-    protected void describeMismatch(Element<? extends Value> value, final Element<Property> item, final ElementMatcher<Property> matcher, Description description) {
-        SelfDescribing mismatchDescriptor = new SelfDescribingBase() {
-            @Override
-            public void describeTo(Description description) {
-                matcher.describeMismatch(item, description);
-            }
-        };
-        describeConsumer(mismatchDescriptor, description);
-    }
-    
+       
     protected abstract static class AbstractAdaptedValue<Value, Property> extends MatchValueBase<Property> {
         
         private final Class<?> valueType;
@@ -95,45 +76,56 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             }
             description.appendValue(value);
         }
+        
+        protected <I> MatchValue.Mismatch<I> matchResultOfUnaccepted(I element, final Object value, Matcher<?> m) {
+            return new MismatchBase<I>(element, m) {
+                @Override
+                public void describeExpected(ExpectationDescription description) {
+                    SelfDescribing sd = new SelfDescribingBase() {
+                        @Override
+                        public void describeTo(Description description) {
+                            describeExpectedToAccept(value, description);
+                        }
+                    };
+                    description.addExpected(-1, sd);
+                }
+                @Override
+                public void describeMismatch(Description description) {
+                    describeMismatchOfUnaccapted(value, description);
+                }
+            };
+        }
 
         protected MatchValue<Value> getActualValue() {
             return actualValue;
         }
         
-        protected ElementMatcher<Value> adapt(ElementMatcher<Property> matcher) {
+        protected ElementMatcher<Value> adapt(ElementMatcher<? super Property> matcher) {
             return new InternalAdaptingMatcher<>(this, matcher);
         }
-        
-        @Override
-        public boolean matches(ElementMatcher<Property> matcher) {
-            // will call #matches(Element, ElementMatcher)
-            return actualValue.matches(adapt(matcher));
-        }
 
-        @Override
-        public void describeMatch(Description description) {
-            // will call #describeMatch(Element, ElementMatcher, Description)
-            actualValue.getMatch().describeMatch(description);
-        }
-
-        @Override
-        public void describeExpected(ExpectationDescription description) {
-            // will call #describeExpected(Element, ElementMatcher, Description)
-            actualValue.getMismatch().describeExpected(description);
-        }
-
-        @Override
-        public void describeMismatch(Description description) {
-            // will call #describeMismatch(Element, ElementMatcher, Description)
-            actualValue.getMismatch().describeMismatch(description);
-        }
-        
         @Override
         public boolean matched() {
             return actualValue.matched();
         }
         
-        protected boolean matches(Element<?> element, ElementMatcher<Property> matcher) {
+        @Override
+        public boolean matches(ElementMatcher<? super Property> matcher) {
+            // will call #matches(Element, ElementMatcher)
+            return actualValue.matches(adapt(matcher));
+        }
+
+        @Override
+        public MatchResult<?> matchResult() {
+            // will call #matchResult(Element, ElementMatcher, ElementMatcher)
+            return actualValue.matchResult();
+        }
+        
+        protected abstract void describeConsumer(SelfDescribing sd, Description d);
+        
+        protected abstract void describeProducer(SelfDescribing sd, Description d);
+
+        protected boolean matches(Element<?> element, ElementMatcher<? super Property> matcher) {
             if (acceptValue(element.value())) {
                 return matchSafely((Element) element, matcher);
             } else {
@@ -141,66 +133,19 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             }
         }
         
-        protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<Property> matcher);
+        protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<? super Property> matcher);
         
-        protected <I extends Element<?>> MatchResult<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<Property> matcher) {
+        protected <I extends Element<?>> MatchValue.Result<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
             if (acceptValue(element.value())) {
                 return matchResultSafely((Element) element, adaptedMatcher, matcher);
             } else {
-                return new MatchResultMismatch<I, Matcher<?>>(element, matcher) {
-                    @Override
-                    public void describeExpected(Description d) {
-                        ExpectationDescription ex = (ExpectationDescription) d;
-                        SelfDescribing sd = new SelfDescribingBase() {
-                            @Override
-                            public void describeTo(Description description) {
-                                describeExpectedToAccept(element.value(), description);
-                            }
-                        };
-                        ex.addExpected(-1, sd);
-                    }
-                };
+                return matchResultOfUnaccepted(element, element.value(), adaptedMatcher);
             }
         }
         
-        protected <I extends Element<Value>> MatchResult<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<Property> matcher) {
+        protected <I extends Element<Value>> MatchValue.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
             throw new UnsupportedOperationException("matchResultSafely");
         }
-        
-        protected void describeMatch(final Element<?> element, ElementMatcher<Property> matcher, Description description) {
-            if (true) throw new UnsupportedOperationException("deprecated");
-            describeMatchSafely((Element) element, matcher, description);
-        }
-        
-        protected abstract void describeMatchSafely(Element<Value> element, ElementMatcher<Property> matcher, Description description);
-        
-        protected void describeExpected(final Element<?> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
-            if (true) throw new UnsupportedOperationException("deprecated");
-            if (acceptValue(element.value())) {
-                describeExpectedSafely((Element) element, matcher, description);
-            } else {
-                SelfDescribing sd = new SelfDescribingBase() {
-                    @Override
-                    public void describeTo(Description description) {
-                        describeExpectedToAccept(element.value(), description);
-                    }
-                };
-                description.addExpected(-1, sd);
-            }
-        }
-        
-        protected abstract void describeExpectedSafely(Element<Value> element, ElementMatcher<Property> matcher, ExpectationDescription description);
-        
-        protected void describeMismatch(Element<?> element, ElementMatcher<Property> matcher, Description description) {
-            if (true) throw new UnsupportedOperationException("deprecated");
-            if (acceptValue(element.value())) {
-                describeMismatchSafely((Element) element, matcher, description);
-            } else {
-                describeMismatchOfUnaccapted(element.value(), description);
-            }
-        }
-        
-        protected abstract void describeMismatchSafely(Element<Value> element, ElementMatcher<Property> matcher, Description description);
         
         protected <T> T cachedItem(Element<Value> key) {
             Object value;
@@ -236,14 +181,73 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
     }
     
+    protected abstract static class MismatchBase<Value> 
+                    extends MatchResultMismatch<Value, Matcher<?>>
+                    implements MatchValue.Mismatch<Value> {
+
+        public MismatchBase(Value value, Matcher<?> matcher) {
+            super(value, matcher);
+        }
+
+        @Override
+        public MatchValue.Mismatch<Value> getMismatch() {
+            return this;
+        }
+
+        @Override
+        public final void describeExpected(Description d) {
+            throw new UnsupportedOperationException("internal use only");
+        }
+        
+    }
+    
+    protected abstract static class MatchBase<Value> 
+                    extends MatchResultSuccess<Value, Matcher<?>>
+                    implements MatchValue.Result<Value> {
+
+        public MatchBase(Value value, Matcher<?> matcher) {
+            super(value, matcher);
+        }
+
+        @Override
+        public MatchValue.Mismatch<Value> getMismatch() {
+            return null;
+        }
+        
+    }
+    
+    protected abstract static class ResultBase<Value> 
+                    extends AbstractMatchResult<Value, Matcher<?>>
+                    implements MatchValue.Result<Value>, MatchValue.Mismatch<Value> {
+
+        public ResultBase(Value value, Matcher<?> matcher) {
+            super(value, matcher);
+        }
+
+        public ResultBase(Value value, Matcher<?> matcher, boolean success) {
+            super(value, matcher, success);
+        }
+
+        @Override
+        public MatchValue.Mismatch<Value> getMismatch() {
+            return (MatchValue.Mismatch<Value>) super.getMismatch();
+        }
+
+        @Override
+        public final void describeExpected(Description d) {
+            throw new UnsupportedOperationException("internal use only");
+        }
+        
+    }
+    
     protected static class InternalAdaptingMatcher<Value, Property> 
                     extends QuickResultMatcherBase<Element<?>> 
                     implements ElementMatcher<Value> {
 
         private final AbstractAdaptedValue<Value, Property> adaptedValue;
-        private final ElementMatcher<Property> itemMatcher;
+        private final ElementMatcher<? super Property> itemMatcher;
 
-        public InternalAdaptingMatcher(AbstractAdaptedValue<Value, Property> adaptedValue, ElementMatcher<Property> itemMatcher) {
+        public InternalAdaptingMatcher(AbstractAdaptedValue<Value, Property> adaptedValue, ElementMatcher<? super Property> itemMatcher) {
             this.adaptedValue = adaptedValue;
             this.itemMatcher = itemMatcher;
         }
@@ -262,9 +266,9 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
-        public <I> MatchResult<I> matchResult(I item) {
+        public <I> MatchValue.Result<I> matchResult(I item) {
             final Element<?> e = (Element) item;
-            return (MatchResult) adaptedValue.matchResult(e, this, itemMatcher);
+            return (MatchValue.Result) adaptedValue.matchResult(e, this, itemMatcher);
 //            return new AbstractMatchResult<I, Matcher<?>>(item, this, matches(item)) {
 //                @Override
 //                public void describeMatch(Description d) {
@@ -281,17 +285,9 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
 //                }
 //            };
         }
-
-        @Override
-        public void describeExpected(Element<?> e, ExpectationDescription description) {
-            throw new UnsupportedOperationException("deprecated");
-            //adaptedValue.describeExpected(e, itemMatcher, description);
-        }
-        
         @Override
         public void describeMismatch(Object item, Description description) {
-            Element<?> e = (Element) item;
-            adaptedValue.describeMismatch(e, itemMatcher, description);
+            throw new UnsupportedOperationException("internal use only");
         }
     }    
 }

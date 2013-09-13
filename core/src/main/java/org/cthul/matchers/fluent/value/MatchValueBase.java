@@ -1,7 +1,7 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
@@ -9,51 +9,28 @@ import org.hamcrest.Matcher;
  *
  */
 public abstract class MatchValueBase<Value> 
-                extends Nested.Result<MatchValue<Value>, Matcher<?>>
-                implements MatchValue<Value>, MatchValue.Mismatch<Value> {
+                extends SelfDescribingBase 
+                implements MatchValue<Value> {
     
-    private final AndChainMatcher.Builder<Element<Value>> allMatchers = new AndChainMatcher.Builder<>();
-
     public MatchValueBase() {
-        super(null, null);
     }
 
     @Override
-    public boolean matches(ElementMatcher<Value> matcher) {
-        allMatchers.and(matcher);
-        return true;
+    public boolean matches(Matcher<? super Value> matcher) {
+        // todo: create element matcher
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MatchValue<Value> matchResult(ElementMatcher<Value> matcher) {
+    public MatchResult<?> matchResult(Matcher<? super Value> matcher) {
         matches(matcher);
-        return this;
-    }
-    
-    protected Matcher<?> tmpMatcher() {
-        return allMatchers;
+        return matchResult();
     }
 
     @Override
-    public MatchValue<Value> getValue() {
-        return this;
-    }
-
-    @Override
-    public Matcher<?> getMatcher() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MatchValue.Mismatch<Value> getMismatch() {
-        return matched() ? null : this;
-    }
-
-    @Override
-    public void describeExpected(Description d) {
-        Expectation e = new Expectation();
-        describeExpected(e);
-        d.appendDescriptionOf(e);
+    public MatchResult<?> matchResult(ElementMatcher<? super Value> matcher) {
+        matches(matcher);
+        return matchResult();
     }
 
     @Override
@@ -61,4 +38,8 @@ public abstract class MatchValueBase<Value>
         return adapter.adapt(this);
     }
 
+    @Override
+    public void describeTo(Description description) {
+        describeValue(description);
+    }
 }

@@ -1,6 +1,6 @@
 package org.cthul.matchers.fluent.value;
 
-import java.util.Collection;
+import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -14,19 +14,19 @@ import org.hamcrest.SelfDescribing;
  * able to provide messages that describe its state.
  * @param <Value> element type
  */
-public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
+public interface MatchValue<Value> extends SelfDescribing {
     
-    @Override
-    Mismatch<Value> getMismatch();
+    boolean matches(Matcher<? super Value> matcher);
     
-    /**
-     * Applies the matcher.
-     * @param matcher the matcher
-     * @return true iff value is valid
-     */
-    boolean matches(ElementMatcher<Value> matcher);
+    MatchResult<?> matchResult(Matcher<? super Value> matcher);
     
-    MatchValue<Value> matchResult(ElementMatcher<Value> matcher);
+    boolean matches(ElementMatcher<? super Value> matcher);
+    
+    MatchResult<?> matchResult(ElementMatcher<? super Value> matcher);
+    
+    boolean matched();
+    
+    MatchResult<?> matchResult();
         
     /**
      * Describes the value.
@@ -48,7 +48,13 @@ public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
      */
     <Property> MatchValue<Property> get(MatchValueAdapter<? super Value, Property> adapter);
     
-    interface Mismatch<Value> extends MatchResult.Mismatch<MatchValue<Value>> {
+    interface Result<Value> extends MatchResult<Value> {
+        
+        @Override
+        MatchValue.Mismatch<Value> getMismatch();
+    }
+    
+    interface Mismatch<Value> extends MatchValue.Result<Value>, MatchResult.Mismatch<Value> {
         
         /**
          * Describes what was expected of the value.
@@ -66,7 +72,6 @@ public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
     interface Element<Value> {
         
         Value value();
-        
     }
     
     /**
@@ -74,16 +79,10 @@ public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
      * @param <Value> value type
      * @see org.cthul.matchers.fluent.value.ElementMatcher
      */
-    interface ElementMatcher<Value> extends Matcher<Element<?>> {
+    interface ElementMatcher<Value> extends QuickDiagnosingMatcher<Element<?>> {
         
-        /**
-         * Generates a description that explains what would have been expected
-         * of an element to be matched successfully.
-         * @param e element that was rejected
-         * @param description the description to append to
-         */
-        void describeExpected(Element<?> e, ExpectationDescription description);
-        
+        @Override
+        <I> MatchValue.Result<I> matchResult(I item);
     }
     
     /**
@@ -99,6 +98,5 @@ public interface MatchValue<Value> extends MatchResult<MatchValue<Value>> {
          * @param expected 
          */
         void addExpected(int index, SelfDescribing expected);
-        
     }
 }

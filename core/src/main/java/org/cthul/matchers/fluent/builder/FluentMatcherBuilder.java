@@ -199,7 +199,7 @@ public class FluentMatcherBuilder
                     && m instanceof QuickDiagnosingMatcher) {
                 result = (QuickDiagnosingMatcher) m;
             } else {
-                result = new AdaptingMatcher<>(matchValueType, m);
+                result = (QuickDiagnosingMatcher) matchValueType.adapt(m);
             }
         }
         return result;

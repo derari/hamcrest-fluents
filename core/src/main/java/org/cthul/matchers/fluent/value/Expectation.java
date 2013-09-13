@@ -3,6 +3,7 @@ package org.cthul.matchers.fluent.value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
@@ -17,6 +18,9 @@ public class Expectation
     private ArrayList<SelfDescribing> sorted = null;
     private ArrayList<SelfDescribing> unsorted = null;
     private StringDescription current = null;
+
+    public Expectation() {
+    }
 
     protected StringDescription current() {
         if (current == null) {
@@ -107,5 +111,4 @@ public class Expectation
             }
         }
     }
-    
 }

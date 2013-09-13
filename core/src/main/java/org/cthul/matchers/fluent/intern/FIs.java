@@ -67,10 +67,16 @@ public class FIs<T> extends NestedResultMatcher<T> {
             }
             @Override
             public void describeExpected(Description d) {
+                if (prefix != null) {
+                    d.appendText(prefix).appendText(" ");
+                }
                 if (not) {
                     d.appendText("not ");
+                    nestedDescribeTo(getExpectedPrecedence(), result, d);
+                } else {
+                    result.getMismatch().describeExpected(d);
+                    //nestedDescribeTo(getExpectedPrecedence(), result.getMismatch().getExpectedDescription(), d);
                 }
-                nestedDescribeTo(getExpectedPrecedence(), result, d);
             }
             @Override
             public void describeMismatch(Description d) {

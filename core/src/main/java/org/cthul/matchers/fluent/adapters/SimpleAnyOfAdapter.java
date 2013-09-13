@@ -5,14 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.result.MatchResult;
-import org.cthul.matchers.diagnose.result.MatchResultMismatch;
-import org.cthul.matchers.diagnose.result.MatchResultSuccess;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValue.Element;
 import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.SelfDescribing;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
@@ -99,7 +97,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
 
         @Override
-        protected boolean matchSafely(Element<V> element, ElementMatcher<Item> matcher) {
+        protected boolean matchSafely(Element<V> element, ElementMatcher<? super Item> matcher) {
             PreviousMatcher<Item> pm = addToPreviousChain(matcher);
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.firstValid();
@@ -118,7 +116,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             return false;
         }
         
-        protected PreviousMatcher<Item> addToPreviousChain(ElementMatcher<Item> matcher) {
+        protected PreviousMatcher<Item> addToPreviousChain(ElementMatcher<? super Item> matcher) {
             for (PreviousMatcher<Item> pm = matchers; pm != null; pm = pm.next) {
                 if (pm.matcher == matcher) {
                     return pm;
@@ -156,7 +154,7 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
 
         @Override
-        protected <I extends Element<V>> MatchResult<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<Item> matcher) {
+        protected <I extends Element<V>> Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Item> matcher) {
             PreviousMatcher<Item> pm = addToPreviousChain(matcher);
             AnyItemIterable<Item> it = cachedItem(element);
             E<Item> e = it.firstValid();
@@ -179,21 +177,21 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             return failResult(element, adaptedMatcher, it);
         }
         
-        protected <I extends Element<V>> MatchResult<I> emptyResult(I element, ElementMatcher<V> adaptedMatcher) {
-            return new MatchResultMismatch<I, Matcher<?>>(element, adaptedMatcher) {
-                @Override
-                public void describeMismatch(Description d) {
-                    d.appendText("empty");
-                }
-            };
-        }
-        
-        protected <I extends Element<V>> MatchResult<I> successResult(I element, ElementMatcher<V> adaptedMatcher, final E<Item> e) {
+//        protected <I extends Element<V>> Result<I> emptyResult(I element, ElementMatcher<V> adaptedMatcher) {
+//            return new MatchResultMismatch<I, Matcher<?>>(element, adaptedMatcher) {
+//                @Override
+//                public void describeMismatch(Description d) {
+//                    d.appendText("empty");
+//                }
+//            };
+//        }
+//        
+        protected <I extends Element<V>> Result<I> successResult(I element, ElementMatcher<V> adaptedMatcher, final E<Item> e) {
             final List<MatchResult.Match<?>> matches = new ArrayList<>();
             for (PreviousMatcher<Item> pm = matchers; pm != null; pm = pm.next) {
                 matches.add(QuickDiagnose.matchResult(pm.matcher, e).getMatch());
             }
-            return new MatchResultSuccess<I, Matcher<?>>(element, adaptedMatcher) {
+            return new MatchBase<I>(element, adaptedMatcher) {
                 @Override
                 public void describeMatch(Description d) {
                     describeElement(getValue().value(), e.value, e.i, d);
@@ -210,10 +208,10 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             };
         }
         
-        protected <I extends Element<V>> MatchResult<I> failResult(I element, ElementMatcher<V> adaptedMatcher, final AnyItemIterable<Item> it) {            
-            return new MatchResultMismatch<I, Matcher<?>>(element, adaptedMatcher) {
+        protected <I extends Element<V>> Result<I> failResult(I element, ElementMatcher<V> adaptedMatcher, final AnyItemIterable<Item> it) {            
+            return new MismatchBase<I>(element, adaptedMatcher) {
                 @Override
-                public void describeExpected(Description d) {
+                public void describeExpected(ExpectationDescription d) {
                     for (E<Item> e = it.first(); e != null; e = it.next(e)) {
                         e.mismatchResult().describeExpected(d);
                     }
@@ -251,38 +249,48 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         }
 
         @Override
-        protected void describeMatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        protected void describeProducer(SelfDescribing sd, Description d) {
+            SimpleAnyOfAdapter.this.describeProducer(sd, d);
         }
 
         @Override
-        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
-            AnyItemIterable<Item> it = cachedItem(element);
-            for (E<Item> e = it.first(); e != null; e = it.next(e)) {
-                e.mismatch.describeExpected(e, description);
-            }
-        }
-
-        @Override
-        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
-            AnyItemIterable<Item> it = cachedItem(element);
-            E<Item> first = it.first();
-            E<Item> e = first;
-            while (e != null) {
-                if (e != first) {
-                    if (e.next == null) {
-                        description.appendText(e == first.next ? " " : ", ");
-                        description.appendText("and ");
-                    } else {
-                        description.appendText(", ");
-                    }
-                }
-                describeElement(element.value(), e.value(), e.i, description);
-                e.mismatch.describeMismatch(e, description);
-                e = it.next(e);
-            }
+        protected void describeConsumer(SelfDescribing sd, Description d) {
+            SimpleAnyOfAdapter.this.describeConsumer(sd, d);
         }
         
+//        @Override
+//        protected void describeMatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        }
+//
+//        @Override
+//        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
+//            AnyItemIterable<Item> it = cachedItem(element);
+//            for (E<Item> e = it.first(); e != null; e = it.next(e)) {
+//                e.mismatch.describeExpected(e, description);
+//            }
+//        }
+//
+//        @Override
+//        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
+//            AnyItemIterable<Item> it = cachedItem(element);
+//            E<Item> first = it.first();
+//            E<Item> e = first;
+//            while (e != null) {
+//                if (e != first) {
+//                    if (e.next == null) {
+//                        description.appendText(e == first.next ? " " : ", ");
+//                        description.appendText("and ");
+//                    } else {
+//                        description.appendText(", ");
+//                    }
+//                }
+//                describeElement(element.value(), e.value(), e.i, description);
+//                e.mismatch.describeMismatch(e, description);
+//                e = it.next(e);
+//            }
+//        }
+
     }
     
     protected static class AnyItemIterable<Item> {
@@ -331,9 +339,9 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
         
         private final Item value;
         final int i;
-        ElementMatcher<Item> mismatch = null;
+        ElementMatcher<? super Item> mismatch = null;
         E<Item> next = null;
-        MatchResult.Mismatch<E<Item>> mismatchResult = null;
+        MatchValue.Mismatch<E<Item>> mismatchResult = null;
 
         public E(Item value, int i) {
             this.value = value;
@@ -345,9 +353,9 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
             return value;
         }
         
-        public MatchResult.Mismatch<E<Item>> mismatchResult() {
+        public MatchValue.Mismatch<E<Item>> mismatchResult() {
             if (mismatchResult == null) {
-                mismatchResult = QuickDiagnose.matchResult(mismatch, this).getMismatch();
+                mismatchResult = mismatch.matchResult(this).getMismatch();
             }
             return mismatchResult;
         }
@@ -355,11 +363,11 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
     
     protected static class PreviousMatcher<Value> {
         
-        final ElementMatcher<Value> matcher;
+        final ElementMatcher<? super Value> matcher;
         boolean success = true;
         PreviousMatcher next = null;
 
-        public PreviousMatcher(ElementMatcher<Value> matcher) {
+        public PreviousMatcher(ElementMatcher<? super Value> matcher) {
             this.matcher = matcher;
         }
     }
