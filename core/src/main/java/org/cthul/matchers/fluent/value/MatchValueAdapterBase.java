@@ -81,33 +81,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
         @Override
         public void describeTo(Description description) {
             mva2.describeProducer(mva1, description);
-//            description.appendDescriptionOf(mva1)
-//                    .appendText(" ")
-//                    .appendDescriptionOf(mva2);
         }
-        
-//
-//        @Override
-//        public void describeProducer(final SelfDescribing producer, Description description) {
-//            SelfDescribing producerDescriptor = new SelfDescribingBase() {
-//                @Override
-//                public void describeTo(Description description) {
-//                    mva1.describeProducer(producer, description);
-//                }
-//            };
-//            mva2.describeProducer(producerDescriptor, description);
-//        }
-//
-//        @Override
-//        public void describeConsumer(final SelfDescribing consumer, Description description) {
-//            SelfDescribing consumerDescriptor = new SelfDescribingBase() {
-//                @Override
-//                public void describeTo(Description description) {
-//                    mva2.describeProducer(consumer, description);
-//                }
-//            };
-//            mva1.describeProducer(consumerDescriptor, description);
-//        }        
     }
     
     protected static class SingleElementValue<Value> 

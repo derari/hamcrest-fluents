@@ -17,8 +17,7 @@ public abstract class MatchValueBase<Value>
 
     @Override
     public boolean matches(Matcher<? super Value> matcher) {
-        // todo: create element matcher
-        throw new UnsupportedOperationException("Not supported yet.");
+        return matches(new ElementMatcherWrapper<>(-1, matcher));
     }
 
     @Override
