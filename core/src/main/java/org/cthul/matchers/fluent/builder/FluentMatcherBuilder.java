@@ -13,7 +13,6 @@ import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
-import org.cthul.matchers.fluent.value.AdaptingMatcher;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
