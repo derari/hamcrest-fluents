@@ -56,12 +56,12 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
 
         @Override
         public void describeValue(Description description) {
-            ConvertingAdapter.this.describeValue(getActualValue(), description);
+            ConvertingAdapter.this.describeValue(getSourceValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            ConvertingAdapter.this.describeValueType(getActualValue(), description);
+            ConvertingAdapter.this.describeValueType(getSourceValue(), description);
         }
 
         @Override

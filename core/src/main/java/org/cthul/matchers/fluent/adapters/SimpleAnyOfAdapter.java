@@ -242,12 +242,12 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
 
         @Override
         public void describeValue(Description description) {
-            SimpleAnyOfAdapter.this.describeValue(getActualValue(), description);
+            SimpleAnyOfAdapter.this.describeValue(getSourceValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            SimpleAnyOfAdapter.this.describeValueType(getActualValue(), description);
+            SimpleAnyOfAdapter.this.describeValueType(getSourceValue(), description);
         }
 
         @Override

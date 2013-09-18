@@ -1,6 +1,6 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.intern.FIs;
+import org.cthul.matchers.CIs;
 import java.util.ArrayList;
 import java.util.List;
 import org.cthul.matchers.chain.AndChainMatcher;
@@ -91,7 +91,7 @@ public class FluentMatcherBuilder
 
     @Override
     protected This _applyMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
-        matchers.add(FIs.wrap(prefix, not, matcher));
+        matchers.add(CIs.wrap(prefix, not, matcher));
         return _this();
     }
 

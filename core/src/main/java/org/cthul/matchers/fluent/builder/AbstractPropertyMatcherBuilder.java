@@ -2,7 +2,7 @@ package org.cthul.matchers.fluent.builder;
 
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
-import org.cthul.matchers.fluent.intern.FIs;
+import org.cthul.matchers.CIs;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -117,13 +117,13 @@ public abstract class AbstractPropertyMatcherBuilder
 
         @Override
         protected ThisFluent _applyMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(FIs.wrap(prefix, not, matcher));
+            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
             return AbstractPropertyMatcherBuilder.this._applyMatcher(m, flPrefix, flNot);
         }
 
         @Override
         protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(FIs.wrap(prefix, not, matcher));
+            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
             return AbstractPropertyMatcherBuilder.this._updateMatcher(m, flPrefix, flNot);
         }
     }

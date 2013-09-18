@@ -163,12 +163,12 @@ public abstract class SimpleEachOfAdapter<Value, Item>
 
         @Override
         public void describeValue(Description description) {
-            SimpleEachOfAdapter.this.describeValue(getActualValue(), description);
+            SimpleEachOfAdapter.this.describeValue(getSourceValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            SimpleEachOfAdapter.this.describeValueType(getActualValue(), description);
+            SimpleEachOfAdapter.this.describeValueType(getSourceValue(), description);
         }
 
         @Override

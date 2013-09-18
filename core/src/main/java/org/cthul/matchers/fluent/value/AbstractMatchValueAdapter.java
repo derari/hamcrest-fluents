@@ -15,22 +15,29 @@ import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
- *
+ * Provides a framework for implementing {@link MatchValue}s that
+ * are built by an adapter.
+ * <p>
+ * Subclasses will implement {@link #adapt(MatchValue)} to return
+ * an instance of {@link AbstractAdaptedValue}.
  */
 public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchValueAdapterBase<Value, Property> {
-
-    @Override
-    public MatchValue<Property> adapt(Object value) {
-        return adapt(new SingleElementValue<Value>(value));
-    }
     
     @Override
     public abstract MatchValue<Property> adapt(MatchValue<? extends Value> value);
     
+    /**
+     * Describes the values this adapter produces from a source {@link MatchValue}.
+     * @see #describeProducer(org.hamcrest.SelfDescribing, org.hamcrest.Description) 
+     */
     protected void describeValue(MatchValue<? extends Value> actual, Description description) {
         describeProducer(actual, description);
     }
     
+    /**
+     * Describes the type of values this adapter produces from a source {@link MatchValue}.
+     * @see #describeProducer(org.hamcrest.SelfDescribing, org.hamcrest.Description) 
+     */
     protected void describeValueType(final MatchValue<? extends Value> actual, Description description) {
         SelfDescribing actualDescriptor = new SelfDescribingBase() {
             @Override
@@ -40,19 +47,38 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         };
         describeProducer(actualDescriptor, description);
     }
-       
+    
+    /**
+     * Adapts elements of a source {@link MatchValue} and applies matchers on them.
+     * <p>
+     * Calls to {@link #matched()} and {@link #matchResult()} are directly 
+     * delegated to the source value. 
+     * For calls to {@link #matches(org.cthul.matchers.fluent.value.ElementMatcher)},
+     * the source value will be called with an {@linkplain #adapt(org.cthul.matchers.fluent.value.ElementMatcher) adapted matcher}
+     * that will pass all elements to this 
+     * <p>  
+     * First, it rejects all elements whose values are not of an expected type.
+     * Then, {@link #matchSafely(org.cthul.matchers.fluent.value.ElementMatcher.Element, org.cthul.matchers.fluent.value.ElementMatcher) #matchSafely()} 
+     * and {@link #matchResultSafely(org.cthul.matchers.fluent.value.ElementMatcher.Element, org.cthul.matchers.fluent.value.ElementMatcher, org.cthul.matchers.fluent.value.ElementMatcher) #matchResultSafely()} 
+     * do the actual adapting and apply element matchers respectively.
+     * <p>
+     * A {@linkplain #cachedItem(org.cthul.matchers.fluent.value.ElementMatcher.Element)  caching mechanism} allows to store state
+     * for source values independently.
+     * @param <Value>
+     * @param <Property> 
+     */
     protected abstract static class AbstractAdaptedValue<Value, Property> extends MatchValueBase<Property> {
         
         private final Class<?> valueType;
-        private final MatchValue<Value> actualValue;
+        private final MatchValue<Value> sourceValue;
         
         private Map<Element<Value>, Object> cache = null;
         private Element<Value> firstKey = null;
         private Object firstCached = null;
 
-        public AbstractAdaptedValue(Class<?> valueType, MatchValue<Value> actualValue) {
+        public AbstractAdaptedValue(Class<?> valueType, MatchValue<Value> sourceValue) {
             this.valueType = valueType;
-            this.actualValue = actualValue;
+            this.sourceValue = sourceValue;
         }
         
         protected boolean acceptValue(Object value) {
@@ -95,8 +121,8 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             };
         }
 
-        protected MatchValue<Value> getActualValue() {
-            return actualValue;
+        protected MatchValue<Value> getSourceValue() {
+            return sourceValue;
         }
         
         protected ElementMatcher<Value> adapt(ElementMatcher<? super Property> matcher) {
@@ -105,19 +131,19 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
 
         @Override
         public boolean matched() {
-            return actualValue.matched();
+            return sourceValue.matched();
         }
         
         @Override
         public boolean matches(ElementMatcher<? super Property> matcher) {
             // will call #matches(Element, ElementMatcher)
-            return actualValue.matches(adapt(matcher));
+            return sourceValue.matches(adapt(matcher));
         }
 
         @Override
         public MatchResult<?> matchResult() {
             // will call #matchResult(Element, ElementMatcher, ElementMatcher)
-            return actualValue.matchResult();
+            return sourceValue.matchResult();
         }
         
         protected abstract void describeConsumer(SelfDescribing sd, Description d);
@@ -142,11 +168,33 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             }
         }
         
-        protected <I extends Element<Value>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
-            throw new UnsupportedOperationException("matchResultSafely");
-        }
+        /**
+         * Returns a {@code MatchResult} that describes the {@code element}'s match.
+         * <p>
+         * The match result should have {@code element} as value and 
+         * {@code adaptedMatcher} as matcher. It is recommended to extend
+         * {@link MatchBase}, {@link MismatchBase}, or {@link ResultBase}.
+         * @param <I>
+         * @param element
+         * @param adaptedMatcher
+         * @param matcher
+         * @return 
+         */
+        protected abstract <I extends Element<Value>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher);
         
+        /**
+         * Allows to cache state for an element. 
+         * If a key is seen for the first time, 
+         * {@link #createItem(org.cthul.matchers.fluent.value.ElementMatcher.Element) #createItem()} is called.
+         * 
+         * @param <T>
+         * @param key
+         * @return cached value
+         */
         protected <T> T cachedItem(Element<Value> key) {
+            // before creating a map to manage the cache,
+            // we use firstKey and firstCached for the likely case 
+            // that only one key will ever occur
             Object value;
             if (cache == null) {
                 if (key.equals(firstKey)) {
@@ -177,12 +225,11 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         protected Object createItem(Element<Value> key) {
             throw new UnsupportedOperationException("#createItem not implemented");
         }
-        
     }
     
     protected abstract static class MismatchBase<Value> 
                     extends MatchResultMismatch<Value, Matcher<?>>
-                    implements ElementMatcher.Mismatch<Value> {
+                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
 
         public MismatchBase(Value value, Matcher<?> matcher) {
             super(value, matcher);
@@ -197,7 +244,6 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         public final void describeExpected(Description d) {
             throw new UnsupportedOperationException("internal use only");
         }
-        
     }
     
     protected abstract static class MatchBase<Value> 
@@ -212,13 +258,18 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         public ElementMatcher.Mismatch<Value> getMismatch() {
             return null;
         }
-        
     }
     
     protected abstract static class ResultBase<Value> 
                     extends AbstractMatchResult<Value, Matcher<?>>
                     implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
 
+        /**
+         * When this constructor is used, 
+         * {@link #matched()} should be overridden.
+         * @param value
+         * @param matcher 
+         */
         public ResultBase(Value value, Matcher<?> matcher) {
             super(value, matcher);
         }
@@ -236,9 +287,13 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         public final void describeExpected(Description d) {
             throw new UnsupportedOperationException("internal use only");
         }
-        
     }
     
+    /**
+     * An {@link ElementMatcher} that delegates all calls to its {@link AbstractAdaptedValue}.
+     * @param <Value>
+     * @param <Property> 
+     */
     protected static class InternalAdaptingMatcher<Value, Property> 
                     extends QuickResultMatcherBase<Element<?>> 
                     implements ElementMatcher<Value> {
@@ -268,25 +323,17 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         public <I> ElementMatcher.Result<I> matchResult(I item) {
             final Element<?> e = (Element) item;
             return (ElementMatcher.Result) adaptedValue.matchResult(e, this, itemMatcher);
-//            return new AbstractMatchResult<I, Matcher<?>>(item, this, matches(item)) {
-//                @Override
-//                public void describeMatch(Description d) {
-//                    adaptedValue.describeMatch(e, itemMatcher, d);
-//                }
-//                @Override
-//                public void describeExpected(Description d) {
-//                    ExpectationDescription ex = (ExpectationDescription) d;
-//                    adaptedValue.describeExpected(e, itemMatcher, ex);
-//                }
-//                @Override
-//                public void describeMismatch(Description d) {
-//                    adaptedValue.describeMismatch(e, itemMatcher, d);
-//                }
-//            };
         }
+        
+        /**
+         * Use {@link #matchResult(java.lang.Object)} instead.
+         * <p>
+         * This matcher should never occur in a context 
+         * where this method needs to be called.
+         */
         @Override
         public void describeMismatch(Object item, Description description) {
-            throw new UnsupportedOperationException("internal use only");
+            throw new UnsupportedOperationException("matcher for internal use only");
         }
     }    
 }

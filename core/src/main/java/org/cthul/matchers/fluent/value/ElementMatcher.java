@@ -7,6 +7,9 @@ import org.hamcrest.SelfDescribing;
 
 /**
  * A Hamcrest Matcher that accepts {@link Element}s of a type.
+ * <p>
+ * The matcher accepts any type of element, 
+ * the value type has to be checked explicitly.
  * @param <Value> value type
  * @see org.cthul.matchers.fluent.value.ElementMatcher
  */
@@ -26,12 +29,20 @@ public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMat
         Value value();
     }
     
+    /**
+     * A {@code MatchResult} that provides a specialized {@link Mismatch}.
+     * @param <Value> 
+     */
     interface Result<Value> extends MatchResult<Value> {
         
         @Override
         ElementMatcher.Mismatch<Value> getMismatch();
     }
     
+    /**
+     * A {@link MatchResult.Mismatch} that can fill an {@link ExpectationDescription}.
+     * @param <Value> 
+     */
     interface Mismatch<Value> extends Result<Value>, MatchResult.Mismatch<Value> {
         
         /**
@@ -49,7 +60,8 @@ public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMat
     interface ExpectationDescription extends Description {
         
         /**
-         * 
+         * Adds an expectation. The index sets the order in which it will be
+         * written to the result. {@code -1} will append to the beginning.
          * @param index
          * @param expected 
          */

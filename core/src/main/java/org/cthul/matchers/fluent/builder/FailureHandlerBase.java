@@ -1,6 +1,6 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.value.Expectation;
+import org.cthul.matchers.fluent.value.ExpectationStringDescription;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;

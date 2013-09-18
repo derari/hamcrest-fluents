@@ -1,7 +1,7 @@
 package org.cthul.matchers.fluent.builder;
 
 import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
-import org.cthul.matchers.fluent.intern.FIs;
+import org.cthul.matchers.CIs;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import org.cthul.matchers.InstanceOf;
@@ -376,7 +376,7 @@ public abstract class AbstractFluentPropertyBuilder
         }
         
         public Matcher<Object> that(Matcher<T> nested, String prefix, boolean not) {
-            nested = FIs.wrap(prefix, not, nested);
+            nested = CIs.wrap(prefix, not, nested);
             this.isA_that = isA.that(nested);
             return this;
         }

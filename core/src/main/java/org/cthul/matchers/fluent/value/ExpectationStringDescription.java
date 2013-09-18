@@ -12,7 +12,7 @@ import org.hamcrest.StringDescription;
 /**
  *
  */
-public class Expectation 
+public class ExpectationStringDescription 
                 extends SelfDescribingBase
                 implements ExpectationDescription {
     
@@ -20,7 +20,7 @@ public class Expectation
     private ArrayList<SelfDescribing> unsorted = null;
     private StringDescription current = null;
 
-    public Expectation() {
+    public ExpectationStringDescription() {
     }
 
     protected StringDescription current() {
@@ -105,9 +105,7 @@ public class Expectation
         if (source != null) {
             for (SelfDescribing s: source) {
                 if (s != null) {
-                    StringDescription sd = new StringDescription();
-                    sd.appendDescriptionOf(s);
-                    target.add(sd.toString());
+                    target.add(StringDescription.toString(s));
                 }
             }
         }
