@@ -3,6 +3,7 @@ package org.cthul.matchers.fluent.builder;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.CIs;
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -82,6 +83,37 @@ public abstract class AbstractPropertyAssertBuilder
 
         public Neither(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
             super(property, matchers);
+        }
+    }
+
+    @Override
+    public MatchesSome<Value, Property, ThisFluent> matches(int count) {
+        return new MatchesSome<>(this, count);
+    }
+
+    @Override
+    public MatchesSome<Value, Property, ThisFluent> matches(Matcher<? super Integer> countMatcher) {
+        return new MatchesSome<>(this, countMatcher);
+    }
+
+    @Override
+    public MatchesSome<Value, Property, ThisFluent> matches(ChainFactory chainType) {
+        return new MatchesSome<>(this, chainType);
+    }
+    
+    protected static class MatchesSome<Value, Property,
+                                ThisFluent extends FluentAssert<Value>>
+                        extends AbstractFluentPropertyBuilder.MatchesSome<Value, Property, ThisFluent>
+                        implements FluentPropertyAssert.MatchesSome<Value, Property> {
+
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, int count) {
+            super(property, count);
+        }
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Integer> countMatcher) {
+            super(property, countMatcher);
+        }
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
+            super(property, chainType);
         }
     }
 

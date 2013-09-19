@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent;
 
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -130,6 +131,27 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     
     /**
      * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(int count, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(ChainFactory chainType, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
      */
     @Override
     <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Value, P> adapter);
@@ -171,6 +193,30 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      */
     @Override
     Both<Value, Value> both(Matcher<? super Value> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Either<Value, Value> either(Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Value> matches(int count);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Value> matches(Matcher<? super Integer> countMatcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Value> matches(ChainFactory chainType);
     
     /**
      * Adds a matcher to the fluent that matches only instances of {@code clazz}

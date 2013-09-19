@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent;
 
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -126,6 +127,24 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
+    FluentAssert<Value> matches(int count, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> matches(ChainFactory chainType, Matcher<? super Value>... matchers);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Value, P> matcher);
 
     /**
@@ -199,6 +218,24 @@ public interface FluentAssert<Value>
     @Override
     FluentPropertyAssert.Neither<Value, Value> neither(Matcher<? super Value>... matchers);
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentPropertyAssert.MatchesSome<Value, Value> matches(int count);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentPropertyAssert.MatchesSome<Value, Value> matches(Matcher<? super Integer> countMatcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentPropertyAssert.MatchesSome<Value, Value> matches(ChainFactory chainType);
+    
     /**
      * {@inheritDoc}
      */

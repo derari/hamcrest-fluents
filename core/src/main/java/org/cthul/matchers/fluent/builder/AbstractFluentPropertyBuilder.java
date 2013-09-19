@@ -6,8 +6,10 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import org.cthul.matchers.InstanceOf;
 import org.cthul.matchers.chain.AndChainMatcher;
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.chain.NOrChainMatcher;
 import org.cthul.matchers.chain.OrChainMatcher;
+import org.cthul.matchers.chain.SomeOfChainMatcher;
 import org.cthul.matchers.chain.XOrChainMatcher;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
@@ -21,8 +23,8 @@ import org.hamcrest.core.IsEqual;
  *
  */
 public abstract class AbstractFluentPropertyBuilder
-                <Value, Property, ThisFluent extends Fluent<Value>,
-                 This extends FluentProperty<Value, Property>>
+                        <Value, Property, ThisFluent extends Fluent<Value>,
+                         This extends FluentProperty<Value, Property>>
                 implements FluentProperty<Value, Property> {
     
     private boolean negate = false;
@@ -203,6 +205,21 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
+    public ThisFluent matches(int count, Matcher<? super Property>... matchers) {
+        return _match(SomeOfChainMatcher.matches(count, matchers));
+    }
+
+    @Override
+    public ThisFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
+        return _match(SomeOfChainMatcher.matches(countMatcher, matchers));
+    }
+
+    @Override
+    public ThisFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
+        return _match(chainType.create(matchers));
+    }
+
+    @Override
     public <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Property, P> adapter) {
         return _adapt(adapter);
     }
@@ -305,6 +322,43 @@ public abstract class AbstractFluentPropertyBuilder
         public ThisFluent nor(Matcher<? super Property> matcher) {
             matchers[matchers.length-1] = matcher;
             return property._(NOrChainMatcher.nor(matchers));
+        }
+    }
+
+    @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(int count);
+
+    @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(Matcher<? super Integer> countMatcher);
+
+    @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(ChainFactory chainType);
+    
+    protected static class MatchesSome<Value, Property,
+                            ThisFluent extends Fluent<Value>>
+                    implements FluentProperty.MatchesSome<Value, Property> {
+        
+        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final ChainFactory chainType;
+
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, int count) {
+            this.property = property;
+            this.chainType = SomeOfChainMatcher.factory(count);
+        }
+        
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Integer> countMatcher) {
+            this.property = property;
+            this.chainType = SomeOfChainMatcher.factory(countMatcher);
+        }
+        
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
+            this.property = property;
+            this.chainType = chainType;
+        }
+
+        @Override
+        public ThisFluent of(Matcher<? super Property>... matchers) {
+            return property._(chainType.create(matchers));
         }
     }
     

@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent;
 
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -128,6 +129,35 @@ public interface FluentProperty<Value, Property> {
      * @return fluent
      */
     Fluent<Value> none(Matcher<? super Property>... matchers);
+    
+    /**
+     * Equivalent to calling {@link #_(org.hamcrest.Matcher) _(matcher)}
+     * with a matcher that succeeds when exactly {@code count} of 
+     * {@code matchers} succeed.
+     * @param count
+     * @param matchers
+     * @return fluent
+     */
+    Fluent<Value> matches(int count, Matcher<? super Property>... matchers);
+    
+    /**
+     * Equivalent to calling {@link #_(org.hamcrest.Matcher) _(matcher)}
+     * with a matcher that succeeds when the number of succeeding
+     * {@code matchers} is matched by {@code countMatcher}.
+     * @param countMatcher
+     * @param matchers
+     * @return fluent
+     */
+    Fluent<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers);
+    
+    /**
+     * Equivalent to calling {@link #_(org.hamcrest.Matcher) _(matcher)}
+     * with {@code chainType.create(matchers)}.
+     * @param chainType
+     * @param matchers
+     * @return fluent
+     */
+    Fluent<Value> matches(ChainFactory chainType, Matcher<? super Property>... matchers);
 
     /**
      * Returns a {@link FluentProperty} that uses the {@code adapter} to
@@ -270,6 +300,52 @@ public interface FluentProperty<Value, Property> {
          * @see #either(org.hamcrest.Matcher[])
          */
         Fluent<Value> nor(Matcher<? super Property> matcher);
+    }
+    
+    /**
+     * Returns a {@link MatchesSome} that expects 
+     * {@code count} matchers to succeed.
+     * @param count
+     * @return matches-some fluent
+     */
+    MatchesSome<Value, Property> matches(int count);
+    
+    /**
+     * Returns a {@link MatchesSome} that expects {@code countMatcher} 
+     * to accept the number of successful matchers.
+     * @param countMatcher
+     * @return matches-some fluent
+     */
+    MatchesSome<Value, Property> matches(Matcher<? super Integer> countMatcher);
+    
+    /**
+     * Returns a {@link MatchesSome} that combines and applies matchers
+     * using the {@code chainType}.
+     * @param chainType
+     * @return matches-some
+     */
+    MatchesSome<Value, Property> matches(ChainFactory chainType);
+    
+    /**
+     * Combines matchers with a chain factory and applies them against 
+     * the fluent it was created from.
+     * @param <Value> type of the actual value
+     * @param <Property> type of the property to be matched
+     * @see #matches(int) 
+     * @see #matches(org.hamcrest.Matcher) 
+     * @see #matches(org.cthul.matchers.chain.ChainFactory) 
+     */
+    interface MatchesSome<Value, Property> {
+        
+        /**
+         * Builds and applies the combined matchers.
+         * @param matchers
+         * @return fluent
+         * @see #matches(int) 
+         * @see #matches(org.hamcrest.Matcher)  
+         * @see #matches(org.cthul.matchers.chain.ChainFactory) 
+         */
+        Fluent<Value> of(Matcher<? super Property>... matchers);
     }
 
     /**
