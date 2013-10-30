@@ -7,7 +7,7 @@ import org.cthul.matchers.fluent.FluentTestBase;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.junit.Test;
-import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachObject;
+import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachItem;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -92,7 +92,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_success() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachObject()).isA(Integer.class)
+                ._(eachItem()).isA(Integer.class)
                         .that().is(lessThan(6))
                 .isNot(empty());
         apply();
@@ -103,7 +103,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_fail() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachObject()).isA(Integer.class)
+                ._(eachItem()).isA(Integer.class)
                         .that().is(lessThan(2))
                 .isNot(empty());
         apply();
