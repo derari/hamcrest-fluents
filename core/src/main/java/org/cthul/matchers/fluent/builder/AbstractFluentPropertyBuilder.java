@@ -1,17 +1,14 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
-import org.cthul.matchers.fluent.intern.FIs;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import org.cthul.matchers.CIs;
 import org.cthul.matchers.InstanceOf;
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.chain.NOrChainMatcher;
-import org.cthul.matchers.chain.OrChainMatcher;
-import org.cthul.matchers.chain.XOrChainMatcher;
+import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
+import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -72,7 +69,7 @@ public abstract class AbstractFluentPropertyBuilder
         return _match(IsEqual.equalTo(value));
     }
     
-    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter.adapt(matcher));
     }
     
@@ -227,12 +224,12 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter, matcher);
     }
 
     @Override
-    public <P> ThisFluent has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    public <P> ThisFluent has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         _has();
         return _match(adapter, matcher);
     }
@@ -376,7 +373,7 @@ public abstract class AbstractFluentPropertyBuilder
         }
         
         public Matcher<Object> that(Matcher<T> nested, String prefix, boolean not) {
-            nested = FIs.wrap(prefix, not, nested);
+            nested = CIs.wrap(prefix, not, nested);
             this.isA_that = isA.that(nested);
             return this;
         }

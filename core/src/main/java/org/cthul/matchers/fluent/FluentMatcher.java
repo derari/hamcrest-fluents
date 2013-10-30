@@ -220,13 +220,13 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
 
     /**
      * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
@@ -235,7 +235,7 @@ public interface FluentMatcher<Value, Match>
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * Equivalent to {@link #or() or()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
@@ -244,7 +244,7 @@ public interface FluentMatcher<Value, Match>
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * Equivalent to {@link #xor() xor()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
@@ -253,7 +253,7 @@ public interface FluentMatcher<Value, Match>
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
@@ -271,11 +271,11 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <Value2 extends Value> FluentMatcher<Value2, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
+    <Property extends Value> FluentMatcher<Value, Match> isA(Class<Property> clazz, Matcher<? super Property> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <Value2 extends Value> FluentPropertyMatcher.IsA<Value2, Value2, Match> isA(Class<Value2> clazz);
+    <Property extends Value> FluentPropertyMatcher.IsA<Value, Property, Match> isA(Class<Property> clazz);
 }

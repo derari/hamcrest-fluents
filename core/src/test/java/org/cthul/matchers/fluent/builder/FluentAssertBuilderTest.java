@@ -25,7 +25,7 @@ public class FluentAssertBuilderTest extends FluentBuilderTestBase {
         test_assertThat(3).is(equalTo(1));
         assertMismatch(
                 "value is <1>",
-                "but was <3>");
+                "but: was <3>");
     }
     
     @Test
@@ -33,7 +33,7 @@ public class FluentAssertBuilderTest extends FluentBuilderTestBase {
         test_assertThat(3).isNot(equalTo(3));
         assertMismatch(
                 "value is not <3>",
-                "but <3> was <3>");
+                "but: <3> was <3>");
     }
     
     @Test

@@ -141,13 +141,13 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}

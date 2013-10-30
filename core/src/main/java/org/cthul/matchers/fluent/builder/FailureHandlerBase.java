@@ -14,12 +14,12 @@ public abstract class FailureHandlerBase implements FailureHandler {
         } else {
 //            actual.describeTo(description).appendText("\n");
         }
-        description.appendText("Expected that ");
+        description.appendText("Expected: ");
         actual.describeValueType(description);
         description.appendText(" ");
         actual.matchResult().getMismatch().describeExpected(description);
         
-        description.appendText("\n     but ");
+        description.appendText("\n     but: ");
         actual.matchResult().getMismatch().describeMismatch(description);
         
         return description.toString();

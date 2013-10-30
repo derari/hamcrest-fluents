@@ -164,13 +164,13 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> _(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> _(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
@@ -179,7 +179,7 @@ public interface FluentAssert<Value>
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
 
     /**
      * {@inheritDoc}
@@ -200,13 +200,24 @@ public interface FluentAssert<Value>
     FluentPropertyAssert.Neither<Value, Value> neither(Matcher<? super Value>... matchers);
 
     /**
-     * {@inheritDoc}
+     * Adds a matcher to the fluent that matches only instances of {@code clazz}
+     * that are also matched by {@code matcher}, and changes the type of this
+     * fluent to {@code Value2}.
+     * @param <Value2> expected type
+     * @param clazz expected type
+     * @param matcher the matcher
+     * @return fluent
      */
     @Override
     <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
 
     /**
-     * {@inheritDoc}
+     * Immediately adds a matcher to the fluent that matches only 
+     * instances of {@code clazz}, and changes the type of this
+     * fluent to {@code Value2}.
+     * @param Property expected type
+     * @param clazz expected type
+     * @return isA fluent
      */
     @Override
     <Value2 extends Value> FluentPropertyAssert.IsA<Value2, Value2> isA(Class<Value2> clazz);

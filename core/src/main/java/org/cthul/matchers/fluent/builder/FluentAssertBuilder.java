@@ -2,11 +2,8 @@ package org.cthul.matchers.fluent.builder;
 
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
-import org.cthul.matchers.fluent.value.MatchValueAdapter;
-import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
-import org.cthul.matchers.fluent.value.ElementMatcher;
-import org.cthul.matchers.fluent.value.ElementMatcherWrapper;
+import org.cthul.matchers.fluent.value.*;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
@@ -40,8 +37,18 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
     
     @Factory
-    public static <V, T> FluentAssert<T> assertThat(MatchValueAdapter<V, T> adapter, V object) {
+    public static <V, T> FluentAssert<T> assertThat(MatchValueAdapter<? super V, T> adapter, V object) {
         return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+    }
+    
+    @Factory
+    public static <T> FluentAssert<T> assertThat(T object, Matcher<? super T> matcher) {
+        return assertThat(object)._(matcher);
+    }
+    
+    @Factory
+    public static <T, P> FluentAssert<T> assertThat(T object, MatchValueAdapter<? super T, P> adapter, Matcher<? super P> matcher) {
+        return assertThat(object)._(adapter, null);
     }
     
     private int matcherCounter = 0;
@@ -114,7 +121,7 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+    public <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher) {
         _and();
         return _match(adapter, matcher);
     }
