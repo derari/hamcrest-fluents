@@ -1,10 +1,10 @@
 package org.cthul.matchers.fluent.value;
 
+import org.cthul.matchers.CIs;
 import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultProxy;
 import org.cthul.matchers.diagnose.safe.TypesafeNestedResultMatcher;
-import org.cthul.matchers.CIs;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -12,7 +12,8 @@ import org.hamcrest.Matcher;
 /**
  *
  */
-public class ElementMatcherWrapper<Item> extends TypesafeNestedResultMatcher<Element<?>> 
+public class ElementMatcherWrapper<Item> 
+                extends TypesafeNestedResultMatcher<Element<?>> 
                 implements ElementMatcher<Item> {
     
     private final int index;

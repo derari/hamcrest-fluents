@@ -157,13 +157,13 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
 
     /**
      * {@inheritDoc}

@@ -1,9 +1,9 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.FluentMatcher;
-import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.CIs;
 import org.cthul.matchers.chain.ChainFactory;
+import org.cthul.matchers.fluent.FluentMatcher;
+import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 

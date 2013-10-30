@@ -1,11 +1,10 @@
 package org.cthul.matchers.fluent.lib;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
+import org.hamcrest.Description;
 import org.hamcrest.Factory;
 
 /**
@@ -30,6 +29,11 @@ public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
     
     @Factory
     public static <P> PropertyAdapter<P> get(String name, Class<P> clazz) {
+        return property(name);
+    }
+    
+    @Factory
+    public static PropertyAdapter<Boolean> getBoolean(String name) {
         return property(name);
     }
     
@@ -99,6 +103,24 @@ public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
     }
 
     @Override
+    protected boolean acceptValue(Object value) {
+        return getProperty(value.getClass()) != null;
+    }
+
+    @Override
+    protected void describeExpectedToAccept(Object value, Description description) {
+        description.appendText("a value with property '")
+                .appendText(name).appendText("'");
+    }
+
+    @Override
+    protected void describeMismatchOfUnaccapted(Object value, Description description) {
+        description.appendValue(value)
+                .appendText(" had no property '")
+                .appendText(name).appendText("'");
+    }
+
+    @Override
     protected Property adaptValue(Object v) {
         Object prop = getProperty(v.getClass());
         Object p;
@@ -108,7 +130,7 @@ public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
             } else if (prop instanceof Method) {
                 p = ((Method) prop).invoke(v);
             } else {
-                throw new RuntimeException(
+                throw new RuntimeException("Internal error: " +
                         v + " has no property '" + name + "'");
             }
         } catch (IllegalAccessException | InvocationTargetException e) {

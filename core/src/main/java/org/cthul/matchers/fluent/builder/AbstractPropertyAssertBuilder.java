@@ -1,9 +1,9 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.FluentAssert;
-import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.CIs;
 import org.cthul.matchers.chain.ChainFactory;
+import org.cthul.matchers.fluent.FluentAssert;
+import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -116,7 +116,7 @@ public abstract class AbstractPropertyAssertBuilder
             super(property, chainType);
         }
     }
-
+    
     @Override
     public <Property2 extends Property> FluentAssert<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return (FluentAssert) super.isA(clazz, matcher);
@@ -135,7 +135,7 @@ public abstract class AbstractPropertyAssertBuilder
     protected class AssertPropertyBuilder
                     <Property2, This2 extends AssertPropertyBuilder<Property2, This2>>
                     extends AbstractPropertyAssertBuilder<Value, Property2, ThisFluent, This2> 
-                    implements FluentPropertyAssert<Value, Property2> {
+                    /*implements FluentPropertyAssert<Value, Property2>*/ {
         
         private final MatchValueAdapter<? super Property, Property2> adapter;
         private final String flPrefix;

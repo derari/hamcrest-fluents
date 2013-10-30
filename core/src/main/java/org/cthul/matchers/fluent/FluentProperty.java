@@ -199,7 +199,7 @@ public interface FluentProperty<Value, Property> {
      * @param matcher the matcher
      * @return fluent
      */
-    <P> Fluent<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> Fluent<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
 
     /**
      * Equivalent to {@link #has() has()}{@link #_(Matcher) \u2024_(adapter.adapt(matcher)}.
@@ -208,7 +208,7 @@ public interface FluentProperty<Value, Property> {
      * @param matcher the matcher
      * @return property fluent
      */
-    <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
 
     /**
      * Returns a {@link Both} that applies the conjunction of 

@@ -1,22 +1,18 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.CIs;
 import java.util.ArrayList;
 import java.util.List;
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.chain.ChainFactory;
-import org.cthul.matchers.chain.OrChainMatcher;
-import org.cthul.matchers.chain.XOrChainMatcher;
+import org.cthul.matchers.CIs;
+import org.cthul.matchers.chain.*;
+import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
 import org.cthul.matchers.diagnose.nested.MatcherDescription;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
-import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
-import org.hamcrest.Description;
-import org.hamcrest.Factory;
-import org.hamcrest.Matcher;
+import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.hamcrest.*;
 
 /**
  *
@@ -156,30 +152,30 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+    public <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher) {
         _and();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+    public <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher) {
         _or();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher) {
+    public <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher) {
         _xor();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <Value2 extends Value> FluentMatcher<Value2, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
+    public <Value2 extends Value> FluentMatcher<Value, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
         return (FluentMatcher) super.isA(clazz, matcher);
     }
 
     @Override
-    public <Value2 extends Value> FluentPropertyMatcher.IsA<Value2, Value2, Match> isA(Class<Value2> clazz) {
+    public <Property extends Value> FluentPropertyMatcher.IsA<Value, Property, Match> isA(Class<Property> clazz) {
         return (FluentPropertyMatcher.IsA) super.isA(clazz);
     }
 
@@ -194,12 +190,8 @@ public class FluentMatcherBuilder
             if (description != null) {
                 m = new MatcherDescription<>(m, description);
             }
-            if (matchValueType instanceof IdentityValue 
-                    && m instanceof QuickDiagnosingMatcher) {
-                result = (QuickDiagnosingMatcher) m;
-            } else {
-                result = (QuickDiagnosingMatcher) matchValueType.adapt(m);
-            }
+            Matcher<Match> m2 = matchValueType.adapt(m);
+            result = QuickDiagnose.matcher(m2);
         }
         return result;
     }
