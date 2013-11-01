@@ -1,15 +1,14 @@
 package org.cthul.matchers.fluent;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
-import org.junit.Test;
 import org.hamcrest.Matcher;
+import org.junit.Test;
+import static org.cthul.matchers.CoreFluents.match;
+import static org.cthul.matchers.fluent.intern.CoreFluentsBase.*;
 import static org.hamcrest.Matchers.*;
-import static org.cthul.matchers.CoreFluents.*;
 
 /**
  *
@@ -77,6 +76,12 @@ public class ConceptTest {
         
         assertThat(list)
                 .has(size(), lessThan(10));
+        
+        Matcher<Object> empty_or_zero = match()
+                .isA(String.class).that(isEmptyString())
+                .or().isA(Integer.class).thatIs(equalTo(0));
+        assertThat(0)
+                .is(empty_or_zero);
         
 //        assertThat(sizeOf(), list)
 //                .is(lessThan(10));  

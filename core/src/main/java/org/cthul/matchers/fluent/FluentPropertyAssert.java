@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent;
 
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -117,6 +118,24 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
+    FluentAssert<Value> matches(int count, Matcher<? super Property>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    FluentAssert<Value> matches(ChainFactory chainType, Matcher<? super Property>... matchers);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Property, P> adapter);
 
     /**
@@ -141,13 +160,13 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher);
+    <P> FluentAssert<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
@@ -220,7 +239,43 @@ public interface FluentPropertyAssert<Value, Property>
         @Override
         FluentAssert<Value> nor(Matcher<? super Property> matcher);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Property> matches(int count);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Property> matches(Matcher<? super Integer> countMatcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Property> matches(ChainFactory chainType);
+    
+    /**
+     * Combines matchers with a chain factory and applies them against 
+     * the fluent it was created from.
+     * @param <Value> type of the actual value
+     * @param <Property> type of the property to be matched
+     * @see #matches(int) 
+     * @see #matches(org.hamcrest.Matcher) 
+     * @see #matches(org.cthul.matchers.chain.ChainFactory) 
+     */
+    interface MatchesSome<Value, Property> extends FluentProperty.MatchesSome<Value, Property> {
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        FluentAssert<Value> of(Matcher<? super Property>... matchers);
+    }
+    
     /**
      * {@inheritDoc}
      */

@@ -1,15 +1,10 @@
 package org.cthul.matchers.fluent.adapters;
 
-import org.cthul.matchers.diagnose.QuickDiagnose;
-import org.cthul.matchers.diagnose.nested.Nested;
-import org.cthul.matchers.diagnose.result.MatchResult;
-import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
-import org.cthul.matchers.fluent.value.MatchValue;
-import org.cthul.matchers.fluent.value.MatchValue.Element;
-import org.cthul.matchers.fluent.value.MatchValue.ElementMatcher;
-import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
+import org.cthul.matchers.fluent.value.*;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.hamcrest.SelfDescribing;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
@@ -40,10 +35,49 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
     
     protected abstract Property adaptValue(Value v);
     
+    protected boolean acceptValue(Value value) {
+        return true;
+    }
+
+    protected void describeExpectedToAccept(Value value, Description description) {
+        description.appendText("a valid ")
+                .appendText(valueType.getSimpleName());
+    }
+
+    protected void describeMismatchOfUnaccapted(Value value, Description description) {
+        description.appendText("was ").appendValue(value);
+    }
+    
     protected class ConvertedMatchValue<V extends Value> extends AbstractAdaptedValue<V, Property> {
 
         public ConvertedMatchValue(Class<?> valueType, MatchValue<V> actualValue) {
             super(valueType, actualValue);
+        }
+
+        @Override
+        protected boolean acceptValue(Object value) {
+            if (super.acceptValue(value)) {
+                return ConvertingAdapter.this.acceptValue((Value) value);
+            }
+            return false;
+        }
+
+        @Override
+        protected void describeExpectedToAccept(Object value, Description description) {
+            if (super.acceptValue(value)) {
+                ConvertingAdapter.this.describeExpectedToAccept((Value) value, description);
+            } else {
+                super.describeExpectedToAccept(value, description);
+            }
+        }
+
+        @Override
+        protected void describeMismatchOfUnaccapted(Object value, Description description) {
+            if (super.acceptValue(value)) {
+                ConvertingAdapter.this.describeMismatchOfUnaccapted((Value) value, description);
+            } else {
+                super.describeMismatchOfUnaccapted(value, description);
+            }
         }
 
         @Override
@@ -53,55 +87,47 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
         }
 
         @Override
-        protected boolean matchSafely(Element<V> element, ElementMatcher<Property> matcher) {
+        protected boolean matchSafely(Element<V> element, ElementMatcher<? super Property> matcher) {
             return matcher.matches(cachedItem(element));
         }
 
         @Override
         public void describeValue(Description description) {
-            ConvertingAdapter.this.describeValue(getActualValue(), description);
+            ConvertingAdapter.this.describeValue(getSourceValue(), description);
         }
 
         @Override
         public void describeValueType(Description description) {
-            ConvertingAdapter.this.describeValueType(getActualValue(), description);
+            ConvertingAdapter.this.describeValueType(getSourceValue(), description);
         }
 
         @Override
-        protected <I extends Element<V>> MatchResult<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<Property> matcher) {
-            final MatchResult<?> mr = QuickDiagnose.matchResult(matcher, cachedItem(element));
-            return new Nested.Result<I,Matcher<?>>(element, adaptedMatcher, mr.matched()) {
+        protected void describeProducer(SelfDescribing sd, Description d) {
+            ConvertingAdapter.this.describeProducer(sd, d);
+        }
+
+        @Override
+        protected void describeConsumer(SelfDescribing sd, Description d) {
+            ConvertingAdapter.this.describeConsumer(sd, d);
+        }
+
+        @Override
+        protected <I extends Element<V>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Property> matcher) {
+            final ElementMatcher.Result<?> mr = matcher.matchResult(cachedItem(element));
+            return new ResultBase<I>(element, adaptedMatcher, mr.matched()) {
                 @Override
                 public void describeMatch(Description d) {
                     mr.getMatch().describeMatch(d);
                 }
                 @Override
-                public void describeExpected(Description d) {
-                    mr.getMismatch().describeExpected(d);
+                public void describeExpected(ExpectationDescription description) {
+                    mr.getMismatch().describeExpected(description);
                 }
                 @Override
                 public void describeMismatch(Description d) {
                     mr.getMismatch().describeMismatch(d);
                 }
             };
-            
-        }
-
-        @Override
-        protected void describeMatchSafely(Element<V> element, ElementMatcher<Property> matcher, Description description) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Property> matcher, ExpectationDescription description) {
-            Element<Property> item = cachedItem(element);
-            ConvertingAdapter.this.describeExpected(element, item, matcher, description);
-        }
-
-        @Override
-        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Property> matcher, Description description) {
-            Element<Property> item = cachedItem(element);
-            ConvertingAdapter.this.describeMismatch(element, item, matcher, description);
         }
     }
     

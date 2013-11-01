@@ -1,6 +1,7 @@
 package org.cthul.matchers.fluent;
 
 import org.cthul.matchers.fluent.builder.*;
+import org.cthul.matchers.fluent.value.ElementMatcher;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
@@ -64,7 +65,7 @@ public class FluentTestBase {
     
     protected FailureHandler TEST_HANDLER = new FailureHandlerBase() {
         @Override
-        public <T> void mismatch(String reason, MatchValue<T> actual, MatchValue.ElementMatcher<T> matcher) {
+        public <T> void mismatch(String reason, MatchValue<T> actual, ElementMatcher<T> matcher) {
             if (!success) {
                 return;// don't override first mismatch
             }

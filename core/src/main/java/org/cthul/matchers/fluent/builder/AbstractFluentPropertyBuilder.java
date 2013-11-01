@@ -1,17 +1,14 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
-import org.cthul.matchers.fluent.intern.FIs;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import org.cthul.matchers.CIs;
 import org.cthul.matchers.InstanceOf;
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.chain.NOrChainMatcher;
-import org.cthul.matchers.chain.OrChainMatcher;
-import org.cthul.matchers.chain.XOrChainMatcher;
+import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
+import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -72,7 +69,7 @@ public abstract class AbstractFluentPropertyBuilder
         return _match(IsEqual.equalTo(value));
     }
     
-    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter.adapt(matcher));
     }
     
@@ -203,6 +200,21 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
+    public ThisFluent matches(int count, Matcher<? super Property>... matchers) {
+        return _match(SomeOfChainMatcher.matches(count, matchers));
+    }
+
+    @Override
+    public ThisFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
+        return _match(SomeOfChainMatcher.matches(countMatcher, matchers));
+    }
+
+    @Override
+    public ThisFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
+        return _match(chainType.create(matchers));
+    }
+
+    @Override
     public <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Property, P> adapter) {
         return _adapt(adapter);
     }
@@ -227,12 +239,12 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter, matcher);
     }
 
     @Override
-    public <P> ThisFluent has(MatchValueAdapter<? super Property, P> adapter, Matcher<P> matcher) {
+    public <P> ThisFluent has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         _has();
         return _match(adapter, matcher);
     }
@@ -309,6 +321,43 @@ public abstract class AbstractFluentPropertyBuilder
     }
     
     @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(int count);
+
+    @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(Matcher<? super Integer> countMatcher);
+
+    @Override
+    public abstract FluentProperty.MatchesSome<Value, Property> matches(ChainFactory chainType);
+    
+    protected static class MatchesSome<Value, Property,
+                            ThisFluent extends Fluent<Value>>
+                    implements FluentProperty.MatchesSome<Value, Property> {
+        
+        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final ChainFactory chainType;
+
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, int count) {
+            this.property = property;
+            this.chainType = SomeOfChainMatcher.factory(count);
+        }
+        
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Integer> countMatcher) {
+            this.property = property;
+            this.chainType = SomeOfChainMatcher.factory(countMatcher);
+        }
+        
+        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
+            this.property = property;
+            this.chainType = chainType;
+        }
+
+        @Override
+        public ThisFluent of(Matcher<? super Property>... matchers) {
+            return property._(chainType.create(matchers));
+        }
+    }
+    
+    @Override
     public <Property2 extends Property> Fluent<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return _match(InstanceOf.isA(clazz).that(matcher));
     }
@@ -376,7 +425,7 @@ public abstract class AbstractFluentPropertyBuilder
         }
         
         public Matcher<Object> that(Matcher<T> nested, String prefix, boolean not) {
-            nested = FIs.wrap(prefix, not, nested);
+            nested = CIs.wrap(prefix, not, nested);
             this.isA_that = isA.that(nested);
             return this;
         }
@@ -416,7 +465,6 @@ public abstract class AbstractFluentPropertyBuilder
                 description.appendText("is ");
                 isA.describeTo(description);
             }
-        }
-        
+        }       
     }
 }

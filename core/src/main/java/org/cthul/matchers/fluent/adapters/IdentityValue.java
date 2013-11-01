@@ -2,6 +2,7 @@ package org.cthul.matchers.fluent.adapters;
 
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 
 /**
  *
@@ -26,6 +27,12 @@ public class IdentityValue<Value> extends ConvertingAdapter<Value, Value> {
     public MatchValue<Value> adapt(MatchValue<? extends Value> value) {
         // shortcut, this adapter adds nothing
         return (MatchValue) value;
+    }
+
+    @Override
+    public Matcher<Value> adapt(Matcher<? super Value> matcher) {
+        // shortcut, this adapter adds nothing
+        return (Matcher) matcher;
     }
 
     @Override

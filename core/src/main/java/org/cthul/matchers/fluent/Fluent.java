@@ -1,5 +1,6 @@
 package org.cthul.matchers.fluent;
 
+import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -130,6 +131,27 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     
     /**
      * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(int count, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    Fluent<Value> matches(ChainFactory chainType, Matcher<? super Value>... matchers);
+    
+    /**
+     * {@inheritDoc}
      */
     @Override
     <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Value, P> adapter);
@@ -157,14 +179,14 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      * @return this
      */
     @Override
-    <P> Fluent<Value> _(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> Fluent<Value> _(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
      * @return this
      */
     @Override
-    <P> Fluent<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<P> matcher);
+    <P> Fluent<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
@@ -173,25 +195,38 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     Both<Value, Value> both(Matcher<? super Value> matcher);
     
     /**
-     * Adds a matcher to the fluent that matches only instances of {@code clazz}
-     * that are also matched by {@code matcher}, and changes the type of this
-     * fluent to {@code Value2}.
-     * @param <Value2> expected type
-     * @param clazz expected type
-     * @param matcher the matcher
-     * @return fluent
+     * {@inheritDoc}
      */
     @Override
-    <Value2 extends Value> Fluent<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
+    Either<Value, Value> either(Matcher<? super Value>... matchers);
     
     /**
-     * Immediately adds a matcher to the fluent that matches only 
-     * instances of {@code clazz}, and changes the type of this
-     * fluent to {@code Value2}.
-     * @param <Value2> expected type
-     * @param clazz expected type
-     * @return isA fluent
+     * {@inheritDoc}
      */
     @Override
-    <Value2 extends Value> FluentProperty.IsA<Value2, Value2> isA(Class<Value2> clazz);
+    MatchesSome<Value, Value> matches(int count);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Value> matches(Matcher<? super Integer> countMatcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MatchesSome<Value, Value> matches(ChainFactory chainType);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <Property extends Value> Fluent<? extends Value> isA(Class<Property> clazz, Matcher<? super Property> matcher);
+        
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <Property extends Value> FluentProperty.IsA<? extends Value, Property> isA(Class<Property> clazz);
 }

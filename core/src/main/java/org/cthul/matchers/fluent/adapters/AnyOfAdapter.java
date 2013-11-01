@@ -58,7 +58,7 @@ public class AnyOfAdapter<Item> extends
     }
     
     @Factory
-    public static AnyOfAdapter<Object> anyObject() {
+    public static AnyOfAdapter<Object> anyItem() {
         return any();
     }
     

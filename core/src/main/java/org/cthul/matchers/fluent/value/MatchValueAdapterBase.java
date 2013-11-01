@@ -4,42 +4,83 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.diagnose.QuickDiagnose;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
+import org.cthul.matchers.diagnose.result.MatchResultProxy;
+import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.proc.Proc;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
+import org.hamcrest.core.IsAnything;
 
 /**
- *
+ * Default superclass for {@link MatchValueAdapter}.
+ * Provides default implementations for all methods 
+ * that do not implement specific logic 
+ * (see also {@link AbstractMatchValueAdapter}).
+ * <p>
+ * All implementations should extend this class for forward compatibility.
  */
 public abstract class MatchValueAdapterBase<Value, Property> 
                 extends SelfDescribingBase
                 implements MatchValueAdapter<Value, Property> {
 
+    /**
+     * {@inheritDoc}
+     * @see CombinedMatchValueAdapter
+     */
     @Override
     public <Value0> MatchValueAdapter<Value0, Property> adapt(MatchValueAdapter<Value0, ? extends Value> adapter) {
         return new CombinedMatchValueAdapter<>(adapter, this);
     }
 
+    /**
+     * {@inheritDoc}
+     * @see AdaptingMatcher
+     */
     @Override
     public Matcher<Value> adapt(Matcher<? super Property> matcher) {
         return new AdaptingMatcher<>(this, matcher);
     }
+
+    /**
+     * Delegates to {@link #adapt(MatchValue)}.
+     * @see SingleElementValue 
+     */
+    @Override
+    public MatchValue<Property> adapt(Object value) {
+        return adapt(new SingleElementValue<Value>(value));
+    }
     
+    /**
+     * Calls {@link #adapt(MatchValueAdapter) adapter.adapt(this)}.
+     */
     @Override
     public <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter) {
         return adapter.adapt(this);
     }
     
+    /**
+     * Indicates whether this adapter's description should be included when
+     * describing match values or match messages.
+     * @return whether this adapter has a description
+     */
     protected boolean hasDescription() {
         return true;
     }
 
-    @Override
-    public void describeConsumer(SelfDescribing consumer, Description description) {
+    /**
+     * Describes this adapter as a producer to {@code consumer}.
+     * <p>
+     * By default, if this adapter {@linkplain  #hasDescription() has a description},
+     * it is written to {@code description} first.
+     * @param consumer
+     * @param description 
+     */
+    protected void describeConsumer(SelfDescribing consumer, Description description) {
         if (hasDescription()) {
             description.appendDescriptionOf(this)
                        .appendText(" ");
@@ -47,8 +88,15 @@ public abstract class MatchValueAdapterBase<Value, Property>
         description.appendDescriptionOf(consumer);
     }
 
-    @Override
-    public void describeProducer(SelfDescribing producer, Description description) {
+    /**
+     * Describes this adapter as a consumer of {@code producer}.
+     * <p>
+     * By default, if this adapter {@linkplain  #hasDescription() has a description},
+     * it is written to {@code description} first, followed by {@code " of "}.
+     * @param producer
+     * @param description 
+     */
+    protected void describeProducer(SelfDescribing producer, Description description) {
         if (hasDescription()) {
             description.appendDescriptionOf(this)
                        .appendText(" of ");
@@ -56,12 +104,18 @@ public abstract class MatchValueAdapterBase<Value, Property>
         description.appendDescriptionOf(producer);
     }
     
+    /**
+     * Adapts values with two 
+     * @param <Value>
+     * @param <Tmp>
+     * @param <Property> 
+     */
     protected static class CombinedMatchValueAdapter<Value, Tmp, Property> extends MatchValueAdapterBase<Value, Property> {
         
         private final MatchValueAdapter<Value, ? extends Tmp> mva1;
-        private final MatchValueAdapter<Tmp, Property> mva2;
+        private final MatchValueAdapterBase<Tmp, Property> mva2;
 
-        public CombinedMatchValueAdapter(MatchValueAdapter<Value, ? extends Tmp> mva1, MatchValueAdapter<Tmp, Property> mva2) {
+        public CombinedMatchValueAdapter(MatchValueAdapter<Value, ? extends Tmp> mva1, MatchValueAdapterBase<Tmp, Property> mva2) {
             this.mva1 = mva1;
             this.mva2 = mva2;
         }
@@ -78,42 +132,28 @@ public abstract class MatchValueAdapterBase<Value, Property>
 
         @Override
         public void describeTo(Description description) {
-            description.appendDescriptionOf(mva1)
-                    .appendText(" ")
-                    .appendDescriptionOf(mva2);
+            mva2.describeProducer(mva1, description);
         }
-
-        @Override
-        public void describeProducer(final SelfDescribing producer, Description description) {
-            SelfDescribing producerDescriptor = new SelfDescribingBase() {
-                @Override
-                public void describeTo(Description description) {
-                    mva1.describeProducer(producer, description);
-                }
-            };
-            mva2.describeProducer(producerDescriptor, description);
-        }
-
-        @Override
-        public void describeConsumer(final SelfDescribing consumer, Description description) {
-            SelfDescribing consumerDescriptor = new SelfDescribingBase() {
-                @Override
-                public void describeTo(Description description) {
-                    mva2.describeProducer(consumer, description);
-                }
-            };
-            mva1.describeProducer(consumerDescriptor, description);
-        }        
     }
     
+    /**
+     * A match value that has a single, plain element.
+     * <p>
+     * If you feel you need to directly create an instance of this class,
+     * use {@link IdentityValue#value(java.lang.Object)}.
+     * @param <Value> 
+     */
     protected static class SingleElementValue<Value> 
                     extends MatchValueBase<Value>
-                    implements MatchValue.Element<Object> {
+                    implements Element<Object> {
 
+        private static final ElementMatcher<Object> ANYTHING = new ElementMatcherWrapper<>(-1, IsAnything.anything("anything"));
+        
         private final Object value;
-        private MatchValue.ElementMatcher<Value> failed = null;
-        private MatchValue.ElementMatcher<Value> last = null;
-        private MatchResult<?> result = null;
+        private boolean valid = true;
+        private ElementMatcher<? super Value> last = ANYTHING;
+        private ElementMatcher.Result<?> internResult = null;
+        private Result matchResult = null;
         private String valueType = null;
 
         public SingleElementValue(Object value) {
@@ -121,35 +161,20 @@ public abstract class MatchValueAdapterBase<Value, Property>
         }
 
         @Override
-        public boolean matches(MatchValue.ElementMatcher<Value> matcher) {
-            super.matches(matcher);
-            if (failed != null) return false;
-            result = null;
+        public boolean matches(ElementMatcher<? super Value> matcher) {
+            if (!valid) return false;
+            last = matcher;
+            internResult = null;
             if (matcher.matches(this)) {
-                last = matcher;
                 return true;
             }
-            last = null;
-            failed = matcher;
+            valid = false;
             return false;
-        }
-        
-        private MatchResult<?> result() {
-            if (result == null) {
-                if (failed != null) {
-                    result = QuickDiagnose.matchResult(failed, this);
-                } else if (last != null) {
-                    result = QuickDiagnose.matchResult(last, this);
-                } else {
-                    result = AndChainMatcher.all().matchResult(this);
-                }
-            }
-            return result;
         }
         
         @Override
         public boolean matched() {
-            return failed == null;
+            return valid;
         }
 
         @Override
@@ -189,24 +214,135 @@ public abstract class MatchValueAdapterBase<Value, Property>
            return "value";
         }
 
+        private ElementMatcher.Result<?> result() {
+            if (internResult == null) {
+                internResult = last.matchResult(this);
+            }
+            return internResult;
+        }
+        
         @Override
-        public void describeMatch(Description d) {
-            result().getMatch().describeMatch(d);
+        public MatchResult<?> matchResult() {
+            if (matchResult == null) {
+                matchResult = new Result();
+            }
+            return matchResult;
         }
 
-        @Override
-        public void describeExpected(MatchValue.ExpectationDescription description) {
-            result().getMismatch().describeExpected(description);
-        }
-
-        @Override
-        public void describeMismatch(Description description) {
-            result().getMismatch().describeMismatch(description);
-        }
-
+        /**
+         * Implements the {@link Element} interface.
+         * @return element value
+         */
         @Override
         public Object value() {
             return value;
+        }
+        
+        /**
+         * MatchResult describing the current state.
+         * <p>
+         * Most calls are directly delegated to {@link SingleElementValue#result()}.
+         */
+        protected class Result extends MatchResultProxy<Value, Matcher<?>> {
+
+            public Result() {
+                super(null);
+            }
+
+            @Override
+            public Value getValue() {
+                return (Value) value;
+            }
+
+            @Override
+            public boolean matched() {
+                return SingleElementValue.this.matched();
+            }
+
+            @Override
+            protected ElementMatcher.Result<?> result() {
+                return SingleElementValue.this.result();
+            }
+
+            @Override
+            protected ElementMatcher.Mismatch<?> mismatch() {
+                return (ElementMatcher.Mismatch<?>) super.mismatch();
+            }
+
+            /**
+             * Fills an {@link ExpectationDescription} and 
+             * writes it to {@code description}
+             * @param description 
+             */
+            @Override
+            public void describeExpected(Description description) {
+//                if (description instanceof ExpectationDescription) {
+//                    mismatch().describeExpected((ExpectationDescription) description);
+//                } else {
+                    ExpectationStringDescription ex = new ExpectationStringDescription();
+                    mismatch().describeExpected(ex);
+                    ex.describeTo(description);
+//                }
+            }
+        }
+    }
+    
+    protected static class AdaptingMatcher<Value, Property> extends NestedResultMatcher<Value> {
+
+        private final ElementMatcherWrapper<Property> matcher;
+        private final MatchValueAdapterBase<Value, Property> adapter;
+
+        public AdaptingMatcher(MatchValueAdapterBase<Value, Property> adapter, Matcher<? super Property> matcher, String prefix, boolean not) {
+            this.adapter = adapter;
+            this.matcher = new ElementMatcherWrapper<>(-1, matcher, prefix, not);
+        }
+
+        public AdaptingMatcher(MatchValueAdapterBase<Value, Property> adapter, Matcher<? super Property> matcher) {
+            this.adapter = adapter;
+            this.matcher = new ElementMatcherWrapper<>(-1, matcher);
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            adapter.describeConsumer(matcher, description);
+        }
+
+        @Override
+        public int getDescriptionPrecedence() {
+            return Nested.precedenceOf(matcher);
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            return adapter.adapt(item).matches(matcher);
+        }
+
+        @Override
+        public <I> MatchResult<I> matchResult(I item) {
+            MatchResult<?> mr = adapter.adapt(item).matchResult(matcher);
+            return new AdaptedResult<>(mr, item);
+        }
+        
+        class AdaptedResult<I> extends MatchResultProxy<I, AdaptingMatcher<?, ?>> {
+
+            public AdaptedResult(MatchResult<?> result, I value) {
+                super(result, value, AdaptingMatcher.this);
+            }
+
+            @Override
+            public void describeMatch(Description description) {
+                adapter.describeConsumer(match().getMatchDescription(), description);
+            }
+
+            @Override
+            public void describeExpected(Description description) {
+                adapter.describeConsumer(mismatch().getExpectedDescription(), description);
+            }
+
+            @Override
+            public void describeMismatch(Description description) {
+                adapter.describeConsumer(mismatch().getMismatchDescription(), description);
+            }
         }
     }
 }

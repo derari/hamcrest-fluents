@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentTestBase;
-import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachObject;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.junit.Test;
+import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachItem;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -63,7 +63,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_fluent_isA_success() {
         fluent((Object) 3)
                 .isA(Integer.class)
-                .is(lessThan(5));
+                .thatIs(lessThan(5));
         apply();
         assertSuccess();
     }
@@ -72,17 +72,17 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_fluent_isA_type_fail() {
         fluent((Object) "")
                 .isA(Integer.class)
-                .is(lessThan(5));
+                .thatIs(lessThan(5));
         apply();
         assertMismatch("is an instance of java.lang.Integer",
-                       "but \"\" is a java.lang.String");
+                       "but: \"\" is a java.lang.String");
     }
     
     @Test
     public void test_fluent_isA_value_fail() {
         fluent((Object) 3)
                 .isA(Integer.class)
-                .is(lessThan(2));
+                .thatIs(lessThan(2));
         apply();
         assertMismatch("is a value less than <2>",
                        "was greater than <2>");
@@ -92,7 +92,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_success() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachObject()).isA(Integer.class)
+                ._(eachItem()).isA(Integer.class)
                         .that().is(lessThan(6))
                 .isNot(empty());
         apply();
@@ -103,7 +103,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_fail() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachObject()).isA(Integer.class)
+                ._(eachItem()).isA(Integer.class)
                         .that().is(lessThan(2))
                 .isNot(empty());
         apply();

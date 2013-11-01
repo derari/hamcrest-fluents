@@ -3,6 +3,8 @@ package org.cthul.matchers.fluent.value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
@@ -10,13 +12,16 @@ import org.hamcrest.StringDescription;
 /**
  *
  */
-public class Expectation 
+public class ExpectationStringDescription 
                 extends SelfDescribingBase
-                implements MatchValue.ExpectationDescription {
+                implements ExpectationDescription {
     
     private ArrayList<SelfDescribing> sorted = null;
     private ArrayList<SelfDescribing> unsorted = null;
     private StringDescription current = null;
+
+    public ExpectationStringDescription() {
+    }
 
     protected StringDescription current() {
         if (current == null) {
@@ -100,12 +105,9 @@ public class Expectation
         if (source != null) {
             for (SelfDescribing s: source) {
                 if (s != null) {
-                    StringDescription sd = new StringDescription();
-                    sd.appendDescriptionOf(s);
-                    target.add(sd.toString());
+                    target.add(StringDescription.toString(s));
                 }
             }
         }
     }
-    
 }

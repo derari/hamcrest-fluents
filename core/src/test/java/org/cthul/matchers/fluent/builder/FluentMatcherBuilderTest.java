@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentMatcher;
-import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachObject;
+import static org.cthul.matchers.fluent.adapters.EachOfAdapter.eachItem;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.junit.Test;
 import static org.hamcrest.Matchers.*;
@@ -39,7 +39,7 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
     public void test_property_isA_message() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachObject()).isA(Integer.class)
+                ._(eachItem()).isA(Integer.class)
                         .that().is(lessThan(2))
                 .isNot(empty());
         apply();

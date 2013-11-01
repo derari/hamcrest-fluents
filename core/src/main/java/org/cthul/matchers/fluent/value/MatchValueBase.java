@@ -1,64 +1,66 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.chain.AndChainMatcher;
-import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 /**
- *
+ * Default superclass for {@link MatchValue}.
+ * Provides default implementations for all methods 
+ * that do not implement specific logic.
+ * <p>
+ * All implementations should extend this class for forward compatibility.
  */
 public abstract class MatchValueBase<Value> 
-                extends Nested.Result<MatchValue<Value>, Matcher<?>>
-                implements MatchValue<Value>, MatchValue.Mismatch<Value> {
+                extends SelfDescribingBase 
+                implements MatchValue<Value> {
     
-    private final AndChainMatcher.Builder<Element<Value>> allMatchers = new AndChainMatcher.Builder<>();
-
     public MatchValueBase() {
-        super(null, null);
     }
 
+    /**
+     * Calls {@link #matches(org.hamcrest.Matcher)} with an
+     * {@link ElementMatcherWrapper}.
+     */
     @Override
-    public boolean matches(ElementMatcher<Value> matcher) {
-        allMatchers.and(matcher);
-        return true;
+    public boolean matches(Matcher<? super Value> matcher) {
+        return matches(new ElementMatcherWrapper<>(-1, matcher));
     }
 
+    /**
+     * Calls {@link #matches(org.hamcrest.Matcher)} and returns the result of
+     * {@link #matchResult()}.
+     */
     @Override
-    public MatchValue<Value> matchResult(ElementMatcher<Value> matcher) {
+    public MatchResult<?> matchResult(Matcher<? super Value> matcher) {
         matches(matcher);
-        return this;
-    }
-    
-    protected Matcher<?> tmpMatcher() {
-        return allMatchers;
+        return matchResult();
     }
 
+    /**
+     * Calls {@link #matches(ElementMatcher)} and returns the result of
+     * {@link #matchResult()}.
+     */
     @Override
-    public MatchValue<Value> getValue() {
-        return this;
+    public MatchResult<?> matchResult(ElementMatcher<? super Value> matcher) {
+        matches(matcher);
+        return matchResult();
     }
 
-    @Override
-    public Matcher<?> getMatcher() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MatchValue.Mismatch<Value> getMismatch() {
-        return matched() ? null : this;
-    }
-
-    @Override
-    public void describeExpected(Description d) {
-        Expectation e = new Expectation();
-        describeExpected(e);
-        d.appendDescriptionOf(e);
-    }
-
+    /**
+     * Calls {@link MatchValueAdapter#adapt(MatchValue) adapter.adapt(this)}.
+     */
     @Override
     public <Property> MatchValue<Property> get(MatchValueAdapter<? super Value, Property> adapter) {
         return adapter.adapt(this);
     }
 
+    /**
+     * Calls {@link #describeValue(org.hamcrest.Description)}
+     */
+    @Override
+    public void describeTo(Description description) {
+        describeValue(description);
+    }
 }

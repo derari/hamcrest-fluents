@@ -1,16 +1,25 @@
 package org.cthul.matchers.fluent.value;
 
-import org.hamcrest.Description;
+import org.cthul.matchers.fluent.adapters.SimpleAdapter;
+import org.cthul.matchers.fluent.adapters.SimpleAnyOfAdapter;
+import org.cthul.matchers.fluent.adapters.SimpleEachOfAdapter;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
 /**
- * Creates {@link MatchValue} from a plain value.
+ * Creates {@link MatchValue}s from plain values.
  * <p>
  * A MatchValueAdapter represents an aspect of some type, 
  * like the length of strings or each element of lists.
  * It can then be used to create {@link MatchValue}s that represent
  * this aspect of a concrete value.
+ * <p>
+ * Every implementation should extend {@link MatchValueAdapterBase} for
+ * forward compatibility, but there are other abstract implementations which
+ * might be better starting points.
+ * @see SimpleAdapter
+ * @see SimpleAnyOfAdapter
+ * @see SimpleEachOfAdapter
  */
 public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
     
@@ -53,19 +62,5 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * @return match value adapter
      */
     <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter);
-    
-    /**
-     * Describes a producer that will have its output adapted by this adapter.
-     * @param producer producer to be described
-     * @param description description to append to
-     */
-    void describeProducer(SelfDescribing producer, Description description);
-    
-    /**
-     * Describes a consumer that will receive the output of this adapter.
-     * @param consumer consumer to be described
-     * @param description description to append to
-     */
-    void describeConsumer(SelfDescribing consumer, Description description);
     
 }

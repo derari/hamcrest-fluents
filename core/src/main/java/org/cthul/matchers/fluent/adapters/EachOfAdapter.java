@@ -58,7 +58,7 @@ public class EachOfAdapter<Item> extends
     }
     
     @Factory
-    public static EachOfAdapter<Object> eachObject() {
+    public static EachOfAdapter<Object> eachItem() {
         return each();
     }
     

@@ -1,105 +1,70 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.diagnose.QuickDiagnose;
-import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
-import org.cthul.matchers.diagnose.safe.TypesafeNestedResultMatcher;
-import org.cthul.matchers.diagnose.safe.TypesafeQuickResultMatcherBase;
-import org.cthul.matchers.fluent.intern.FIs;
-import org.cthul.matchers.fluent.value.MatchValue.Element;
-import org.cthul.matchers.fluent.value.MatchValue.ExpectationDescription;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.SelfDescribing;
 
 /**
- *
+ * A Hamcrest Matcher that accepts {@link Element}s of a type.
+ * <p>
+ * The matcher accepts any type of element, 
+ * the value type has to be checked explicitly.
+ * @param <Value> value type
+ * @see org.cthul.matchers.fluent.value.ElementMatcher
  */
-public class ElementMatcher<Item> extends TypesafeNestedResultMatcher<Element<?>> 
-                implements MatchValue.ElementMatcher<Item> {
+public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMatcher.Element<?>> {
+
+    @Override
+    <I> Result<I> matchResult(I item);
     
-    private final int index;
-    private final Matcher<? super Item> matcher;
-
-    public ElementMatcher(int index, Matcher<? super Item> matcher, String prefix, boolean not) {
-        this(index, FIs.wrap(prefix, not, matcher));
-    }
-    
-    public ElementMatcher(int index, Matcher<? super Item> matcher) {
-        super(Element.class);
-        this.index = index;
-        this.matcher = matcher;
-    }
-
-    @Override
-    public int getDescriptionPrecedence() {
-        return Nested.precedenceOf(matcher);
-    }
-
-    @Override
-    public int getMismatchPrecedence() {
-        return Nested.mismatchPrecedenceOf(matcher);
-    }
-
-    @Override
-    protected boolean matchesSafely(Element<?> item) {
-        return matcher.matches(item.value());
-    }
-
-    @Override
-    public void describeTo(Description description) {
-        matcher.describeTo(description);
-    }
-
-    @Override
-    public void describeExpected(Element<?> e, ExpectationDescription description) {
-        description.addExpected(index, this);
-    }
-
-    @Override
-    protected void describeMismatchSafely(Element<?> item, Description mismatchDescription) {
-        matcher.describeMismatch(item.value(), mismatchDescription);
-    }
-
-    @Override
-    protected <I extends Element<?>> MatchResult<I> matchResultSafely(I item) {
-        final MatchResult<?> result = quickMatchResult(matcher, item.value());
-        return new NestedResult<I, ElementMatcher<?>>(item, this, result.matched()) {
-            @Override
-            public int getMatchPrecedence() {
-                return result.getMatch().getMatchPrecedence();
-            }
-            @Override
-            public void describeMatch(Description d) {
-                result.getMatch().describeMatch(d);
-            }
-            @Override
-            public int getExpectedPrecedence() {
-                return result.getMismatch().getExpectedPrecedence();
-            }
-            @Override
-            public void describeExpected(Description d) {
-                if (d instanceof ExpectationDescription) {
-                    ExpectationDescription ex = (ExpectationDescription) d;
-                    ex.addExpected(index, result.getMismatch().getExpectedDescription());
-                } else {
-                    throw new IllegalArgumentException("Expected ExpectationDescription, got " + d);
-                    //super.describeExpected(d);
-                }
-            }
-            @Override
-            public int getMismatchPrecedence() {
-                return result.getMismatch().getMismatchPrecedence();
-            }
-            @Override
-            public void describeMismatch(Description d) {
-                result.getMismatch().describeMismatch(d);
-            }
-        };
+    /**
+     * A single element.
+     * <p>
+     * If two elements are equal, they represent the same underlying value.
+     * @param <Value> value type
+     */
+    interface Element<Value> {
+        
+        Value value();
     }
     
-    public Matcher<? super Item> getActualMatcher() {
-        return matcher;
+    /**
+     * A {@code MatchResult} that provides a specialized {@link Mismatch}.
+     * @param <Value> 
+     */
+    interface Result<Value> extends MatchResult<Value> {
+        
+        @Override
+        ElementMatcher.Mismatch<Value> getMismatch();
     }
     
+    /**
+     * A {@link MatchResult.Mismatch} that can fill an {@link ExpectationDescription}.
+     * @param <Value> 
+     */
+    interface Mismatch<Value> extends Result<Value>, MatchResult.Mismatch<Value> {
+        
+        /**
+         * Describes what was expected of the value.
+         * @param description 
+         */
+        void describeExpected(ExpectationDescription description);
+    }
+    
+    /**
+     * A description that consists of multiple expectation descriptions,
+     * which will be combined for the end result.
+     * Can be expected to remove duplicates.
+     */
+    interface ExpectationDescription extends Description {
+        
+        /**
+         * Adds an expectation. The index sets the order in which it will be
+         * written to the result. {@code -1} will append to the beginning.
+         * @param index
+         * @param expected 
+         */
+        void addExpected(int index, SelfDescribing expected);
+    }
 }
