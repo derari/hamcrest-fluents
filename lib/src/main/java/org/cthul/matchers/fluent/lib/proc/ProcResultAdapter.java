@@ -1,10 +1,12 @@
-package org.cthul.matchers.fluent.lib;
+package org.cthul.matchers.fluent.lib.proc;
 
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
+import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.proc.Proc;
 import org.cthul.proc.Procs;
 import org.hamcrest.Description;
+import org.hamcrest.Factory;
 
 /**
  *
@@ -13,31 +15,46 @@ public class ProcResultAdapter<T> extends SimpleAdapter<Proc, T> {
     
     private static final ProcResultAdapter INSTANCE = new ProcResultAdapter();
     
+    @Factory
     public static <T> ProcResultAdapter<T> result() {
         return INSTANCE;
     }
     
+    @Factory
     public static <T> MatchValue<T> resultOf(Proc proc) {
         return INSTANCE.adapt(proc);
     }
     
+    @Factory
+    public static <T> MatchValue<T> resultOf(MatchValue<? extends Proc> proc) {
+        return INSTANCE.adapt(proc);
+    }
+    
+    public static <V, T> MatchValueAdapter<V, T> resultOf(MatchValueAdapter<V, ? extends Proc> proc) {
+        return INSTANCE.adapt(proc);
+    }
+    
+    @Factory
     public static <T> MatchValue<T> resultOf(Proc proc, Object... args) {
         return resultOf(proc.call(args));
     }
     
+    @Factory
     public static <T> MatchValue<T> resultOf(Object instance, String method, Object... args) {
-        return resultOf(Procs.invoke(instance, method, args));
+        return resultOf(Procs.invokeWith(instance, method, args));
     }
     
+    @Factory
     public static <T> MatchValue<T> resultOf(Class<?> clazz, String method, Object... args) {
-        return resultOf(Procs.invoke(clazz, method, args));
+        return resultOf(Procs.invokeWith(clazz, method, args));
     }
 
+    @Factory
     public static <T> MatchValue<T> resultOf(String method, Object... args) {
         return resultOf(detectClass(1), method, args);
     }
     
-    private static Class detectClass(int i) {
+    static Class detectClass(int i) {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         // 0: getStackTrace
         // 1: detectClass

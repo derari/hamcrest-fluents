@@ -80,7 +80,7 @@
         <profile>
             <id>gen-matcher</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -124,7 +124,7 @@
                                 <configuration>
                                     <target>
                                         <mkdir dir="${generated-matcher-dir}"/>
-                                        <copy file="${project.build.sourceDirectory}/../hamcrest/CoreFluents.java" todir="${generated-matcher-dir}/org/cthul/matchers"/>
+                                        <copy file="${project.build.sourceDirectory}/../hamcrest/Fluents.java" todir="${generated-matcher-dir}/org/cthul/matchers"/>
                                     </target>
                                 </configuration>
                             </execution>
@@ -145,9 +145,9 @@
                                     <mainClass>org.hamcrest.generator.config.XmlConfigurator</mainClass>
                                     <includePluginDependencies>true</includePluginDependencies>
                                     <arguments>
-                                        <argument>${project.build.sourceDirectory}/../hamcrest/CoreFluents.xml</argument>
+                                        <argument>${project.build.sourceDirectory}/../hamcrest/Fluents.xml</argument>
                                         <argument>${project.build.sourceDirectory}</argument>
-                                        <argument>org.cthul.matchers.CoreFluentsBase</argument>
+                                        <argument>org.cthul.matchers.intern.FluentsBase</argument>
                                         <argument>${generated-matcher-dir}</argument>
                                     </arguments>
                                     <sourceRoot>${generated-matcher-dir}</sourceRoot>

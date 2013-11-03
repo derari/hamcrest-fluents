@@ -1,4 +1,4 @@
-package org.cthul.matchers.fluent.lib;
+package org.cthul.matchers.fluent.lib.collection;
 
 import java.util.Map;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;

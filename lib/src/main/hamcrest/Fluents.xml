@@ -1,0 +1,22 @@
+<matchers>
+
+    <factory class="org.cthul.matchers.fluent.builder.FluentAssertBuilder"/>
+    <!--<factory class="org.cthul.matchers.fluent.builder.FluentMatcherBuilder"/>-->
+    
+    <factory class="org.cthul.matchers.fluent.adapters.EachOfAdapter"/>
+    <factory class="org.cthul.matchers.fluent.adapters.AnyOfAdapter"/>
+    <factory class="org.cthul.matchers.fluent.adapters.IdentityValue"/>
+    
+    <factory class="org.cthul.matchers.fluent.lib.collection.ArraySizeAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.collection.IterableSizeAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.collection.MapValueAdapter"/>
+    
+    <factory class="org.cthul.matchers.fluent.lib.object.PropertyAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.object.ThrowableAnyCauseAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.object.ThrowableCauseAdapter"/>
+    
+    <factory class="org.cthul.matchers.fluent.lib.proc.ProcCallAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.proc.ProcFailureAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.proc.ProcResultAdapter"/>
+
+</matchers>

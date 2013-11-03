@@ -1,4 +1,4 @@
-package org.cthul.matchers.fluent.lib;
+package org.cthul.matchers.fluent.lib.collection;
 
 import java.util.*;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
@@ -8,7 +8,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import static org.cthul.matchers.CoreFluents.match;
 import static org.cthul.matchers.fluent.intern.CoreFluentsBase.*;
-import static org.cthul.matchers.fluent.lib.MapValueAdapter.*;
+import static org.cthul.matchers.fluent.lib.collection.MapValueAdapter.*;
 import static org.hamcrest.Matchers.*;
 
 /**

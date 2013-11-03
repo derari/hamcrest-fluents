@@ -38,7 +38,7 @@ public class MatchValueTest {
     public void test_simple_match() {
         MatchResult.Match<?> match = value6.matchResult(gt3_or_lt1).getMatch();
         assertThat(match.toString(), 
-                   is("a value greater than <3>"));
+                   is("was a value greater than <3>"));
     }
     
     @Test
@@ -59,7 +59,7 @@ public class MatchValueTest {
     public void test_eachOf_match() {
         MatchResult.Match<?> match = each456.matchResult(gt3_or_lt1).getMatch();
         assertThat(match.toString(),
-                   is("#0 a value greater than <3>, #1 a value greater than <3>, #2 a value greater than <3>"));
+                   is("#0 was a value greater than <3>, #1 was a value greater than <3>, #2 was a value greater than <3>"));
     }
     
     @Test
@@ -75,12 +75,12 @@ public class MatchValueTest {
         assertThat(mismatch.getExpectedDescription().toString(),
                    is("a value less than <6>"));
     }
-    
+
     @Test
     public void test_anyOf_match() {
         MatchResult.Match<?> match = any167.matchResult(gt3_or_lt1).getMatch();
         assertThat(match.toString(),
-                   is("#1 a value greater than <3>"));
+                   is("#1 was a value greater than <3>"));
     }
     
     @Test
@@ -101,7 +101,7 @@ public class MatchValueTest {
     public void test_size_match() {
         MatchResult.Match<?> match = size6.matchResult(gt3_or_lt1).getMatch();
         assertThat(match.toString(),
-                   is("a value greater than <3>"));
+                   is("was a value greater than <3>"));
     }
     
     @Test

@@ -1,4 +1,4 @@
-package org.cthul.matchers.fluent.lib;
+package org.cthul.matchers.fluent.lib.object;
 
 import java.lang.reflect.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,12 +33,12 @@ public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
     }
     
     @Factory
-    public static PropertyAdapter<Boolean> getBoolean(String name) {
+    public static PropertyAdapter<Boolean> booleanProperty(String name) {
         return property(name);
     }
     
     @Factory
-    public static PropertyAdapter<Integer> getInt(String name) {
+    public static PropertyAdapter<Integer> intProperty(String name) {
         return property(name);
     }
     
