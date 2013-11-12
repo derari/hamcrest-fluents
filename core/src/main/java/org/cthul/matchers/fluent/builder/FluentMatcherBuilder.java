@@ -2,7 +2,7 @@ package org.cthul.matchers.fluent.builder;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.cthul.matchers.CIs;
+import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;

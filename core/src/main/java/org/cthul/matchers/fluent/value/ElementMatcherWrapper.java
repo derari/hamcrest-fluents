@@ -1,6 +1,6 @@
 package org.cthul.matchers.fluent.value;
 
-import org.cthul.matchers.CIs;
+import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultProxy;

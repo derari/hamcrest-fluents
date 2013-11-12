@@ -1,6 +1,6 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.CIs;
+import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;

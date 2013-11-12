@@ -2,8 +2,8 @@ package org.cthul.matchers.fluent.builder;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import org.cthul.matchers.CIs;
-import org.cthul.matchers.InstanceOf;
+import org.cthul.matchers.object.CIs;
+import org.cthul.matchers.object.InstanceOf;
 import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
