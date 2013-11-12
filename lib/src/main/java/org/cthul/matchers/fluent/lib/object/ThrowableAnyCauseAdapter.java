@@ -29,7 +29,7 @@ public class ThrowableAnyCauseAdapter extends SimpleAnyOfAdapter<Throwable, Thro
         return anyCause().adapt(value);
     }
     
-    @Factory
+    //@Factory
     public static <V> MatchValueAdapter<V, Throwable> anyCauseOf(MatchValueAdapter<V, ? extends Throwable> adapter) {
         return anyCause().adapt(adapter);
     }

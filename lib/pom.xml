@@ -45,8 +45,9 @@
                         </goals>
                         <configuration>
                             <finalName>${project.artifactId}-${project.version}-wo-hamcrest</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <attach>false</attach>
+                            <classifier>wo-hamcrest</classifier>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <attach>true</attach>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
@@ -59,7 +60,7 @@
                             </dependencySets>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--<execution>
                         <id>assemble-jar-all-dependencies</id>
                         <phase>package</phase>
                         <goals>
@@ -71,7 +72,7 @@
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
               </plugin>
         </plugins>
@@ -136,7 +137,7 @@
                         <version>1.2</version>
                         <executions>
                             <execution>
-                                <id>generate-matchers-class</id>
+                                <id>generate-fluents-class</id>
                                 <phase>process-classes</phase>
                                 <goals>
                                     <goal>java</goal>
@@ -147,7 +148,25 @@
                                     <arguments>
                                         <argument>${project.build.sourceDirectory}/../hamcrest/Fluents.xml</argument>
                                         <argument>${project.build.sourceDirectory}</argument>
-                                        <argument>org.cthul.matchers.intern.FluentsBase</argument>
+                                        <argument>org.cthul.matchers.fluent.intern.FluentsBase</argument>
+                                        <argument>${generated-matcher-dir}</argument>
+                                    </arguments>
+                                    <sourceRoot>${generated-matcher-dir}</sourceRoot>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-matchers-class</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>org.hamcrest.generator.config.XmlConfigurator</mainClass>
+                                    <includePluginDependencies>true</includePluginDependencies>
+                                    <arguments>
+                                        <argument>${project.build.sourceDirectory}/../hamcrest/FlMatchers.xml</argument>
+                                        <argument>${project.build.sourceDirectory}</argument>
+                                        <argument>org.cthul.matchers.FlMatchers</argument>
                                         <argument>${generated-matcher-dir}</argument>
                                     </arguments>
                                     <sourceRoot>${generated-matcher-dir}</sourceRoot>
@@ -193,7 +212,6 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.sf.twip</groupId>

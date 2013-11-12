@@ -9,6 +9,7 @@
     
     <factory class="org.cthul.matchers.fluent.lib.collection.ArraySizeAdapter"/>
     <factory class="org.cthul.matchers.fluent.lib.collection.IterableSizeAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.collection.MapSizeAdapter"/>
     <factory class="org.cthul.matchers.fluent.lib.collection.MapValueAdapter"/>
     
     <factory class="org.cthul.matchers.fluent.lib.object.PropertyAdapter"/>

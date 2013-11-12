@@ -26,7 +26,7 @@ public class ArraySizeAdapter extends SimpleAdapter<Object, Integer> {
         return arraySize().adapt(value);
     }
 
-    @Factory
+    //@Factory
     public static <V> MatchValueAdapter<V, Integer> arraySizeOf(MatchValueAdapter<V, ?> adapter) {
         return arraySize().adapt(adapter);
     }
