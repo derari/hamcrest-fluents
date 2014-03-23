@@ -17,3 +17,4 @@ or get it with Maven from https://oss.sonatype.org/content/repositories/snapshot
 
 If you found a bug or are missing a feature, please [create an issue](https://github.com/derari/hamcrest-fluents/issues).
 If you want to request more fluent methods, also provide some examples of how they would be used.
+If you have other questions, head over to the [forum](https://groups.google.com/forum/#!forum/cthul).

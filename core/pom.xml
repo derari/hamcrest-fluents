@@ -5,20 +5,20 @@
     <parent>
         <artifactId>cthul-fluent-matchers-parent</artifactId>
         <groupId>org.cthul.matchers.fluent</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
     <groupId>org.cthul.matchers.fluent</groupId>
     <artifactId>cthul-fluent-matchers-core</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>Cthul Fluent Matchers</name>
-    <url>http://cthul.org</url>
+    <version>1.0</version>
+    <name>Cthul Fluent Matchers Core</name>
+    <url>http://cthul.org/fluent-matchers</url>
     <description>
         Provides a fluent API for hamcrest.org matchers.
     </description>
     <distributionManagement>
         <site>
-            <id>cthul-matcher-maven-docs</id>
-            <url>${project.url.docs}matcher/</url>
+            <id>cthul-fluent-matchers-core-maven-docs</id>
+            <url>${project.url.docs}core/</url>
         </site>
     </distributionManagement>
     <properties>
@@ -145,6 +145,10 @@
         <dependency>
             <groupId>org.cthul</groupId>
             <artifactId>cthul-matchers</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.cthul</groupId>
+            <artifactId>cthul-objects</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

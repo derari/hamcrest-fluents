@@ -9,9 +9,9 @@
     <groupId>org.cthul.matchers.fluent</groupId>
     <artifactId>cthul-fluent-matchers-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>Cthul Hamcrest Fluents POM</name>
-    <url>http://cthul.org/</url>
+    <url>http://cthul.org/fluent-matchers</url>
     <description>
         Fluents for Hamcrest -- Parent POM
     </description>
@@ -37,7 +37,7 @@
     </scm>
     <distributionManagement>
         <site>
-            <id>cthul-maven-docs</id>
+            <id>cthul-fluent-matchers-maven-docs</id>
             <url>${project.url.docs}</url>
         </site>
     </distributionManagement>
@@ -248,7 +248,12 @@
             <dependency>
                 <groupId>org.cthul</groupId>
                 <artifactId>cthul-matchers</artifactId>
-                <version>1.1.0-SNAPSHOT</version>
+                <version>1.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.cthul</groupId>
+                <artifactId>cthul-objects</artifactId>
+                <version>1.1.0</version>
             </dependency>
         </dependencies>   
     </dependencyManagement>
