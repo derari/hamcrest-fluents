@@ -15,7 +15,11 @@ import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 
 /**
- *
+ * Base class for all fluent implementations.
+ * @param <Value>
+ * @param <Property>
+ * @param <ThisFluent>
+ * @param <This> 
  */
 public abstract class AbstractFluentPropertyBuilder
                 <Value, Property, ThisFluent extends Fluent<Value>,
@@ -123,7 +127,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public ThisFluent _(Matcher<? super Property> matcher) {
+    public ThisFluent __(Matcher<? super Property> matcher) {
         return _match(matcher);
     }
 
@@ -160,7 +164,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public ThisFluent _(Property value) {
+    public ThisFluent equalTo(Property value) {
         return _match(value);
     }
 
@@ -215,7 +219,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public <P> FluentProperty<Value, P> _(MatchValueAdapter<? super Property, P> adapter) {
+    public <P> FluentProperty<Value, P> __(MatchValueAdapter<? super Property, P> adapter) {
         return _adapt(adapter);
     }
     
@@ -239,7 +243,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public <P> ThisFluent _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
+    public <P> ThisFluent __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter, matcher);
     }
 
@@ -266,7 +270,7 @@ public abstract class AbstractFluentPropertyBuilder
         
         @Override
         public ThisFluent and(Matcher<? super Property> matcher) {
-            return property._(AndChainMatcher.both(first, matcher));
+            return property.__(AndChainMatcher.both(first, matcher));
         }
     }
 
@@ -288,13 +292,13 @@ public abstract class AbstractFluentPropertyBuilder
         @Override
         public ThisFluent or(Matcher<? super Property> matcher) {
             matchers[matchers.length-1] = matcher;
-            return property._(OrChainMatcher.or(matchers));
+            return property.__(OrChainMatcher.or(matchers));
         }
         
         @Override
         public ThisFluent xor(Matcher<? super Property> matcher) {
             matchers[matchers.length-1] = matcher;
-            return property._(XOrChainMatcher.xor(matchers));
+            return property.__(XOrChainMatcher.xor(matchers));
         }
     }
     
@@ -316,7 +320,7 @@ public abstract class AbstractFluentPropertyBuilder
         @Override
         public ThisFluent nor(Matcher<? super Property> matcher) {
             matchers[matchers.length-1] = matcher;
-            return property._(NOrChainMatcher.nor(matchers));
+            return property.__(NOrChainMatcher.nor(matchers));
         }
     }
     
@@ -353,7 +357,7 @@ public abstract class AbstractFluentPropertyBuilder
 
         @Override
         public ThisFluent of(Matcher<? super Property>... matchers) {
-            return property._(chainType.create(matchers));
+            return property.__(chainType.create(matchers));
         }
     }
     
@@ -404,7 +408,7 @@ public abstract class AbstractFluentPropertyBuilder
         }
 
         public Fluent<?> that(Matcher<? super Property> matcher) {
-            return that()._(matcher);
+            return that().__(matcher);
         }
         
         public Fluent<?> thatIs(Matcher<? super Property> matcher) {

@@ -66,7 +66,7 @@ public class ConceptTest {
                 .and(hasItem(3));
         
         assertThat(eachOf(metaList))
-                .has(size())._(greaterThan(2));
+                .has(size()).__(greaterThan(2));
         
         assertThat(sizeOf(eachOf(metaList)))
                 .is(greaterThan(2));

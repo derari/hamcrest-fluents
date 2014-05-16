@@ -4,6 +4,7 @@ import org.cthul.matchers.diagnose.SelfDescribingBase;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.SelfDescribing;
 
 /**
  * Default superclass for {@link MatchValue}.
@@ -11,10 +12,13 @@ import org.hamcrest.Matcher;
  * that do not implement specific logic.
  * <p>
  * All implementations should extend this class for forward compatibility.
+ * @param <Value>
  */
 public abstract class MatchValueBase<Value> 
                 extends SelfDescribingBase 
                 implements MatchValue<Value> {
+
+    private SelfDescribing typeDescription = null;
     
     public MatchValueBase() {
     }
@@ -62,5 +66,23 @@ public abstract class MatchValueBase<Value>
     @Override
     public void describeTo(Description description) {
         describeValue(description);
+    }
+
+    @Override
+    public SelfDescribing getValueDescription() {
+        return this;
+    }
+
+    @Override
+    public SelfDescribing getValueTypeDescription() {
+        if (typeDescription == null) {
+            typeDescription = new SelfDescribingBase() {
+                @Override
+                public void describeTo(Description description) {
+                    describeValueType(description);
+                }
+            };
+        }
+        return typeDescription;
     }
 }

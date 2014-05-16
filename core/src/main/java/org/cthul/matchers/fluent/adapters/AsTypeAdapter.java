@@ -4,8 +4,9 @@ import org.hamcrest.Description;
 
 /**
  *
+ * @param <Type>
  */
-public class AsTypeAdapter<V> extends ConvertingAdapter<Object, V> {
+public class AsTypeAdapter<Type> extends ConvertingAdapter<Object, Type> {
 
     public static <V> AsTypeAdapter<V> as(Class<V> clazz) {
         return new AsTypeAdapter<>(clazz);
@@ -53,8 +54,8 @@ public class AsTypeAdapter<V> extends ConvertingAdapter<Object, V> {
     }
 
     @Override
-    protected V adaptValue(Object v) {
-        return (V) v;
+    protected Type adaptValue(Object v) {
+        return (Type) v;
     }
 
     @Override

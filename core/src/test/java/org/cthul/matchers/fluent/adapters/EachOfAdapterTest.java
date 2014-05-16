@@ -2,12 +2,7 @@ package org.cthul.matchers.fluent.adapters;
 
 import java.util.Arrays;
 import java.util.List;
-import org.cthul.matchers.fluent.FluentAssert;
-import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentTestBase;
-import org.cthul.matchers.fluent.builder.FluentAssertBuilder;
-import org.cthul.matchers.fluent.builder.FluentMatcherBuilder;
-import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 import static org.hamcrest.Matchers.*;
@@ -22,21 +17,21 @@ public class EachOfAdapterTest extends FluentTestBase {
         
     @Test
     public void test_simple_match() {
-        test_assertThat(eachOf(1, 3, 5))._(lessThan(2));
+        test_assertThat(eachOf(1, 3, 5)).__(lessThan(2));
         assertMismatch("greater than <2>");
     }
     
     @Test
     public void test_simple_match_success() {
-        test_assertThat(eachOf(1, 3, 5))._(lessThan(10));
+        test_assertThat(eachOf(1, 3, 5)).__(lessThan(10));
         assertSuccess();
     }
     
     @Test
     public void test_chained_match() {
         test_assertThat(eachOf(1, 3, 4))
-                ._(lessThan(5))
-                ._(lessThan(2));
+                .__(lessThan(5))
+                .__(lessThan(2));
         assertMismatch("greater than <2>");
     }
     
@@ -49,7 +44,7 @@ public class EachOfAdapterTest extends FluentTestBase {
     public void test_chained_each() {
         List<Integer> list = Arrays.asList(1, 3, 5);
         test_assertThat(list)
-                ._(eachInt()).is(greaterThan(0));
+                .__(eachInt()).is(greaterThan(0));
     }
     
     @Test
@@ -90,7 +85,7 @@ public class EachOfAdapterTest extends FluentTestBase {
     @Test
     public void test_assert_description_chained(){
         List<Integer> list = Arrays.asList(1, 3, 5);
-        test_assertThat(list)._(eachInt()).is(greaterThan(3));
+        test_assertThat(list).__(eachInt()).is(greaterThan(3));
         
         assertMismatch(
                 "each is a value greater than <3>",

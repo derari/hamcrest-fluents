@@ -40,7 +40,7 @@ public interface FluentPropertyAssert<Value, Property>
      * @return fluent
      */
     @Override
-    FluentAssert<Value> _(Matcher<? super Property> matcher);
+    FluentAssert<Value> __(Matcher<? super Property> matcher);
 
     /**
      * {@inheritDoc}
@@ -76,7 +76,7 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    FluentAssert<Value> _(Property value);
+    FluentAssert<Value> equalTo(Property value);
 
     /**
      * {@inheritDoc}
@@ -136,7 +136,7 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Property, P> adapter);
+    <P> FluentPropertyAssert<Value, P> __(MatchValueAdapter<? super Property, P> adapter);
 
     /**
      * {@inheritDoc}
@@ -160,7 +160,7 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <P> FluentAssert<Value> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}

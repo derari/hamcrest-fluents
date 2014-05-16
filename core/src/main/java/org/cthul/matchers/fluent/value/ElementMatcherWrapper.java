@@ -11,6 +11,7 @@ import org.hamcrest.Matcher;
 
 /**
  *
+ * @param <Item>
  */
 public class ElementMatcherWrapper<Item> 
                 extends TypesafeNestedResultMatcher<Element<?>> 

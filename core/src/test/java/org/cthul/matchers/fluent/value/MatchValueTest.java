@@ -9,6 +9,8 @@ import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.junit.Test;
 import static org.cthul.matchers.CthulMatchers.*;
+import static org.cthul.matchers.CthulMatchers.both;
+import static org.cthul.matchers.CthulMatchers.either;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 

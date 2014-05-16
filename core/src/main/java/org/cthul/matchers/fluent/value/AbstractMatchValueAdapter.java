@@ -20,6 +20,8 @@ import org.hamcrest.SelfDescribing;
  * <p>
  * Subclasses will implement {@link #adapt(MatchValue)} to return
  * an instance of {@link AbstractAdaptedValue}.
+ * @param <Value>
+ * @param <Property>
  */
 public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchValueAdapterBase<Value, Property> {
     
@@ -28,24 +30,22 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     
     /**
      * Describes the values this adapter produces from a source {@link MatchValue}.
+     * @param source
+     * @param description
      * @see #describeProducer(org.hamcrest.SelfDescribing, org.hamcrest.Description) 
      */
-    protected void describeValue(MatchValue<? extends Value> actual, Description description) {
-        describeProducer(actual, description);
+    protected void describeValue(MatchValue<? extends Value> source, Description description) {
+        describeProducer(source.getValueDescription(), description);
     }
     
     /**
      * Describes the type of values this adapter produces from a source {@link MatchValue}.
+     * @param source
+     * @param description
      * @see #describeProducer(org.hamcrest.SelfDescribing, org.hamcrest.Description) 
      */
-    protected void describeValueType(final MatchValue<? extends Value> actual, Description description) {
-        SelfDescribing actualDescriptor = new SelfDescribingBase() {
-            @Override
-            public void describeTo(Description description) {
-                actual.describeValueType(description);
-            }
-        };
-        describeProducer(actualDescriptor, description);
+    protected void describeValueType(final MatchValue<? extends Value> source, Description description) {
+        describeProducer(source.getValueTypeDescription(), description);
     }
     
     /**
@@ -162,7 +162,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
         protected <I extends Element<?>> ElementMatcher.Result<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
             if (acceptValue(element.value())) {
-                return matchResultSafely((Element) element, adaptedMatcher, matcher);
+                return (ElementMatcher.Result) matchResultSafely((Element) element, adaptedMatcher, matcher);
             } else {
                 return matchResultOfUnaccepted(element, element.value(), adaptedMatcher);
             }
@@ -330,10 +330,11 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
          * <p>
          * This matcher should never occur in a context 
          * where this method needs to be called.
+         * @param description
          */
         @Override
         public void describeMismatch(Object item, Description description) {
             throw new UnsupportedOperationException("matcher for internal use only");
         }
-    }    
+    }
 }

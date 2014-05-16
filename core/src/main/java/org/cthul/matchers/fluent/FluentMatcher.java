@@ -76,7 +76,7 @@ public interface FluentMatcher<Value, Match>
      *          a matcher or calling {@link #getMatcher() getMatcher()}
      */
     @Override
-    FluentMatcher<Value, Match> _(Matcher<? super Value> matcher);
+    FluentMatcher<Value, Match> __(Matcher<? super Value> matcher);
 
     /**
      * {@inheritDoc}
@@ -112,7 +112,7 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> _(Value value);
+    FluentMatcher<Value, Match> equalTo(Value value);
 
     /**
      * {@inheritDoc}
@@ -133,21 +133,21 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> isNot(Value value);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #_(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #and() and()}{@link #__(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this
      */
     FluentMatcher<Value, Match> and(Matcher<? super Value> matcher);
 
     /**
-     * Equivalent to {@link #or() or()}{@link #_(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #or() or()}{@link #__(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this
      */
     FluentMatcher<Value, Match> or(Matcher<? super Value> matcher);
 
     /**
-     * Equivalent to {@link #xor() xor()}{@link #_(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #xor() xor()}{@link #__(Matcher) \u2024_(matcher)}.
      * @param matcher the matcher
      * @return this
      */
@@ -193,7 +193,7 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> _(MatchValueAdapter<? super Value, P> matcher);
+    <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Value, P> matcher);
 
     /**
      * {@inheritDoc}
@@ -214,14 +214,14 @@ public interface FluentMatcher<Value, Match>
     <P> FluentPropertyMatcher<Value, P, Match> hasNot(MatchValueAdapter<? super Value, P> adapter);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
     <P> FluentPropertyMatcher<Value, P, Match> and(MatchValueAdapter<? super Value, P> adapter);
 
     /**
-     * Equivalent to {@link #or() or()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
      * @param <P> property type
      * @param adapter the adapter
      * @return property fluent
@@ -229,7 +229,7 @@ public interface FluentMatcher<Value, Match>
     <P> FluentPropertyMatcher<Value, P, Match> or(MatchValueAdapter<? super Value, P> adapter);
 
     /**
-     * Equivalent to {@link #xor() xor()}{@link #_(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
@@ -239,7 +239,7 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <P> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}
@@ -248,7 +248,7 @@ public interface FluentMatcher<Value, Match>
     <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
      * @param <P> property type
      * @param adapter the adapter
      * @param matcher the matcher
@@ -257,7 +257,7 @@ public interface FluentMatcher<Value, Match>
     <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
-     * Equivalent to {@link #or() or()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
      * @param <P> property type
      * @param adapter the adapter
      * @param matcher the matcher
@@ -266,7 +266,7 @@ public interface FluentMatcher<Value, Match>
     <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
     
     /**
-     * Equivalent to {@link #xor() xor()}{@link #_(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
+     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
      * @param <P> property type
      * @param adapter the adapter
      * @param matcher the matcher

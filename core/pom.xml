@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>cthul-fluent-matchers-parent</artifactId>
@@ -43,92 +43,12 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>1.6</version>
+                        <groupId>org.cthul.api4j</groupId>
+                        <artifactId>api4j-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>add-matcher-source</id>
-                                <phase>generate-sources</phase>
                                 <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>add-matcher-source-site</id>
-                                <phase>pre-site</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <sources>
-                                <source>${generated-matcher-dir}</source>
-                            </sources>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>generate-matcher-dir</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <mkdir dir="${generated-matcher-dir}"/>
-                                        <copy file="${project.build.sourceDirectory}/../hamcrest/CoreFluents.java" todir="${generated-matcher-dir}/org/cthul/matchers"/>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.2</version>
-                        <executions>
-                            <execution>
-                                <id>generate-matchers-class</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                                <configuration>
-                                    <mainClass>org.hamcrest.generator.config.XmlConfigurator</mainClass>
-                                    <includePluginDependencies>true</includePluginDependencies>
-                                    <arguments>
-                                        <argument>${project.build.sourceDirectory}/../hamcrest/CoreFluents.xml</argument>
-                                        <argument>${project.build.sourceDirectory}</argument>
-                                        <argument>org.cthul.matchers.fluent.intern.CoreFluentsBase</argument>
-                                        <argument>${generated-matcher-dir}</argument>
-                                    </arguments>
-                                    <sourceRoot>${generated-matcher-dir}</sourceRoot>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.hamcrest</groupId>
-                                <artifactId>hamcrest-generator</artifactId>
-                                <version>${project.dependencies.hamcrest.version}</version>
-                                <scope>runtime</scope>
-                            </dependency>    
-                        </dependencies>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>compile-generated-matchers</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>compile</goal>
+                                    <goal>generate-api</goal>
                                 </goals>
                             </execution>
                         </executions>

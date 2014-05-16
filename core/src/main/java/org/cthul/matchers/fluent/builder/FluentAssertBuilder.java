@@ -43,12 +43,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     
     @Factory
     public static <T> FluentAssert<T> assertThat(T object, Matcher<? super T> matcher) {
-        return assertThat(object)._(matcher);
+        return assertThat(object).__(matcher);
     }
     
     @Factory
     public static <T, P> FluentAssert<T> assertThat(T object, MatchValueAdapter<? super T, P> adapter, Matcher<? super P> matcher) {
-        return assertThat(object)._(adapter, null);
+        return assertThat(object).__(adapter, null);
     }
     
     private int matcherCounter = 0;

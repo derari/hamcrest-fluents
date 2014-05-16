@@ -32,7 +32,7 @@ public interface MatchValue<Value> extends SelfDescribing {
      * Applies a matcher, which may cause the match value to become invalid.
      * The matcher may be called several times with different elements.
      * @param matcher
-     * @return {@code true} iff the match value is valid
+     * @return {@code true} iff the match value is still valid
      */
     boolean matches(Matcher<? super Value> matcher);
     
@@ -49,7 +49,7 @@ public interface MatchValue<Value> extends SelfDescribing {
      * Applies a matcher, which may cause the match value to become invalid.
      * The matcher may be called several times with different elements.
      * @param matcher
-     * @return {@code true} iff the match value is valid
+     * @return {@code true} iff the match value is still valid
      */
     boolean matches(ElementMatcher<? super Value> matcher);
     
@@ -79,12 +79,16 @@ public interface MatchValue<Value> extends SelfDescribing {
      * @param description 
      */
     void describeValue(Description description);
+    
+    SelfDescribing getValueDescription();
         
     /**
      * Describes this value's type.
      * @param description 
      */
     void describeValueType(Description description);
+    
+    SelfDescribing getValueTypeDescription();
     
     /**
      * Equivalent to {@code adapter.adapt(this)}.

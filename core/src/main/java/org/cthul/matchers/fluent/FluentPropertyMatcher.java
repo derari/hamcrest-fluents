@@ -37,7 +37,7 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> _(Matcher<? super Property> matcher);
+    FluentMatcher<Value, Match> __(Matcher<? super Property> matcher);
 
     /**
      * {@inheritDoc}
@@ -73,7 +73,7 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> _(Property value);
+    FluentMatcher<Value, Match> equalTo(Property value);
 
     /**
      * {@inheritDoc}
@@ -133,7 +133,7 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> _(MatchValueAdapter<? super Property, P> adapter);
+    <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Property, P> adapter);
         
     /**
      * {@inheritDoc}
@@ -157,7 +157,7 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> _(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <P> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
     
     /**
      * {@inheritDoc}

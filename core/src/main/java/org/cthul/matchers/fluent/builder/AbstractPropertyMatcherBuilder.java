@@ -22,8 +22,8 @@ public abstract class AbstractPropertyMatcherBuilder
     }
 
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> _(MatchValueAdapter<? super Property, P> adapter) {
-        return (FluentPropertyMatcher) super._(adapter);
+    public <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Property, P> adapter) {
+        return (FluentPropertyMatcher) super.__(adapter);
     }
     
     @Override

@@ -9,8 +9,7 @@ import java.util.Arrays;
  *
  */
 public class SwitchInvocationHandler implements InvocationHandler {
-    
-    
+
     private final Object[] impls;
 
     public SwitchInvocationHandler(Object... impls) {

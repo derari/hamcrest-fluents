@@ -17,7 +17,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     
     @Test
     public void test_simple_match_success() {
-        fluent(3)._(lessThan(5));
+        fluent(3).__(lessThan(5));
         apply();
         assertSuccess();
     }
@@ -25,8 +25,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     @Test
     public void test_chained_match_success() {
         fluent(3)
-                ._(lessThan(5))
-                ._(greaterThan(0));
+                .__(lessThan(5))
+                .__(greaterThan(0));
         apply();
         assertSuccess();
     }
@@ -34,9 +34,9 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     @Test
     public void test_chained_match_fail() {
         fluent(3)
-                ._(lessThan(5))
-                ._(greaterThan(4))
-                ._(lessThan(2));
+                .__(lessThan(5))
+                .__(greaterThan(4))
+                .__(lessThan(2));
         apply();
         assertMismatch("less than <4>");
     }
@@ -45,7 +45,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_negated_match_success() {
         fluent(3)
                 .not(lessThan(2))
-                ._(greaterThan(1));
+                .__(greaterThan(1));
         apply();
         assertSuccess();
     }
@@ -54,7 +54,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_negated_match_fail() {
         fluent(3)
                 .not(lessThan(5))
-                ._(greaterThan(1));
+                .__(greaterThan(1));
         apply();
         assertMismatch("less than <5>");
     }
@@ -92,7 +92,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_success() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachItem()).isA(Integer.class)
+                .__(eachItem()).isA(Integer.class)
                         .that().is(lessThan(6))
                 .isNot(empty());
         apply();
@@ -103,7 +103,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_fail() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachItem()).isA(Integer.class)
+                .__(eachItem()).isA(Integer.class)
                         .that().is(lessThan(2))
                 .isNot(empty());
         apply();

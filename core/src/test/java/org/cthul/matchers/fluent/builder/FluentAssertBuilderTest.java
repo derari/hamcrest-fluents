@@ -40,7 +40,7 @@ public class FluentAssertBuilderTest extends FluentBuilderTestBase {
     public void test_message_with_property() {
         List<Integer> list = Arrays.asList(1, 2, 3);
         test_assertThat(list)
-                .has()._(size())._(lessThan(2));
+                .has().__(size()).__(lessThan(2));
         assertMismatch("has size a value less than <2>");
     }
     

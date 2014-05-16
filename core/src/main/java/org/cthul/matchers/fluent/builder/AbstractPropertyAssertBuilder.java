@@ -8,7 +8,11 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
 /**
- *
+ * 
+ * @param <Value>
+ * @param <Property>
+ * @param <ThisFluent>
+ * @param <This> 
  */
 public abstract class AbstractPropertyAssertBuilder
                 <Value, Property, ThisFluent extends FluentAssert<Value>,
@@ -22,8 +26,8 @@ public abstract class AbstractPropertyAssertBuilder
     }
 
     @Override
-    public <P> FluentPropertyAssert<Value, P> _(MatchValueAdapter<? super Property, P> adapter) {
-        return (FluentPropertyAssert) super._(adapter);
+    public <P> FluentPropertyAssert<Value, P> __(MatchValueAdapter<? super Property, P> adapter) {
+        return (FluentPropertyAssert) super.__(adapter);
     }
     
     @Override

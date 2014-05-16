@@ -9,6 +9,7 @@ import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultProxy;
+import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.proc.Proc;
 import org.hamcrest.Description;
@@ -19,10 +20,12 @@ import org.hamcrest.core.IsAnything;
 /**
  * Default superclass for {@link MatchValueAdapter}.
  * Provides default implementations for all methods 
- * that do not implement specific logic 
+ * that do not implement specific logic.
  * (see also {@link AbstractMatchValueAdapter}).
  * <p>
  * All implementations should extend this class for forward compatibility.
+ * @param <Value>
+ * @param <Property>
  */
 public abstract class MatchValueAdapterBase<Value, Property> 
                 extends SelfDescribingBase
@@ -270,8 +273,8 @@ public abstract class MatchValueAdapterBase<Value, Property>
             }
 
             /**
-             * Fills an {@link ExpectationDescription} and 
-             * writes it to {@code description}
+             * Fills an {@link ElementMatcher.ExpectationDescription ExpectationDescription} 
+             * and writes it to {@code description}
              * @param description 
              */
             @Override

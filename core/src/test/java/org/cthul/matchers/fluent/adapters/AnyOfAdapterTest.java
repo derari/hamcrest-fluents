@@ -14,37 +14,36 @@ import org.junit.Test;
  *
  */
 public class AnyOfAdapterTest extends FluentTestBase {
-        
+
     @Test
     public void test_simple_match() {
-        test_assertThat(anyOf(1, 3, 5))._(lessThan(1));
+        test_assertThat(anyOf(1, 3, 5)).__(lessThan(1));
         assertMismatch("greater than <1>");
     }
     
     @Test
     public void test_simple_match_success() {
-        test_assertThat(anyOf(1, 3, 5))._(greaterThan(3));
+        test_assertThat(anyOf(1, 3, 5)).__(greaterThan(3));
         assertSuccess();
     }
     
     @Test
     public void test_chained_match() {
         test_assertThat(anyOf(1, 3, 4))
-                ._(lessThan(5))
-                ._(lessThan(1));
+                .__(lessThan(5))
+                .__(lessThan(1));
         assertMismatch("greater than <1>");
     }
     
     @Test
     public void test_as_matcher() {
-        
     }
     
     @Test
     public void test_chained_any() {
         List<Integer> list = Arrays.asList(1, 3, 5);
         test_assertThat(list)
-                ._(anyInt()).is(greaterThan(3));
+                .__(anyInt()).is(greaterThan(3));
     }
     
     @Test

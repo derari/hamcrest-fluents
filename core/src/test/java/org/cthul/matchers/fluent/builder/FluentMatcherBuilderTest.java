@@ -25,7 +25,7 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
 
     @Override
     protected void apply(MatchValue value) {
-        test_assertThat(value)._(current);
+        test_assertThat(value).__(current);
     }
     
     @Test
@@ -39,7 +39,7 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
     public void test_property_isA_message() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                ._(eachItem()).isA(Integer.class)
+                .__(eachItem()).isA(Integer.class)
                         .that().is(lessThan(2))
                 .isNot(empty());
         apply();

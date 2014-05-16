@@ -17,6 +17,8 @@ import org.hamcrest.SelfDescribing;
  * Every implementation should extend {@link MatchValueAdapterBase} for
  * forward compatibility, but there are other abstract implementations which
  * might be better starting points.
+ * @param <Value>
+ * @param <Property>
  * @see SimpleAdapter
  * @see SimpleAnyOfAdapter
  * @see SimpleEachOfAdapter
