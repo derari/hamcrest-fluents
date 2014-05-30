@@ -8,7 +8,12 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
 /**
- *
+ * Base class for all fluent matcher implementations
+ * @param <Value> base value type
+ * @param <Property> property type
+ * @param <Match> match value type
+ * @param <ThisFluent> type of fluent this property belongs to
+ * @param <This> fluent interface implemented by this class
  */
 public abstract class AbstractPropertyMatcherBuilder
                 <Value, Property, Match, ThisFluent extends FluentMatcher<Value, Match>,
@@ -22,22 +27,22 @@ public abstract class AbstractPropertyMatcherBuilder
     }
 
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Property, P> adapter) {
+    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         return (FluentPropertyMatcher) super.__(adapter);
     }
     
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> has(MatchValueAdapter<? super Property, P> adapter) {
+    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         return (FluentPropertyMatcher) super.has(adapter);
     }
     
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> not(MatchValueAdapter<? super Property, P> adapter) {
+    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         return (FluentPropertyMatcher) super.not(adapter);
     }
     
     @Override
-    public <P> FluentPropertyMatcher<Value, P, Match> hasNot(MatchValueAdapter<? super Property, P> adapter) {
+    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         return (FluentPropertyMatcher) super.hasNot(adapter);
     }
     
@@ -150,13 +155,13 @@ public abstract class AbstractPropertyMatcherBuilder
         @Override
         protected ThisFluent _applyMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
             Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyMatcherBuilder.this._applyMatcher(m, flPrefix, flNot);
+            return AbstractPropertyMatcherBuilder.this._apply(m, flPrefix, flNot);
         }
 
         @Override
         protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
             Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyMatcherBuilder.this._updateMatcher(m, flPrefix, flNot);
+            return AbstractPropertyMatcherBuilder.this._update(m, flPrefix, flNot);
         }
     }
 }

@@ -31,7 +31,7 @@ public class ProcFailureAdapter extends SimpleAdapter<Proc, Throwable> {
         return INSTANCE.adapt(proc);
     }
     
-    //@Factory
+    @Factory
     public static <V> MatchValueAdapter<V, Throwable> thrownBy(MatchValueAdapter<V, ? extends Proc> proc) {
         return INSTANCE.adapt(proc);
     }

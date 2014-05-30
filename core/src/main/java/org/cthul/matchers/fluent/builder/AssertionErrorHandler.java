@@ -3,6 +3,9 @@ package org.cthul.matchers.fluent.builder;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.ElementMatcher;
 
+/**
+ * Handles mismatches by throwing {@link AssertionError}s.
+ */
 public class AssertionErrorHandler extends FailureHandlerBase {
 
     public static final AssertionErrorHandler INSTANCE = new AssertionErrorHandler();

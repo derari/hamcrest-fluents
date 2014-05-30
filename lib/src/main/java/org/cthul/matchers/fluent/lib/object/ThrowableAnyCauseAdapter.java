@@ -20,6 +20,11 @@ public class ThrowableAnyCauseAdapter extends SimpleAnyOfAdapter<Throwable, Thro
     }
     
     @Factory
+    public static ThrowableAnyCauseAdapter anyCauseOf() {
+        return INSTANCE;
+    }
+    
+    @Factory
     public static MatchValue<Throwable> anyCauseOf(Throwable throwable) {
         return anyCause().adapt(throwable);
     }
@@ -29,7 +34,7 @@ public class ThrowableAnyCauseAdapter extends SimpleAnyOfAdapter<Throwable, Thro
         return anyCause().adapt(value);
     }
     
-    //@Factory
+    @Factory
     public static <V> MatchValueAdapter<V, Throwable> anyCauseOf(MatchValueAdapter<V, ? extends Throwable> adapter) {
         return anyCause().adapt(adapter);
     }

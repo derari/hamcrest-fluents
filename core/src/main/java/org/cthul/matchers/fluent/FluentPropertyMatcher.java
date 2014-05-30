@@ -97,19 +97,19 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> all(Matcher<? super Property>... matcher);
+    FluentMatcher<Value, Match> all(Matcher<? super Property>... matchers);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> any(Matcher<? super Property>... matcher);
+    FluentMatcher<Value, Match> any(Matcher<? super Property>... matchers);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentMatcher<Value, Match> none(Matcher<? super Property>... matcher);
+    FluentMatcher<Value, Match> none(Matcher<? super Property>... matchers);
     
     /**
      * {@inheritDoc}
@@ -133,37 +133,49 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
         
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> has(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> not(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> hasNot(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <NextProperty> FluentMatcher<Value, Match> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <NextProperty> FluentMatcher<Value, Match> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
 
     /**
      * {@inheritDoc}

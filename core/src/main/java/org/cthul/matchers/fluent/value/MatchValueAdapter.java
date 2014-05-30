@@ -64,5 +64,4 @@ public interface MatchValueAdapter<Value, Property> extends SelfDescribing {
      * @return match value adapter
      */
     <Property2> MatchValueAdapter<Value, Property2> get(MatchValueAdapter<? super Property, Property2> adapter);
-    
 }

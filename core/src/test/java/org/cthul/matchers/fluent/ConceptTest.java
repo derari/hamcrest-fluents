@@ -6,8 +6,7 @@ import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 import org.junit.Test;
-import static org.cthul.matchers.CoreFluents.match;
-import static org.cthul.matchers.fluent.intern.CoreFluentsBase.*;
+import static org.cthul.matchers.fluent.CoreFluents.*;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -82,9 +81,11 @@ public class ConceptTest {
                 .or().isA(Integer.class).thatIs(equalTo(0));
         assertThat(0)
                 .is(empty_or_zero);
+        assertThat("")
+                .is(empty_or_zero);
         
-//        assertThat(sizeOf(), list)
-//                .is(lessThan(10));  
+        assertThat(sizeOf(), list)
+                .is(lessThan(10));
         
         // assertThat(list, size())
         

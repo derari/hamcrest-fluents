@@ -22,12 +22,12 @@ public class ProcCallAdapter extends SimpleAdapter<Proc, Proc> {
         return call(args).adapt(proc);
     }
     
-    //@Factory
+    @Factory
     public static <T> MatchValueAdapter<Proc, T> resultOfCall(Object... args) {
         return ProcResultAdapter.resultOf(call(args));
     }
     
-    //@Factory
+    @Factory
     public static MatchValueAdapter<Proc, Throwable> thrownByCall(Object... args) {
         return ProcFailureAdapter.thrownBy(call(args));
     }

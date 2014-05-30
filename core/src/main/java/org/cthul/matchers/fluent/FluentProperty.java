@@ -43,71 +43,73 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> __(Matcher<? super Property> matcher);
 
     /**
-     * Equivalent to {@link #is() is()}{@link #__(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #is() is()}{@link #__(Matcher) .__(matcher)}.
      * @param matcher the matcher
      * @return fluent
      */
     Fluent<Value> is(Matcher<? super Property> matcher);
 
     /**
-     * Equivalent to {@link #has() has()}{@link #__(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #has() has()}{@link #__(Matcher) .__(matcher)}.
      * @param matcher the matcher
      * @return fluent
      */
     Fluent<Value> has(Matcher<? super Property> matcher);
 
     /**
-     * Equivalent to {@link #not() not()}{@link #__(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #not() not()}{@link #__(Matcher) .__(matcher)}.
      * @param matcher the matcher
      * @return fluent
      */
     Fluent<Value> not(Matcher<? super Property> matcher);
 
     /**
-     * Equivalent to {@link #is() is()}{@link #not() \u2024not()}{@link #__(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #is() is()}{@link #not() .not()}{@link #__(Matcher) .__(matcher)}.
      * @param matcher the matcher
      * @return fluent
      */
     Fluent<Value> isNot(Matcher<? super Property> matcher);
 
     /**
-     * Equivalent to {@link #has() has()}{@link #not() \u2024not()}{@link #__(Matcher) \u2024_(matcher)}.
+     * Equivalent to {@link #has() has()}{@link #not() .not()}{@link #__(Matcher) .__(matcher)}.
      * @param matcher the matcher
      * @return fluent
      */
     Fluent<Value> hasNot(Matcher<? super Property> matcher);
     
     /**
-     * Adds a matcher that checks if the property is {@code equalTo}
+     * Adds a matcher that checks if the property is 
+     * {@link org.hamcrest.core.IsEqual#equalTo(Object) equalTo}
      * the given value.
      * @param value the value
      * @return fluent
+     * @see org.hamcrest.core.IsEqual#equalTo(Object) 
      */
     Fluent<Value> equalTo(Property value);
     
     /**
-     * Equivalent to {@link #is() is()}{@link #equalTo(Object) \u2024_(value)}. 
+     * Equivalent to {@link #is() is()}{@link #equalTo(Object) .equalTo(value)}. 
      * @param value the value
      * @return fluent
      */
     Fluent<Value> is(Property value);
     
     /**
-     * Equivalent to {@link #not() not()}{@link #equalTo(Object) \u2024_(value)}.
+     * Equivalent to {@link #not() not()}{@link #equalTo(Object) .equalTo(value)}.
      * @param value the value
      * @return fluent
      */
     Fluent<Value> not(Property value);
     
     /**
-     * Equivalent to {@link #is() is()}{@link #not() \u2024not()}{@link #equalTo(Object) \u2024_(value)}.
+     * Equivalent to {@link #is() is()}{@link #not() .not()}{@link #equalTo(Object) .equalTo(value)}.
      * @param value the value
      * @return fluent
      */
     Fluent<Value> isNot(Property value);
 
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
      * with the conjunction of {@code matchers}.
      * @param matchers the matchers
      * @return fluent
@@ -115,7 +117,7 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> all(Matcher<? super Property>... matchers);
 
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
      * with the disjunction of {@code matchers}.
      * @param matchers the matchers
      * @return fluent
@@ -123,7 +125,7 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> any(Matcher<? super Property>... matchers);
 
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
      * with the joint denial of {@code matchers}.
      * @param matchers the matchers
      * @return fluent
@@ -131,7 +133,7 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> none(Matcher<? super Property>... matchers);
     
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
      * with a matcher that succeeds when exactly {@code count} of 
      * {@code matchers} succeed.
      * @param count
@@ -141,7 +143,7 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> matches(int count, Matcher<? super Property>... matchers);
     
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
      * with a matcher that succeeds when the number of succeeding
      * {@code matchers} is matched by {@code countMatcher}.
      * @param countMatcher
@@ -151,8 +153,8 @@ public interface FluentProperty<Value, Property> {
     Fluent<Value> matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers);
     
     /**
-     * Equivalent to calling {@link #__(org.hamcrest.Matcher) _(matcher)}
-     * with {@code chainType.create(matchers)}.
+     * Equivalent to calling {@link #__(Matcher) __(matcher)}
+     * with the result of {@code chainType.create(matchers)}.
      * @param chainType
      * @param matchers
      * @return fluent
@@ -162,53 +164,71 @@ public interface FluentProperty<Value, Property> {
     /**
      * Returns a {@link FluentProperty} that uses the {@code adapter} to
      * apply matchers against a property of the actual value.
-     * @param <P> property type
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentProperty<Value, P> __(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #has() has()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
-     * @param <P> property type
+     * Equivalent to {@link #has() has()}{@link #__(MatchValueAdapter) .__(adapter)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentProperty<Value, P> has(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #not() not()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
-     * @param <P> property type
+     * Equivalent to {@link #not() not()}{@link #__(MatchValueAdapter) .__(adapter)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentProperty<Value, P> not(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #has() has()}{@link #not() \u2024not()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
-     * @param <P> property type
+     * Equivalent to {@link #has() has()}{@link #not() .not()}{@link #__(MatchValueAdapter) .__(adapter)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #__(Matcher) _(adapter.adapt(matcher)}.
-     * @param <P> property type
+     * Equivalent to {@link #__(Matcher) __(adapter.adapt(matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return fluent
      */
-    <P> Fluent<Value> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> Fluent<Value> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
 
     /**
-     * Equivalent to {@link #has() has()}{@link #__(Matcher) \u2024_(adapter.adapt(matcher)}.
-     * @param <P> property type
+     * Equivalent to {@link #has() has()}{@link #__(Matcher) .__(adapter.adapt(matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return property fluent
      */
-    <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> Fluent<Value> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+
+    /**
+     * Equivalent to {@link #has() has()}{@link #__(Matcher) .__(adapter.adapt(matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return property fluent
+     */
+    <NextProperty> Fluent<Value> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+
+    /**
+     * Equivalent to {@link #has() has()}{@link #not() .not()}{@link #__(Matcher) .__(adapter.adapt(matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return property fluent
+     */
+    <NextProperty> Fluent<Value> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
 
     /**
      * Returns a {@link Both} that applies the conjunction of 
@@ -391,20 +411,20 @@ public interface FluentProperty<Value, Property> {
         FluentProperty<Value, Property> that();
 
         /**
-         * Equivalent to {@link #that() that()}{@link FluentProperty#is() \u2024is()}.
+         * Equivalent to {@link #that() that()}{@link FluentProperty#is() .is()}.
          * @return fluent property
          */
         FluentProperty<Value, Property> thatIs();
 
         /**
-         * Equivalent to {@link #that() that()}{@link FluentProperty#__(Matcher) \u2024_(matcher)}.
+         * Equivalent to {@link #that() that()}{@link FluentProperty#__(Matcher) .__(matcher)}.
          * @param matcher the matcher
          * @return fluent 
          */
         Fluent<Value> that(Matcher<? super Property> matcher);
 
         /**
-         * Equivalent to {@link #that() that()}{@link FluentProperty#is() \u2024is()}{@link FluentProperty#__(Matcher) \u2024_(matcher)}.
+         * Equivalent to {@link #that() that()}{@link FluentProperty#is() .is()}{@link FluentProperty#__(Matcher) .__(matcher)}.
          * @param matcher the matcher
          * @return fluent 
          */

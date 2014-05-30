@@ -1,8 +1,8 @@
 package org.cthul.matchers.fluent.lib.object;
 
-import org.cthul.matchers.fluent.lib.object.PropertyAdapter;
 import org.junit.Test;
-import static org.cthul.matchers.CoreFluents.*;
+
+import static org.cthul.matchers.fluent.CoreFluents.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -43,11 +43,11 @@ public class PropertyAdapterTest {
         }
         
         public int prop() {
-            return prop+1;
+            throw new UnsupportedOperationException();
         }
         
         public int getProp() {
-            return prop+1;
+            throw new UnsupportedOperationException();
         }
     }
     
@@ -64,7 +64,7 @@ public class PropertyAdapterTest {
         }
         
         public int getProp() {
-            return prop;
+            throw new UnsupportedOperationException();
         }
     }
     
@@ -77,7 +77,7 @@ public class PropertyAdapterTest {
         }
         
         private int prop() {
-            return prop+1;
+            throw new UnsupportedOperationException();
         }
 
         public int getProp() {

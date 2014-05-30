@@ -6,6 +6,7 @@ import org.hamcrest.Factory;
 
 /**
  *
+ * @param <Item>
  */
 public class EachOfAdapter<Item> extends 
                 SimpleEachOfAdapter<Iterable<? extends Item>, Item> {

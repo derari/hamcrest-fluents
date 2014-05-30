@@ -154,39 +154,53 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      * {@inheritDoc}
      */
     @Override
-    <P> FluentProperty<Value, P> __(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentProperty<Value, P> has(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentProperty<Value, P> not(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentProperty<Value, NextProperty> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Value, P> adapter);
-    
-    /**
-     * {@inheritDoc}
-     * @return this
-     */
-    @Override
-    <P> Fluent<Value> __(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentProperty<Value, NextProperty> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      * @return this
      */
     @Override
-    <P> Fluent<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> Fluent<Value> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    <NextProperty> Fluent<Value> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    <NextProperty> Fluent<Value> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     * @return this
+     */
+    @Override
+    <NextProperty> Fluent<Value> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}
@@ -220,13 +234,14 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
     
     /**
      * {@inheritDoc}
+     * @param <Value2> expected type
      */
     @Override
-    <Property extends Value> Fluent<? extends Value> isA(Class<Property> clazz, Matcher<? super Property> matcher);
+    <Value2 extends Value> Fluent<? extends Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
         
     /**
      * {@inheritDoc}
      */
     @Override
-    <Property extends Value> FluentProperty.IsA<? extends Value, Property> isA(Class<Property> clazz);
+    <Property2 extends Value> FluentProperty.IsA<? extends Value, Property2> isA(Class<Property2> clazz);
 }

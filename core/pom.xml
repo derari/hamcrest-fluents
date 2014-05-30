@@ -22,10 +22,67 @@
         </site>
     </distributionManagement>
     <properties>
-        <generated-matcher-dir>${project.build.directory}/generated-sources/hamcrest</generated-matcher-dir>
+        <build.freemarker.sourceDirectory>${project.build.directory}/generated-sources/freemarker</build.freemarker.sourceDirectory>
     </properties>
     <build>
         <plugins>
+            <!--<plugin>
+                <groupId>com.googlecode.fmpp-maven-plugin</groupId>
+                <artifactId>fmpp-maven-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <cfgFile>src/main/fm/config.fmpp</cfgFile>
+                    <outputDirectory>${build.freemarker.sourceDirectory}/org/cthul/matchers/fluent</outputDirectory>
+                    <templateDirectory>src/main/fm/</templateDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>    
+                        <artifactId>log4j-over-slf4j</artifactId>
+                        <version>1.6.1</version>
+                    </dependency>    
+                    <dependency>
+                        <groupId>org.slf4j</groupId>    
+                        <artifactId>slf4j-simple</artifactId>
+                        <version>1.6.1</version>
+                    </dependency> 
+                </dependencies>
+            </plugin>    
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>add-fmpp-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>add-fmpp-source-site</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>${build.freemarker.sourceDirectory}</source>
+                    </sources>
+                </configuration>
+            </plugin>-->
+            
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
@@ -52,6 +109,13 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.cthul.api4j</groupId>
+                                <artifactId>api4j-hamcrest</artifactId>
+                                <version>1.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                 </plugins>
             </build>

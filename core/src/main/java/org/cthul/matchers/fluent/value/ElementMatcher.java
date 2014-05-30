@@ -10,6 +10,9 @@ import org.hamcrest.SelfDescribing;
  * <p>
  * The matcher accepts any type of element, 
  * the value type has to be checked explicitly.
+ * <p>
+ * This interface is intended for internal communication between 
+ * {@link MatchValueAdapter}s.
  * @param <Value> value type
  * @see org.cthul.matchers.fluent.value.ElementMatcher
  */

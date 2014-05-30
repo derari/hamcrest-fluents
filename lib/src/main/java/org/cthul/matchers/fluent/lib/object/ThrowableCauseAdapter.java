@@ -27,7 +27,7 @@ public class ThrowableCauseAdapter extends SimpleAdapter<Throwable, Throwable> {
         return cause().adapt(value);
     }
     
-    //@Factory
+    @Factory
     public static <V> MatchValueAdapter<V, Throwable> causeOf(MatchValueAdapter<V, ? extends Throwable> adapter) {
         return cause().adapt(adapter);
     }

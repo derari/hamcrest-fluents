@@ -33,6 +33,9 @@ public class SwitchInvocationHandler implements InvocationHandler {
                 } else if (cause instanceof Error) {
                     throw (Error) cause;
                 } else {
+                    if (cause instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
                     throw new RuntimeException(cause);
                 }
             }

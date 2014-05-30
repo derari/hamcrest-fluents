@@ -109,6 +109,48 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> hasNot(Matcher<? super Value> matcher);
 
     /**
+     * Equivalent to {@link #and() and()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> and(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> andNot(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #or() or()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> or(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #or() or()}{@link #not() .not()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> orNot(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> xor(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #not() .not()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentMatcher<Value, Match> xorNot(Matcher<? super Value> matcher);
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -133,25 +175,46 @@ public interface FluentMatcher<Value, Match>
     FluentMatcher<Value, Match> isNot(Value value);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #__(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
+     * Equivalent to {@link #and() and()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
      * @return this
      */
-    FluentMatcher<Value, Match> and(Matcher<? super Value> matcher);
+    FluentMatcher<Value, Match> and(Value value);
 
     /**
-     * Equivalent to {@link #or() or()}{@link #__(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
      * @return this
      */
-    FluentMatcher<Value, Match> or(Matcher<? super Value> matcher);
+    FluentMatcher<Value, Match> andNot(Value value);
 
     /**
-     * Equivalent to {@link #xor() xor()}{@link #__(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
+     * Equivalent to {@link #or() or()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
      * @return this
      */
-    FluentMatcher<Value, Match> xor(Matcher<? super Value> matcher);
+    FluentMatcher<Value, Match> or(Value value);
+
+    /**
+     * Equivalent to {@link #or() or()}{@link #not() .not()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
+     * @return this
+     */
+    FluentMatcher<Value, Match> orNot(Value value);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
+     * @return this
+     */
+    FluentMatcher<Value, Match> xor(Value value);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #not() .not()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
+     * @return this
+     */
+    FluentMatcher<Value, Match> xorNot(Value value);
 
     /**
      * {@inheritDoc}
@@ -193,86 +256,141 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> __(MatchValueAdapter<? super Value, P> matcher);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> has(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> not(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyMatcher<Value, P, Match> hasNot(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyMatcher<Value, P, Match> and(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
-     * @param <P> property type
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyMatcher<Value, P, Match> or(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter) ._(adapter)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyMatcher<Value, P, Match> xor(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+
+    /**
+     * Equivalent to {@link #or() or()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @return property fluent
+     */
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter) ._(adapter)}.
+     * @param adapter the adapter
+     * @return property fluent
+     */
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
+     * @param adapter the adapter
+     * @return property fluent
+     */
+    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
-     * @param <P> property type
+     * {@inheritDoc}
+     */
+    @Override
+    <NextProperty> FluentMatcher<Value, Match> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+
+    /**
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
-     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
-     * @param <P> property type
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
-     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
-     * @param <P> property type
+     * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * Equivalent to {@link #or() or()}{@link #not() .not()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <NextProperty> FluentMatcher<Value, Match> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <NextProperty> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * Equivalent to {@link #xor() xor()}{@link #not() .not()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <NextProperty> FluentMatcher<Value, Match> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}

@@ -2,13 +2,14 @@ package org.cthul.matchers.fluent.value;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.adapters.AnyOfAdapter;
 import org.cthul.matchers.fluent.adapters.EachOfAdapter;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.junit.Test;
-import static org.cthul.matchers.CthulMatchers.*;
+import org.hamcrest.Matcher;
 import static org.cthul.matchers.CthulMatchers.both;
 import static org.cthul.matchers.CthulMatchers.either;
 import static org.hamcrest.Matchers.*;
@@ -19,21 +20,15 @@ import static org.hamcrest.MatcherAssert.*;
  */
 public class MatchValueTest {
     
-    public MatchValueTest() {
-    }
+    private final static Matcher<Integer> gt2_and_lt6 = both(greaterThan(2)).and(lessThan(6));
+    private final static Matcher<Integer> gt3_or_lt1 = either(greaterThan(3)).or(lessThan(1));
     
-    private MatchValue<Integer> value6 = IdentityValue.value(6);
-    private MatchValue<Integer> each456 = EachOfAdapter.eachOf(4, 5, 6);
-    private MatchValue<Integer> any167 = AnyOfAdapter.anyOf(1, 6, 7);
-    private MatchValue<Integer> size6 = sizeOf(1, 2, 3, 4, 5, 6);
-    
-    private ElementMatcherWrapper<Integer> gt2_and_lt6 = new ElementMatcherWrapper<>(0, both(greaterThan(2)).and(lessThan(6)));
-    private ElementMatcherWrapper<Integer> gt3_or_lt1 = new ElementMatcherWrapper<>(0, either(greaterThan(3)).or(lessThan(1)));
+    private final MatchValue<Integer> value6 = IdentityValue.value(6);
+    private final MatchValue<Integer> each456 = EachOfAdapter.eachOf(4, 5, 6);
+    private final MatchValue<Integer> any167 = AnyOfAdapter.anyOf(1, 6, 7);
+    private final MatchValue<Integer> size6 = sizeOf(1, 2, 3, 4, 5, 6);
 
-    @Test
-    public void test_getValue() {
-//        Object value = value6.getValue();
-//        assertThat(value, is((Object) value6));
+    public MatchValueTest() {
     }
     
     @Test
@@ -96,7 +91,7 @@ public class MatchValueTest {
     public void test_anyOf_expected() {
         MatchResult.Mismatch<?> mismatch = any167.matchResult(gt2_and_lt6).getMismatch();
         assertThat(mismatch.getExpectedDescription().toString(),
-                   is("a value less than <6>"));
+                   is("a value greater than <2> and a value less than <6>"));
     }
     
     @Test

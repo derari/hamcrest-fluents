@@ -10,7 +10,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 /**
- *
+ * Creates an {@link ElementMatcher} from a regular {@link Matcher}.
  * @param <Item>
  */
 public class ElementMatcherWrapper<Item> 

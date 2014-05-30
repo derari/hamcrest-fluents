@@ -136,37 +136,49 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> __(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> has(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> not(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentAssert<Value> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentAssert<Value> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <NextProperty> FluentAssert<Value> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <NextProperty> FluentAssert<Value> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}

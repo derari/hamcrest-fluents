@@ -80,6 +80,10 @@ public interface MatchValue<Value> extends SelfDescribing {
      */
     void describeValue(Description description);
     
+    /**
+     * Returns a description of this value.
+     * @return value description
+     */
     SelfDescribing getValueDescription();
         
     /**
@@ -88,6 +92,10 @@ public interface MatchValue<Value> extends SelfDescribing {
      */
     void describeValueType(Description description);
     
+    /**
+     * Returns a description of this value's type.
+     * @return value type description
+     */
     SelfDescribing getValueTypeDescription();
     
     /**

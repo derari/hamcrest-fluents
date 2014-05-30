@@ -6,6 +6,7 @@ import org.hamcrest.Matcher;
 
 /**
  *
+ * @param <Value>
  */
 public class IdentityValue<Value> extends ConvertingAdapter<Value, Value> {
 

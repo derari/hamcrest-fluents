@@ -1,7 +1,8 @@
 package org.cthul.matchers.fluent.lib.proc;
 
 import org.junit.Test;
-import static org.cthul.matchers.CoreFluents.*;
+
+import static org.cthul.matchers.fluent.CoreFluents.assertThat;
 import static org.cthul.matchers.fluent.lib.proc.ProcResultAdapter.*;
 import static org.cthul.proc.Procs.*;
 
@@ -26,6 +27,6 @@ public class ProcResultAdapterTest {
     @Test
     public void dsl2() {
         assertThat(invokeWith("sum", 4, 5, 6))
-                ._(result()).is(15);
+                .__(result()).is(15);
     }
 }

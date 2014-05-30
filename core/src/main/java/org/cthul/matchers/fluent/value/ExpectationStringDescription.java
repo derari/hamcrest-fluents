@@ -10,7 +10,7 @@ import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
 
 /**
- *
+ * Implements {@link ExpectationDescription}.
  */
 public class ExpectationStringDescription 
                 extends SelfDescribingBase

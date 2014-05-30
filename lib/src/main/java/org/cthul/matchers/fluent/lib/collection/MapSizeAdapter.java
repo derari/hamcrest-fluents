@@ -31,7 +31,7 @@ public class MapSizeAdapter extends SimpleAdapter<Map<?, ?>, Integer> {
         return mapSize().adapt(value);
     }
 
-    //@Factory
+    @Factory
     public static <V> MatchValueAdapter<V, Integer> mapSizeOf(MatchValueAdapter<V, ? extends Map<?, ?>> adapter) {
         return mapSize().adapt(adapter);
     }

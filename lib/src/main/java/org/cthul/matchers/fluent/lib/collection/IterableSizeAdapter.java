@@ -25,7 +25,7 @@ public class IterableSizeAdapter extends SimpleAdapter<Iterable<?>, Integer> {
         return size().adapt(value);
     }
 
-    //@Factory
+    @Factory
     public static <V> MatchValueAdapter<V, Integer> sizeOf(MatchValueAdapter<V, ? extends Iterable<?>> adapter) {
         return size().adapt(adapter);
     }
@@ -40,7 +40,7 @@ public class IterableSizeAdapter extends SimpleAdapter<Iterable<?>, Integer> {
             return ((Collection) v).size();
         }
         int i = 0;
-        for (Object _: v) {
+        for (Object o: v) {
             i++;
         }
         return i;

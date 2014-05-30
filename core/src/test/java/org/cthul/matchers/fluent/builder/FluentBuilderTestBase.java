@@ -147,6 +147,10 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
         return fluent(IdentityValue.value(t));
     }
     
+    protected void apply(Object t) {
+        apply(IdentityValue.value(t));
+    }
+    
     protected void apply() {
         apply(value);
     }

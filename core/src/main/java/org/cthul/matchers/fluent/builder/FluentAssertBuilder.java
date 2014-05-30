@@ -9,6 +9,8 @@ import org.hamcrest.Matcher;
 
 /**
  * Implements {@link FluentAssert}.
+ * @param <Value> base value type
+ * @param <This> fluent interface implemented by this class
  */
 public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, This>> 
                 extends AbstractPropertyAssertBuilder<Value, Value, This, This>
@@ -38,6 +40,16 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     
     @Factory
     public static <V, T> FluentAssert<T> assertThat(MatchValueAdapter<? super V, T> adapter, V object) {
+        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+    }
+    
+    @Factory
+    public static <V, T> FluentAssert<T> assertThat(V object, MatchValueAdapter<? super V, T> adapter) {
+        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+    }
+    
+    @Factory
+    public static <V, T> FluentAssert<T> assertThat(MatchValue<? extends V> object, MatchValueAdapter<? super V, T> adapter) {
         return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
     }
     
@@ -108,21 +120,48 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <P> FluentPropertyAssert<Value, P> and(MatchValueAdapter<? super Value, P> adapter) {
+    public This andNot(Matcher<? super Value> matcher) {
+        _and();
+        _not();
+        return _match(matcher);
+    }
+
+    @Override
+    public This and(Value value) {
+        _and();
+        return _match(value);
+    }
+
+    @Override
+    public This andNot(Value value) {
+        _and();
+        _not();
+        return _match(value);
+    }
+
+    @Override
+    public <NextProperty> FluentPropertyAssert<Value, NextProperty> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         return _adapt(adapter);
     }
 
     @Override
-    public <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter) {
+    public <NextProperty> FluentPropertyAssert<Value, NextProperty> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         _not();
         return _adapt(adapter);
     }
 
     @Override
-    public <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher) {
+    public <NextProperty> FluentAssert<Value> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _and();
+        return _match(adapter, matcher);
+    }
+
+    @Override
+    public <NextProperty> FluentAssert<Value> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+        _and();
+        _not();
         return _match(adapter, matcher);
     }
 

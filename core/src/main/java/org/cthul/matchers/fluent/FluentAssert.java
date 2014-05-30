@@ -75,6 +75,20 @@ public interface FluentAssert<Value>
     FluentAssert<Value> hasNot(Matcher<? super Value> matcher);
 
     /**
+     * Equivalent to {@link #and() and()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentAssert<Value> and(Matcher<? super Value> matcher);
+
+    /**
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(Matcher) ._(matcher)}.
+     * @param matcher the matcher
+     * @return this
+     */
+    FluentAssert<Value> andNot(Matcher<? super Value> matcher);
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -99,11 +113,18 @@ public interface FluentAssert<Value>
     FluentAssert<Value> isNot(Value value);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #__(Matcher) \u2024_(matcher)}.
-     * @param matcher the matcher
+     * Equivalent to {@link #and() and()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
      * @return this
      */
-    FluentAssert<Value> and(Matcher<? super Value> matcher);
+    FluentAssert<Value> and(Value value);
+
+    /**
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #equalTo(Object) .equalTo(value)}.
+     * @param value the value
+     * @return this
+     */
+    FluentAssert<Value> andNot(Value value);
 
     /**
      * {@inheritDoc}
@@ -145,60 +166,69 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> __(MatchValueAdapter<? super Value, P> matcher);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> has(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> not(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentPropertyAssert<Value, P> hasNot(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyAssert<Value, P> and(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
-     * Equivalent to {@link #and() and()}{@link #not() \u2024not()}{@link #__(MatchValueAdapter) \u2024_(adapter)}.
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <P> FluentPropertyAssert<Value, P> andNot(MatchValueAdapter<? super Value, P> adapter);
+    <NextProperty> FluentPropertyAssert<Value, NextProperty> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> __(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentAssert<Value> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <P> FluentAssert<Value> has(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentAssert<Value> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
     
     /**
-     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter, Matcher) \u2024_(adapter, matcher)}.
-     * @param <P> property type
+     * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
      * @param adapter the adapter
      * @param matcher the matcher
      * @return this
      */
-    <P> FluentAssert<Value> and(MatchValueAdapter<? super Value, P> adapter, Matcher<? super P> matcher);
+    <NextProperty> FluentAssert<Value> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
+
+    /**
+     * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter, Matcher) ._(adapter, matcher)}.
+     * @param <NextProperty> property type
+     * @param adapter the adapter
+     * @param matcher the matcher
+     * @return this
+     */
+    <NextProperty> FluentAssert<Value> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher);
 
     /**
      * {@inheritDoc}

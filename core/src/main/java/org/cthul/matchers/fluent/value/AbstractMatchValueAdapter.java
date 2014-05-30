@@ -8,6 +8,9 @@ import org.cthul.matchers.diagnose.result.AbstractMatchResult;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultMismatch;
 import org.cthul.matchers.diagnose.result.MatchResultSuccess;
+import org.cthul.matchers.fluent.adapters.SimpleAdapter;
+import org.cthul.matchers.fluent.adapters.SimpleAnyOfAdapter;
+import org.cthul.matchers.fluent.adapters.SimpleEachOfAdapter;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.hamcrest.Description;
@@ -20,8 +23,14 @@ import org.hamcrest.SelfDescribing;
  * <p>
  * Subclasses will implement {@link #adapt(MatchValue)} to return
  * an instance of {@link AbstractAdaptedValue}.
+ * <p>
+ * User will probably rather implement one of {@link SimpleAdapter},
+ * {@link SimpleEachOfAdapter}, or {@link SimpleAnyOfAdapter}.
  * @param <Value>
  * @param <Property>
+ * @see SimpleAdapter
+ * @see SimpleEachOfAdapter
+ * @see SimpleAnyOfAdapter
  */
 public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchValueAdapterBase<Value, Property> {
     

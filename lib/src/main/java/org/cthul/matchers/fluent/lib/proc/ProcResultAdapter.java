@@ -30,7 +30,7 @@ public class ProcResultAdapter<T> extends SimpleAdapter<Proc, T> {
         return INSTANCE.adapt(proc);
     }
     
-    //@Factory
+    @Factory
     public static <V, T> MatchValueAdapter<V, T> resultOf(MatchValueAdapter<V, ? extends Proc> proc) {
         return INSTANCE.adapt(proc);
     }

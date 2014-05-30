@@ -9,6 +9,7 @@ import org.hamcrest.Factory;
 
 /**
  *
+ * @param <Property>
  */
 public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
     
