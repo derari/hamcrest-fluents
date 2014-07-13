@@ -1,0 +1,48 @@
+api1 {
+    println scriptFile("FluentProperty.def.groovy")
+
+    def flApi = evaluate(scriptFile("FluentProperty.def.groovy"))
+
+    generateInterface {
+        comment = "Fluent that matches a property of a value.\n<p>\nAfter the match, the fluent chain goes back to the value itself."
+        typeParameters = "Value, Property"
+        docTags = ["param <Value> the base value's type", 
+                   "param <Property> the value's property type"]
+
+        flApi.core.each { mDef ->
+            generateMethod(mDef.name) {
+                signature = mDef.sig
+                def mTags = mDef.tags
+                if (mDef.ret == "This") {
+                    mTags += "return this property"
+                    returns = "FluentProperty<Value, Property>"
+                } else if (mDef.ret == "Fluent") {
+                    mTags += "return the fluent"
+                    returns = "Fluent<Value>"
+                } else {
+                    returns = cl(mDef.ret)
+                }
+                comment = mDef.comment
+                docTags = mTags
+            }
+        }
+        
+//        ["is", "has", "not"].each { pre ->
+//            generateMethods(methods) {
+//                def paramTypes = parameters*.type*.fullyQualifiedName.join(",")
+//                def paramNames = parameters*.name.join(",")
+//                comment = "Equivalent to calling {@link #${pre}() ${pre}()}{@link #${name}(${paramTypes}) .${name}(${paramNames})}."
+//                name = pre
+//            }
+
+//            if (pre != "not") {
+//                generateMethods(methods) {
+//                    def paramTypes = parameters*.type*.fullyQualifiedName.join(",")
+//                    def paramNames = parameters*.name.join(",")
+//                    comment = "Equivalent to calling {@link #${pre}() ${pre}()}{@link #not() .not()}{@link #${name}(${paramTypes}) .${name}(${paramNames})}."
+//                    name = pre + "Not"
+//                }
+//            }
+//        }
+    }
+}
