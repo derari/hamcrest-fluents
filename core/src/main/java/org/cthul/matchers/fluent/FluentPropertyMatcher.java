@@ -292,13 +292,13 @@ public interface FluentPropertyMatcher<Value, Property, Match>
      * {@inheritDoc}
      */
     @Override
-    <Property2 extends Property> FluentMatcher<? extends Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
+    <Property2 extends Property> FluentMatcher<Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <Property2 extends Property> IsA<? extends Value, Property2, Match> isA(Class<Property2> clazz);
+    <Property2 extends Property> IsA<Value, Property2, Match> isA(Class<Property2> clazz);
     
     /**
      * A proxy for a {@link FluentMatcher} that allows to also match against some

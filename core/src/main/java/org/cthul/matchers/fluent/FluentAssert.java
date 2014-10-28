@@ -270,16 +270,18 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
-    <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
+    <Value2 extends Value> FluentAssert<Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
 
     /**
      * Immediately adds a matcher to the fluent that matches only 
-     * instances of {@code clazz}, and changes the type of this
-     * fluent to {@code Value2}.
+     * instances of {@code clazz}.
      * @param <Value2> expected type
      * @param clazz expected type
      * @return isA fluent
      */
     @Override
-    <Value2 extends Value> FluentPropertyAssert.IsA<Value2, Value2> isA(Class<Value2> clazz);
+    <Value2 extends Value> FluentPropertyAssert.IsA<Value, Value2> isA(Class<Value2> clazz);
+
+    @Override
+    <Value2 extends Value> FluentAssert<Value2> as(Class<Value2> clazz);
 }

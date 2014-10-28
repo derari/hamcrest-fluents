@@ -22,121 +22,121 @@ public interface FluentPropertyImpl
                 <Value, Property, ThisFluent extends Fluent<Value>,
                  This extends FluentPropertyImpl<Value, Property, ThisFluent, This>>
                 extends FluentProperty<Value, Property> {
-    
-    @Override
-    This is();
-
-    @Override
-    This has();
-
-    @Override
-    This not();
-
-    @Override
-    ThisFluent __(Matcher<? super Property> matcher);
-
-    @Override
-    default ThisFluent is(Matcher<? super Property> matcher) {
-        return is().__(matcher);
-    }
-
-    @Override
-    default ThisFluent has(Matcher<? super Property> matcher) {
-        return has().__(matcher);
-    }
-
-    @Override
-    default ThisFluent not(Matcher<? super Property> matcher) {
-        return not().__(matcher);
-    }
-
-    @Override
-    default ThisFluent isNot(Matcher<? super Property> matcher) {
-        return is().not().__(matcher);
-    }
-
-    @Override
-    default ThisFluent hasNot(Matcher<? super Property> matcher) {
-        return has().not().__(matcher);
-    }
-    
-    @Override
-    default ThisFluent equalTo(Property value) {
-        return FluentPropertyImpl.this.__(IsEqual.equalTo(value));
-    }
-    
-    @Override
-    default ThisFluent is(Property value) {
-        return is().equalTo(value);
-    }
-    
-    @Override
-    default ThisFluent not(Property value) {
-        return not().equalTo(value);
-    }
-    
-    @Override
-    default ThisFluent isNot(Property value) {
-        return is().not().equalTo(value);
-    }
-
-    @Override
-    default ThisFluent all(Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(AndChainMatcher.all(matchers));
-    }
-
-    @Override
-    default ThisFluent any(Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(OrChainMatcher.any(matchers));
-    }
-
-    @Override
-    default ThisFluent none(Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(NOrChainMatcher.none(matchers));
-    }
-    
-    @Override
-    default ThisFluent matches(int count, Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(SomeOfChainMatcher.matches(count, matchers));
-    }
-    
-    @Override
-    default ThisFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(SomeOfChainMatcher.matches(countMatcher, matchers));
-    }
-    
-    @Override
-    default ThisFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
-        return FluentPropertyImpl.this.__(chainType.create(matchers));
-    }
-
-    @Override
-    <P> FluentProperty<Value, P> __(MatchValueAdapter<? super Property, P> adapter);
-
-    @Override
-    default <P> FluentProperty<Value, P> has(MatchValueAdapter<? super Property, P> adapter) {
-        return has().__(adapter);
-    }
-
-    @Override
-    default <P> FluentProperty<Value, P> not(MatchValueAdapter<? super Property, P> adapter) {
-        return not().__(adapter);
-    }
-
-    @Override
-    default <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter) {
-        return has().not().__(adapter);
-    }
-
-    @Override
-    default <P> Fluent<Value> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
-        return __(adapter.adapt(matcher));
-    }
-
-    @Override
-    default <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
-        return has().__(adapter, matcher);
-    }
+//    
+//    @Override
+//    This is();
+//
+//    @Override
+//    This has();
+//
+//    @Override
+//    This not();
+//
+//    @Override
+//    ThisFluent __(Matcher<? super Property> matcher);
+//
+//    @Override
+//    default ThisFluent is(Matcher<? super Property> matcher) {
+//        return is().__(matcher);
+//    }
+//
+//    @Override
+//    default ThisFluent has(Matcher<? super Property> matcher) {
+//        return has().__(matcher);
+//    }
+//
+//    @Override
+//    default ThisFluent not(Matcher<? super Property> matcher) {
+//        return not().__(matcher);
+//    }
+//
+//    @Override
+//    default ThisFluent isNot(Matcher<? super Property> matcher) {
+//        return is().not().__(matcher);
+//    }
+//
+//    @Override
+//    default ThisFluent hasNot(Matcher<? super Property> matcher) {
+//        return has().not().__(matcher);
+//    }
+//    
+//    @Override
+//    default ThisFluent equalTo(Property value) {
+//        return FluentPropertyImpl.this.__(IsEqual.equalTo(value));
+//    }
+//    
+//    @Override
+//    default ThisFluent is(Property value) {
+//        return is().equalTo(value);
+//    }
+//    
+//    @Override
+//    default ThisFluent not(Property value) {
+//        return not().equalTo(value);
+//    }
+//    
+//    @Override
+//    default ThisFluent isNot(Property value) {
+//        return is().not().equalTo(value);
+//    }
+//
+//    @Override
+//    default ThisFluent all(Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(AndChainMatcher.all(matchers));
+//    }
+//
+//    @Override
+//    default ThisFluent any(Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(OrChainMatcher.any(matchers));
+//    }
+//
+//    @Override
+//    default ThisFluent none(Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(NOrChainMatcher.none(matchers));
+//    }
+//    
+//    @Override
+//    default ThisFluent matches(int count, Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(SomeOfChainMatcher.matches(count, matchers));
+//    }
+//    
+//    @Override
+//    default ThisFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(SomeOfChainMatcher.matches(countMatcher, matchers));
+//    }
+//    
+//    @Override
+//    default ThisFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
+//        return FluentPropertyImpl.this.__(chainType.create(matchers));
+//    }
+//
+//    @Override
+//    <P> FluentProperty<Value, P> __(MatchValueAdapter<? super Property, P> adapter);
+//
+//    @Override
+//    default <P> FluentProperty<Value, P> has(MatchValueAdapter<? super Property, P> adapter) {
+//        return has().__(adapter);
+//    }
+//
+//    @Override
+//    default <P> FluentProperty<Value, P> not(MatchValueAdapter<? super Property, P> adapter) {
+//        return not().__(adapter);
+//    }
+//
+//    @Override
+//    default <P> FluentProperty<Value, P> hasNot(MatchValueAdapter<? super Property, P> adapter) {
+//        return has().not().__(adapter);
+//    }
+//
+//    @Override
+//    default <P> Fluent<Value> __(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
+//        return __(adapter.adapt(matcher));
+//    }
+//
+//    @Override
+//    default <P> Fluent<Value> has(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
+//        return has().__(adapter, matcher);
+//    }
     
 //    /**
 //     * Returns a {@link MatchesSome} that expects 

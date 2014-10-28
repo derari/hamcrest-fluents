@@ -292,13 +292,22 @@ public interface FluentPropertyAssert<Value, Property>
      * {@inheritDoc}
      */
     @Override
-    <Property2 extends Property> FluentAssert<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
+    <Property2 extends Property> FluentAssert<Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <Property2 extends Property> IsA<? extends Value, Property2> isA(Class<Property2> clazz);
+    <Property2 extends Property> IsA<Value, Property2> isA(Class<Property2> clazz);
+    
+    /**
+     * Immediately adds a matcher to verify the property's class,
+     * and changes the type of this fluent.
+     * @param <Property2>
+     * @param clazz
+     * @return this
+     */
+    <Property2 extends Property> FluentPropertyAssert<? extends Value, Property2> as(Class<Property2> clazz);
 
     /**
      * A proxy for a {@link FluentAssert} that allows to also match against some

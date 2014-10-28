@@ -398,12 +398,12 @@ public abstract class AbstractFluentPropertyBuilder
     }
     
     @Override
-    public <Property2 extends Property> Fluent<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
+    public <Property2 extends Property> Fluent<Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return _match(InstanceOf.isA(clazz).that(matcher));
     }
 
     @Override
-    public <Property2 extends Property> FluentProperty.IsA<? extends Value, Property2> isA(Class<Property2> clazz) {
+    public <Property2 extends Property> FluentProperty.IsA<Value, Property2> isA(Class<Property2> clazz) {
         IsAImpl<Property> isA = new IsAImpl<>(clazz, this);
         ThisFluent fluent = _match(isA.getInternalMatcher());
         Class[] actualIface = { getIsAInterface() };

@@ -237,11 +237,11 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      * @param <Value2> expected type
      */
     @Override
-    <Value2 extends Value> Fluent<? extends Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
+    <Value2 extends Value> Fluent<Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
         
     /**
      * {@inheritDoc}
      */
     @Override
-    <Property2 extends Value> FluentProperty.IsA<? extends Value, Property2> isA(Class<Property2> clazz);
+    <Property2 extends Value> FluentProperty.IsA<Value, Property2> isA(Class<Property2> clazz);
 }

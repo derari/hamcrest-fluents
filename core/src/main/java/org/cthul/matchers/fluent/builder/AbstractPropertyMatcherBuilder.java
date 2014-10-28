@@ -123,12 +123,12 @@ public abstract class AbstractPropertyMatcherBuilder
     }
     
     @Override
-    public <Property2 extends Property> FluentMatcher<? extends Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
+    public <Property2 extends Property> FluentMatcher<Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return (FluentMatcher) super.isA(clazz, matcher);
     }
 
     @Override
-    public <Property2 extends Property> FluentPropertyMatcher.IsA<? extends Value, Property2, Match> isA(Class<Property2> clazz) {
+    public <Property2 extends Property> FluentPropertyMatcher.IsA<Value, Property2, Match> isA(Class<Property2> clazz) {
         return (FluentPropertyMatcher.IsA) super.isA(clazz);
     }
 

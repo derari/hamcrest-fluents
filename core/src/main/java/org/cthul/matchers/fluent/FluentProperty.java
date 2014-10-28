@@ -376,7 +376,7 @@ public interface FluentProperty<Value, Property> {
      * @param matcher the matcher
      * @return fluent
      */
-    <Property2 extends Property> Fluent<? extends Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
+    <Property2 extends Property> Fluent<Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher);
 
     /**
      * Immediately adds a matcher to the fluent that matches only 
@@ -389,7 +389,7 @@ public interface FluentProperty<Value, Property> {
      * @param clazz expected type
      * @return isA fluent
      */
-    <Property2 extends Property> IsA<? extends Value, Property2> isA(Class<Property2> clazz);
+    <Property2 extends Property> IsA<Value, Property2> isA(Class<Property2> clazz);
 
     /**
      * A proxy for a {@link Fluent} that allows to also match against some
