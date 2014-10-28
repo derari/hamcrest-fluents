@@ -11,6 +11,7 @@ import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
+import org.cthul.matchers.fluent.ext.ExtendableFluentMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.*;
 
@@ -23,7 +24,8 @@ import org.hamcrest.*;
 public class FluentMatcherBuilder
                 <Value, Match, This extends FluentMatcherBuilder<Value, Match, This>>
                 extends AbstractPropertyMatcherBuilder<Value, Value, Match, This, This>
-                implements FluentMatcher<Value, Match> {
+                implements FluentMatcher<Value, Match>,
+                ExtendableFluentMatcher<Value, Match, This> {
     
     @Factory
     public static <V> FluentMatcher<V, V> match() {
@@ -236,47 +238,42 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _and();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _and();
         _not();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _or();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _or();
         _not();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _xor();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentMatcher<Value, Match> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _xor();
         _not();
         return _match(adapter, matcher);
-    }
-
-    @Override
-    public <Value2 extends Value> FluentMatcher<Value, Match> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
-        return (FluentMatcher) super.isA(clazz, matcher);
     }
 
     @Override

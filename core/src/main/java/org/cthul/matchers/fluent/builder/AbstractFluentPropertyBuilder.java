@@ -8,6 +8,7 @@ import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
+import org.cthul.matchers.fluent.ext.ExtendableFluentProperty;
 import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
@@ -23,8 +24,9 @@ import org.hamcrest.core.IsEqual;
  */
 public abstract class AbstractFluentPropertyBuilder
                 <Value, Property, ThisFluent extends Fluent<Value>,
-                 This extends FluentProperty<Value, Property>>
-                implements FluentProperty<Value, Property> {
+                 This extends AbstractFluentPropertyBuilder<Value, Property, ThisFluent, This>>
+                implements FluentProperty<Value, Property>,
+                ExtendableFluentProperty<Value, Property, ThisFluent, This> {
     
     private boolean negate = false;
     private String prefix = null;
@@ -398,7 +400,7 @@ public abstract class AbstractFluentPropertyBuilder
     }
     
     @Override
-    public <Property2 extends Property> Fluent<Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
+    public <Property2 extends Property> ThisFluent isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return _match(InstanceOf.isA(clazz).that(matcher));
     }
 

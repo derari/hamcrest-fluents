@@ -4,6 +4,7 @@ import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
+import org.cthul.matchers.fluent.ext.ExtendableFluentPropertyAssert;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.cthul.matchers.object.InstanceOf;
 import org.hamcrest.Matcher;
@@ -17,9 +18,10 @@ import org.hamcrest.Matcher;
  */
 public abstract class AbstractPropertyAssertBuilder
                 <Value, Property, ThisFluent extends FluentAssert<Value>,
-                 This extends FluentPropertyAssert<Value, Property>>
+                 This extends AbstractPropertyAssertBuilder<Value, Property, ThisFluent, This>>
                 extends AbstractFluentPropertyBuilder<Value, Property, ThisFluent, This>
-                implements FluentPropertyAssert<Value, Property> {
+                implements FluentPropertyAssert<Value, Property>,
+                ExtendableFluentPropertyAssert<Value, Property, ThisFluent, This> {
 
     @Override
     protected <P> FluentPropertyAssert<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
@@ -120,11 +122,6 @@ public abstract class AbstractPropertyAssertBuilder
         public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
             super(property, chainType);
         }
-    }
-    
-    @Override
-    public <Property2 extends Property> FluentAssert<Value> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
-        return (FluentAssert) super.isA(clazz, matcher);
     }
 
     @Override

@@ -166,11 +166,6 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <Value2 extends Value> FluentAssert<Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher) {
-        return (FluentAssert) super.isA(clazz, matcher);
-    }
-
-    @Override
     public <Value2 extends Value> FluentPropertyAssert.IsA<Value, Value2> isA(Class<Value2> clazz) {
         return (FluentPropertyAssert.IsA) super.isA(clazz);
     }

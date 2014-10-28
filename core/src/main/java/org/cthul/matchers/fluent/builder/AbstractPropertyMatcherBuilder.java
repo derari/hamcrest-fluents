@@ -4,6 +4,7 @@ import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
+import org.cthul.matchers.fluent.ext.ExtendableFluentPropertyMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -19,7 +20,8 @@ public abstract class AbstractPropertyMatcherBuilder
                 <Value, Property, Match, ThisFluent extends FluentMatcher<Value, Match>,
                  This extends AbstractPropertyMatcherBuilder<Value, Property, Match, ThisFluent, This>>
                 extends AbstractFluentPropertyBuilder<Value, Property, ThisFluent, This>
-                implements FluentPropertyMatcher<Value, Property, Match> {
+                implements FluentPropertyMatcher<Value, Property, Match>,
+                ExtendableFluentPropertyMatcher<Value, Property, Match, ThisFluent, This> {
 
     @Override
     protected <P> FluentPropertyMatcher<Value, P, Match> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
@@ -120,11 +122,6 @@ public abstract class AbstractPropertyMatcherBuilder
         public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
             super(property, chainType);
         }
-    }
-    
-    @Override
-    public <Property2 extends Property> FluentMatcher<Value, Match> isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
-        return (FluentMatcher) super.isA(clazz, matcher);
     }
 
     @Override

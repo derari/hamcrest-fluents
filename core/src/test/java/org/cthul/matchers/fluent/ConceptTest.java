@@ -50,13 +50,13 @@ public class ConceptTest {
                 .and().not(hasItem(7));
         
         assertThat((Object) 1)
-                .isA(Integer.class)
-                .that().is(lessThan(3))
+                .as(Integer.class)
+                .is(lessThan(3))
                 .and(greaterThan(0));
         
         assertThat((Object) 1)
                 .isA(Integer.class, lessThan(3))
-                .and().is(equalTo((Number) 1));
+                .and().isA(Integer.class, equalTo((Number) 1));
         
         assertThat(list)
                 .isNot(empty())
