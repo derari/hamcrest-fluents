@@ -1,11 +1,13 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.FluentAssert;
+import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.fluent.ext.ExtendableFluentPropertyAssert;
+import org.cthul.matchers.fluent.ext.ExtendedAdapter.Matchable;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.object.InstanceOf;
 import org.hamcrest.Matcher;
 
@@ -24,8 +26,8 @@ public abstract class AbstractPropertyAssertBuilder
                 ExtendableFluentPropertyAssert<Value, Property, ThisFluent, This> {
 
     @Override
-    protected <P> FluentPropertyAssert<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
-        return new AssertPropertyBuilder<>(adapter, prefix, not);
+    protected <P> FluentPropertyAssert<Value, P> _newProperty(Matchable<P, ThisFluent> matchable) {
+        return new AssertPropertyBuilder<>(matchable);
     }
 
     @Override
@@ -140,31 +142,28 @@ public abstract class AbstractPropertyAssertBuilder
         return FluentPropertyAssert.IsA.class;
     }
     
-    protected class AssertPropertyBuilder
-                    <Property2, This2 extends AssertPropertyBuilder<Property2, This2>>
-                    extends AbstractPropertyAssertBuilder<Value, Property2, ThisFluent, This2> 
-                    /*implements FluentPropertyAssert<Value, Property2>*/ {
+    protected static class AssertPropertyBuilder
+                    <Value, Property, 
+                     ThisFluent extends FluentAssert<Value>,
+                     This extends AssertPropertyBuilder<Value, Property, ThisFluent, This>>
+                     extends AbstractPropertyAssertBuilder<Value, Property, ThisFluent, This> {
         
-        private final MatchValueAdapter<? super Property, Property2> adapter;
-        private final String flPrefix;
-        private final boolean flNot;
+        private final Matchable<Property, ThisFluent> matchable;
 
-        public AssertPropertyBuilder(MatchValueAdapter<? super Property, Property2> adapter, String prefix, boolean not) {
-            this.adapter = adapter;
-            this.flPrefix = prefix;
-            this.flNot = not;
+        public AssertPropertyBuilder(Matchable<Property, ThisFluent> matchable) {
+            this.matchable = matchable;
+        }
+        
+        @Override
+        protected ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not) {
+            matcher = CIs.wrap(prefix, not, matcher);
+            return matchable.apply(matcher);
         }
 
         @Override
-        protected ThisFluent _applyMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyAssertBuilder.this._apply(m, flPrefix, flNot);
-        }      
-        
-        @Override
-        protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyAssertBuilder.this._update(m, flPrefix, flNot);
-        }
+        protected ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not) {
+            matcher = CIs.wrap(prefix, not, matcher);
+            return matchable.update(matcher);
+        }   
     }
 }

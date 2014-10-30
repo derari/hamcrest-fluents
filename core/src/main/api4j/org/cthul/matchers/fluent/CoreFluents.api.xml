@@ -1,9 +1,9 @@
 <matchers>
     
     <factory class="org.cthul.matchers.fluent.adapters.AnyOfAdapter"/>   
-    <factory class="org.cthul.matchers.fluent.adapters.AsType"/> 
+    <factory class="org.cthul.matchers.fluent.adapters.AsTypeAdapter"/> 
     <factory class="org.cthul.matchers.fluent.adapters.EachOfAdapter"/>
-    <factory class="org.cthul.matchers.fluent.adapters.IdentityValue"/>
+    <!--<factory class="org.cthul.matchers.fluent.adapters.IdentityValue"/>-->
     <factory class="org.cthul.matchers.fluent.adapters.LambdaAdapter"/>
 
     <factory class="org.cthul.matchers.fluent.builder.FluentAssertBuilder"/>

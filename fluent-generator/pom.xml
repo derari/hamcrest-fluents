@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>cthul-fluent-matchers-parent</artifactId>
+        <groupId>org.cthul.matchers.fluent</groupId>
+        <version>1.0</version>
+    </parent>
+    <groupId>org.cthul.matchers.fluent</groupId>
+    <artifactId>cthul-fluent-matchers-generator</artifactId>
+    <version>1.0</version>
+    <name>Cthul Hamcrest Fluents Generator</name>
+    <url>http://cthul.org</url>
+    <description>
+        Processes XML configurations to generate fluents.
+    </description>
+    <distributionManagement>
+        <site>
+            <id>cthul-objects-maven-docs</id>
+            <url>${project.url.docs}objects/</url>
+        </site>
+    </distributionManagement>
+    <properties>
+        <build.freemarker.sourceDirectory>target/generated-sources/freemarker</build.freemarker.sourceDirectory>
+    </properties>
+    <profiles> 
+        
+    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>    
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.cthul.api4j</groupId>
+            <artifactId>api4j-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.twip</groupId>
+            <artifactId>twip</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

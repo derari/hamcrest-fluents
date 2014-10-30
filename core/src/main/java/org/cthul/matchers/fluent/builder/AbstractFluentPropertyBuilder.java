@@ -5,10 +5,17 @@ import java.util.Arrays;
 import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.object.InstanceOf;
 import org.cthul.matchers.chain.*;
+import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
+import org.cthul.matchers.diagnose.nested.Nested;
+import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.ext.ExtendableFluentProperty;
+import org.cthul.matchers.fluent.ext.ExtendedAdapter;
+import org.cthul.matchers.fluent.ext.ExtendedAdapter.FluentPropertyFactory;
+import org.cthul.matchers.fluent.ext.ExtendedAdapter.Matchable;
 import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
@@ -80,6 +87,9 @@ public abstract class AbstractFluentPropertyBuilder
     }
     
     protected ThisFluent _match(Property value) {
+        if (value instanceof Matcher) {
+            return _match(new AmbiguousValueMatcher<>(value));
+        }
         return _match(IsEqual.equalTo(value));
     }
     
@@ -104,7 +114,34 @@ public abstract class AbstractFluentPropertyBuilder
     
     protected abstract ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
     
-    protected abstract <P> FluentProperty<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not);
+    protected <P> FluentProperty<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
+        return _newProperty(matchable(adapter, prefix, not));
+    }
+    
+    protected <P, FlP> FlP _newProperty(FluentPropertyFactory<P, ThisFluent, FlP> factory, MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
+        return factory.create(matchable(adapter, prefix, not));
+    }
+    
+    protected <P, FlP> FlP _newProperty(ExtendedAdapter<Property, P, ThisFluent, FlP> adapter, String prefix, boolean not) {
+        return _newProperty(adapter.getFactory(), adapter.getAdapter(), prefix, not);
+    }
+    
+    protected abstract <P> FluentProperty<Value, P> _newProperty(Matchable<P, ThisFluent> matchable);
+    
+    protected <P> Matchable<P, ThisFluent> matchable(final MatchValueAdapter<? super Property, P> adapter, final String prefix, final boolean not) {
+        return new ExtendedAdapter.Matchable<P, ThisFluent>() {
+            @Override
+            public ThisFluent apply(Matcher<? super P> matcher) {
+                Matcher<? super Property> m = adapter.adapt(matcher);
+                return _apply(m, prefix, not);
+            }
+            @Override
+            public ThisFluent update(Matcher<? super P> matcher) {
+                Matcher<? super Property> m = adapter.adapt(matcher);
+                return _update(m, prefix, not);
+            }
+        };
+    }
     
 //    @Override
 //    public This as(String reason) {
@@ -175,7 +212,8 @@ public abstract class AbstractFluentPropertyBuilder
 
     @Override
     public ThisFluent equalTo(Property value) {
-        return _match(value);
+        // don't use _match(value) this call is not ambiguous
+        return _match(IsEqual.equalTo(value));
     }
 
     @Override
@@ -508,5 +546,48 @@ public abstract class AbstractFluentPropertyBuilder
                 isA.describeTo(description);
             }
         }       
+    }
+    
+    private static class AmbiguousValueMatcher<T> extends NestedResultMatcher<T> {
+        private final Matcher<T> equalToMatcher;
+        private final Matcher<T> matcherValue;
+        
+        public AmbiguousValueMatcher(T value) {
+            this.equalToMatcher = IsEqual.equalTo(value);
+            this.matcherValue = (Matcher) value;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            matcherValue.describeTo(description);
+        }
+
+        @Override
+        public int getDescriptionPrecedence() {
+            return Nested.precedenceOf(matcherValue);
+        }
+        
+        @Override
+        public boolean matches(Object o) {
+            return equalToMatcher.matches(o) ||
+                    matcherValue.matches(o);
+        }
+
+        @Override
+        public <I> MatchResult<I> matchResult(I item) {
+            if (item instanceof Matcher) {
+                if (equalToMatcher.matches(item)) {
+                    return QuickDiagnose.matchResult(equalToMatcher, item);
+                }
+                if (matcherValue.matches(item)) {
+                    return QuickDiagnose.matchResult(equalToMatcher, item);
+                }
+                return QuickDiagnose.matchResult(equalToMatcher, item);
+            }
+            if (equalToMatcher.matches(item)) {
+                return QuickDiagnose.matchResult(equalToMatcher, item);
+            }
+            return QuickDiagnose.matchResult(matcherValue, item);
+        }
     }
 }

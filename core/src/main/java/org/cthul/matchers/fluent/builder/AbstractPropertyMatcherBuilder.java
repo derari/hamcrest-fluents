@@ -1,11 +1,12 @@
 package org.cthul.matchers.fluent.builder;
 
-import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.chain.ChainFactory;
 import org.cthul.matchers.fluent.FluentMatcher;
 import org.cthul.matchers.fluent.FluentPropertyMatcher;
 import org.cthul.matchers.fluent.ext.ExtendableFluentPropertyMatcher;
+import org.cthul.matchers.fluent.ext.ExtendedAdapter.Matchable;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.cthul.matchers.object.CIs;
 import org.hamcrest.Matcher;
 
 /**
@@ -24,8 +25,8 @@ public abstract class AbstractPropertyMatcherBuilder
                 ExtendableFluentPropertyMatcher<Value, Property, Match, ThisFluent, This> {
 
     @Override
-    protected <P> FluentPropertyMatcher<Value, P, Match> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
-        return new MatcherPropertyBuilder<>(adapter, prefix, not);
+    protected <P> FluentPropertyMatcher<Value, P, Match> _newProperty(Matchable<P, ThisFluent> matchable) {
+        return new MatcherPropertyBuilder<>(matchable);
     }
 
     @Override
@@ -134,31 +135,57 @@ public abstract class AbstractPropertyMatcherBuilder
         return FluentPropertyMatcher.IsA.class;
     }
     
-    protected class MatcherPropertyBuilder
-                    <Property2, This2 extends MatcherPropertyBuilder<Property2, This2>>
-                    extends AbstractPropertyMatcherBuilder<Value, Property2, Match, ThisFluent, This2> 
-                    implements FluentPropertyMatcher<Value, Property2, Match> {
+    protected static class MatcherPropertyBuilder
+                    <Value, Property, Match,
+                     ThisFluent extends FluentMatcher<Value, Match>,
+                     This extends MatcherPropertyBuilder<Value, Property, Match, ThisFluent, This>>
+                    extends AbstractPropertyMatcherBuilder<Value, Property, Match, ThisFluent, This> 
+                    implements FluentPropertyMatcher<Value, Property, Match> {
         
-        private final MatchValueAdapter<? super Property, Property2> adapter;
-        private final String flPrefix;
-        private final boolean flNot;
+        private final Matchable<Property, ThisFluent> matchable;
 
-        public MatcherPropertyBuilder(MatchValueAdapter<? super Property, Property2> adapter, String prefix, boolean not) {
-            this.adapter = adapter;
-            this.flPrefix = prefix;
-            this.flNot = not;
+        public MatcherPropertyBuilder(Matchable<Property, ThisFluent> matchable) {
+            this.matchable = matchable;
         }
 
         @Override
-        protected ThisFluent _applyMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyMatcherBuilder.this._apply(m, flPrefix, flNot);
+        protected ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not) {
+            matcher = CIs.wrap(prefix, not, matcher);
+            return matchable.apply(matcher);
         }
 
         @Override
-        protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
-            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
-            return AbstractPropertyMatcherBuilder.this._update(m, flPrefix, flNot);
+        protected ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not) {
+            matcher = CIs.wrap(prefix, not, matcher);
+            return matchable.update(matcher);
         }
     }
+//    
+//    protected class MatcherPropertyBuilder
+//                    <Property2, This2 extends MatcherPropertyBuilder<Property2, This2>>
+//                    extends AbstractPropertyMatcherBuilder<Value, Property2, Match, ThisFluent, This2> 
+//                    implements FluentPropertyMatcher<Value, Property2, Match> {
+//        
+//        private final MatchValueAdapter<? super Property, Property2> adapter;
+//        private final String flPrefix;
+//        private final boolean flNot;
+//
+//        public MatcherPropertyBuilder(MatchValueAdapter<? super Property, Property2> adapter, String prefix, boolean not) {
+//            this.adapter = adapter;
+//            this.flPrefix = prefix;
+//            this.flNot = not;
+//        }
+//
+//        @Override
+//        protected ThisFluent _applyMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
+//            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
+//            return AbstractPropertyMatcherBuilder.this._apply(m, flPrefix, flNot);
+//        }
+//
+//        @Override
+//        protected ThisFluent _updateMatcher(Matcher<? super Property2> matcher, String prefix, boolean not) {
+//            Matcher<? super Property> m = adapter.adapt(CIs.wrap(prefix, not, matcher));
+//            return AbstractPropertyMatcherBuilder.this._update(m, flPrefix, flNot);
+//        }
+//    }
 }

@@ -10,7 +10,7 @@
     <artifactId>cthul-fluent-matchers-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-    <name>Cthul Hamcrest Fluents POM</name>
+    <name>Cthul Fluents Matchers POM</name>
     <url>http://cthul.org/fluent-matchers</url>
     <description>
         Fluents for Hamcrest -- Parent POM
@@ -18,6 +18,8 @@
     <modules>
         <module>core</module>
         <module>lib</module>
+        <module>fluent-generator</module>
+        <module>lib8</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

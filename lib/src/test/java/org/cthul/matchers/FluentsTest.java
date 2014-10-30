@@ -14,6 +14,5 @@ public class FluentsTest {
         assertThat(eachOf(list))
                 .isA(Integer.class)
                 .and().is(lessThan(10));
-        
     }
 }

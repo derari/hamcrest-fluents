@@ -3,7 +3,10 @@ package org.cthul.matchers.fluent.builder;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.FluentPropertyAssert;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
-import org.cthul.matchers.fluent.value.*;
+import org.cthul.matchers.fluent.value.ElementMatcher;
+import org.cthul.matchers.fluent.value.ElementMatcherWrapper;
+import org.cthul.matchers.fluent.value.MatchValue;
+import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
@@ -66,14 +69,11 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     private int matcherCounter = 0;
     private final MatchValue<Value> matchValue;
     private final FailureHandler failureHandler;
-    
-    public final FluentAssertBuilder<Value, This> and;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public FluentAssertBuilder(FailureHandler failureHandler, MatchValue<Value> matchValues) {
         this.matchValue = matchValues;
         this.failureHandler = failureHandler;
-        this.and = this;
     }
 
     public FluentAssertBuilder(FailureHandler failureHandler, Value item) {

@@ -1,0 +1,29 @@
+api1 {
+
+    def genericArgs = "<Value,Property,ThisFluent,This>"
+    def fluents = [
+            "ObjectFluent": [
+                matchers: ["sameInstance", "nullValue", "notNullValue"]
+                ],
+            "AnyObjectFluent": [
+                extends: ["ObjectFluent"]
+                ]
+        ]
+
+    def clFlMatchers = "org.cthul.matchers.FlMatchers".asClass()
+
+    fluents.each { name, decl ->
+        generatedInterface (name) {
+            typeParameters << ["Value", "Property", 
+                    "ThisFluent extends org.cthul.matchers.fluent.Fluent<Value>",
+                    "This extends " + name + genericArgs]
+            interfaces << "org.cthul.matchers.fluent.ext.ExtendableFluentProperty" + genericArgs
+            decl.extends?.each { e ->
+                interfaces << e + genericArgs;
+            }
+            if (decl.matchers) {
+                def 
+            }
+        }
+    }
+}

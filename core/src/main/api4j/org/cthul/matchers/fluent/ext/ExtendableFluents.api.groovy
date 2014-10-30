@@ -17,12 +17,14 @@ api1 {
         methods(propMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
 
         def fluentMethods = clFluentProperty.methods.grep { it.returns.name.endsWith("Fluent") }
         methods(fluentMethods) {
             annotations << "Override"
             returns = "ThisFluent"
+            tags.remove(tags.size()-1)
         }
     }
 
@@ -36,6 +38,7 @@ api1 {
         methods(fluentMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
     }
 
@@ -50,12 +53,14 @@ api1 {
         methods(propMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
 
         def fluentMethods = clFluentPropertyAssert.methods.grep { it.returns.name.endsWith("FluentAssert") }
         methods(fluentMethods) {
             annotations << "Override"
             returns = "ThisFluent"
+            tags.remove(tags.size()-1)
         }
     }
 
@@ -70,6 +75,7 @@ api1 {
         methods(fluentMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
     }
 
@@ -84,12 +90,14 @@ api1 {
         methods(propMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
 
         def fluentMethods = clFluentPropertyMatcher.methods.grep { it.returns.name.endsWith("FluentMatcher") }
         methods(fluentMethods) {
             annotations << "Override"
             returns = "ThisFluent"
+            tags.remove(tags.size()-1)
         }
     }
 
@@ -104,6 +112,7 @@ api1 {
         methods(fluentMethods) {
             annotations << "Override"
             returns = "This"
+            tags.remove(tags.size()-1)
         }
     }
 }

@@ -1,0 +1,4 @@
+<matchers>
+    <factory class="org.cthul.api4j.test.Matcher1" />
+    <factory class="org.cthul.api4j.test.Matcher2" />
+</matchers>
