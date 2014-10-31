@@ -10,9 +10,7 @@ import org.hamcrest.Matcher;
  * an exception or error might be thrown.
  * @param <Value> type of the value that is matched
  */
-public interface FluentAssert<Value>
-                extends Fluent<Value>, 
-                        FluentPropertyAssert<Value, Value> {
+public interface FluentAssert<Value> extends Fluent<Value> {
 
     /**
      * {@inheritDoc}
@@ -166,39 +164,39 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyAssert<Value, NextProperty> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentAssert<Value>> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
@@ -234,37 +232,37 @@ public interface FluentAssert<Value>
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.Both<Value, Value> both(Matcher<? super Value> matcher);
+    Both<Value, ? extends FluentAssert<Value>> both(Matcher<? super Value> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.Either<Value, Value> either(Matcher<? super Value>... matchers);
+    Either<Value, ? extends FluentAssert<Value>> either(Matcher<? super Value>... matchers);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.Neither<Value, Value> neither(Matcher<? super Value>... matchers);
+    Neither<Value, ? extends FluentAssert<Value>> neither(Matcher<? super Value>... matchers);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.MatchesSome<Value, Value> matches(int count);
+    MatchesSome<Value, ? extends FluentAssert<Value>> matches(int count);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.MatchesSome<Value, Value> matches(Matcher<? super Integer> countMatcher);
+    MatchesSome<Value, ? extends FluentAssert<Value>> matches(Matcher<? super Integer> countMatcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyAssert.MatchesSome<Value, Value> matches(ChainFactory chainType);
+    MatchesSome<Value, ? extends FluentAssert<Value>> matches(ChainFactory chainType);
     
     /**
      * {@inheritDoc}
@@ -280,7 +278,7 @@ public interface FluentAssert<Value>
      * @return isA fluent
      */
     @Override
-    <Value2 extends Value> FluentPropertyAssert.IsA<Value, Value2> isA(Class<Value2> clazz);
+    <Value2 extends Value> FluentAssert<Value> isA(Class<Value2> clazz);
 
     @Override
     <Value2 extends Value> FluentAssert<Value2> as(Class<Value2> clazz);

@@ -13,7 +13,7 @@ import org.hamcrest.Matcher;
  * 
  * @param <Value> type of value
  */
-public interface Fluent<Value> extends FluentProperty<Value, Value> {
+public interface Fluent<Value> extends FluentProperty<Value, Fluent<? extends Value>> {
 
     /**
      * {@inheritDoc}
@@ -154,25 +154,25 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentProperty<Value, NextProperty> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends Fluent<Value>> __(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentProperty<Value, NextProperty> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends Fluent<Value>> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentProperty<Value, NextProperty> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends Fluent<Value>> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentProperty<Value, NextProperty> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends Fluent<Value>> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
     
     /**
      * {@inheritDoc}
@@ -206,42 +206,50 @@ public interface Fluent<Value> extends FluentProperty<Value, Value> {
      * {@inheritDoc}
      */
     @Override
-    Both<Value, Value> both(Matcher<? super Value> matcher);
+    Both<Value, ? extends Fluent<Value>> both(Matcher<? super Value> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    Either<Value, Value> either(Matcher<? super Value>... matchers);
+    Either<Value, ? extends Fluent<Value>> either(Matcher<? super Value>... matchers);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    MatchesSome<Value, Value> matches(int count);
+    MatchesSome<Value, ? extends Fluent<Value>> matches(int count);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    MatchesSome<Value, Value> matches(Matcher<? super Integer> countMatcher);
+    MatchesSome<Value, ? extends Fluent<Value>> matches(Matcher<? super Integer> countMatcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    MatchesSome<Value, Value> matches(ChainFactory chainType);
+    MatchesSome<Value, ? extends Fluent<Value>> matches(ChainFactory chainType);
     
     /**
      * {@inheritDoc}
      * @param <Value2> expected type
      */
     @Override
-    <Value2 extends Value> Fluent<Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
-        
+    <Value2 extends Value> Fluent<? extends Value> isA(Class<Value2> clazz, Matcher<? super Value2> matcher);
+
     /**
      * {@inheritDoc}
+     * @param <Value2> expected type
      */
     @Override
-    <Property2 extends Value> FluentProperty.IsA<Value, Property2> isA(Class<Property2> clazz);
+    <Value2 extends Value> Fluent<? extends Value> isA(Class<Value2> clazz);
+
+    /**
+     * {@inheritDoc}
+     * @param <Value2> expected type
+     */
+    @Override
+    public <Value2 extends Value> FluentProperty<Value2, ? extends Fluent<? extends Value>> as(Class<Value2> clazz);
 }

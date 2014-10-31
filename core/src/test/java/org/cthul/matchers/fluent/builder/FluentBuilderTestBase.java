@@ -62,8 +62,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     @Test
     public void test_fluent_isA_success() {
         fluent((Object) 3)
-                .isA(Integer.class)
-                .thatIs(lessThan(5));
+                .as(Integer.class)
+                .is(lessThan(5));
         apply();
         assertSuccess();
     }
@@ -71,8 +71,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     @Test
     public void test_fluent_isA_type_fail() {
         fluent((Object) "")
-                .isA(Integer.class)
-                .thatIs(lessThan(5));
+                .as(Integer.class)
+                .is(lessThan(5));
         apply();
         assertMismatch("is an instance of java.lang.Integer",
                        "but: \"\" is a java.lang.String");
@@ -81,8 +81,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     @Test
     public void test_fluent_isA_value_fail() {
         fluent((Object) 3)
-                .isA(Integer.class)
-                .thatIs(lessThan(2));
+                .as(Integer.class)
+                .is(lessThan(2));
         apply();
         assertMismatch("is a value less than <2>",
                        "was greater than <2>");
@@ -92,8 +92,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_success() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                .__(eachItem()).isA(Integer.class)
-                        .that().is(lessThan(6))
+                .__(eachItem()).as(Integer.class)
+                        .is(lessThan(6))
                 .isNot(empty());
         apply();
         assertSuccess();
@@ -103,8 +103,8 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
     public void test_property_isA_fail() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                .__(eachItem()).isA(Integer.class)
-                        .that().is(lessThan(2))
+                .__(eachItem()).as(Integer.class)
+                        .is(lessThan(2))
                 .isNot(empty());
         apply();
         assertMismatch(

@@ -7,6 +7,7 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import static org.cthul.matchers.fluent.CoreFluents.*;
+import org.cthul.matchers.fluent.ext.ExtendableFluent;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -60,7 +61,7 @@ public class ConceptTest {
         
         assertThat(list)
                 .isNot(empty())
-                .and(each()).isA(Integer.class).thatIs(lessThan(10))
+                .and(each()).as(Integer.class).is(lessThan(10))
                 .and(any()).isA(Integer.class, greaterThan(4))
                 .and(hasItem(3));
         
@@ -77,8 +78,8 @@ public class ConceptTest {
                 .has(size(), lessThan(10));
         
         Matcher<Object> empty_or_zero = match()
-                .isA(String.class).that(isEmptyString())
-                .or().isA(Integer.class).thatIs(equalTo(0));
+                .as(String.class).__(isEmptyString())
+                .or().as(Integer.class).is(equalTo(0));
         assertThat(0)
                 .is(empty_or_zero);
         assertThat("")

@@ -1,8 +1,9 @@
 package org.cthul.matchers.fluent.builder;
 
 import org.cthul.matchers.fluent.FluentAssert;
-import org.cthul.matchers.fluent.FluentPropertyAssert;
+import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
+import org.cthul.matchers.fluent.ext.ExtendableFluentAssert;
 import org.cthul.matchers.fluent.value.ElementMatcher;
 import org.cthul.matchers.fluent.value.ElementMatcherWrapper;
 import org.cthul.matchers.fluent.value.MatchValue;
@@ -16,8 +17,8 @@ import org.hamcrest.Matcher;
  * @param <This> fluent interface implemented by this class
  */
 public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, This>> 
-                extends AbstractPropertyAssertBuilder<Value, Value, This, This>
-                implements FluentAssert<Value> {
+                extends AbstractFluentBuilder<Value, This>
+                implements ExtendableFluentAssert<Value, This> {
     
     @Factory
     public static <T> FluentAssert<T> assertThat(T object) {
@@ -100,12 +101,6 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
         }
         return _this();
     }
-
-    @Override
-    protected This _updateMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
-        // just apply again
-        return _applyMatcher(matcher, prefix, not);
-    }
     
     @Override
     public This and() {
@@ -140,39 +135,34 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     }
 
     @Override
-    public <NextProperty> FluentPropertyAssert<Value, NextProperty> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyAssert<Value, NextProperty> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         _not();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentAssert<Value> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _and();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> FluentAssert<Value> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> This andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _and();
         _not();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <Value2 extends Value> FluentPropertyAssert.IsA<Value, Value2> isA(Class<Value2> clazz) {
-        return (FluentPropertyAssert.IsA) super.isA(clazz);
-    }
-
-    @Override
-    public <Value2 extends Value> FluentAssert<Value2> as(Class<Value2> clazz) {
-        return (FluentAssert) super.as(clazz);
+    public <Value2 extends Value> FluentAssertBuilder<Value2, ?> as(Class<Value2> clazz) {
+        return (FluentAssertBuilder) isA(clazz);
     }
 
     @Override

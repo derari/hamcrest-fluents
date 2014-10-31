@@ -20,7 +20,5 @@ public interface ExtendedAdapter<Value, Property, Fluent, FluentProperty> {
     public static interface Matchable<Property, Fluent> {
         
         Fluent apply(Matcher<? super Property> matcher);
-        
-        Fluent update(Matcher<? super Property> matcher);
     }
 }

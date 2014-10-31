@@ -18,8 +18,7 @@ import org.hamcrest.Matcher;
  * @param <Match> type of the matcher that is built
  */
 public interface FluentMatcher<Value, Match> 
-                extends Fluent<Value>, 
-                        FluentPropertyMatcher<Value, Value, Match>,
+                extends Fluent<Value>,
                         QuickDiagnosingMatcher<Match> {
     
     /**
@@ -256,39 +255,39 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> __(MatchValueAdapter<? super Value, ? extends NextProperty> matcher);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> has(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> not(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> hasNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #and() and()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #and() and()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #or() or()}{@link #__(MatchValueAdapter) ._(adapter)}.
@@ -296,7 +295,7 @@ public interface FluentMatcher<Value, Match>
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #or() or()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
@@ -304,21 +303,21 @@ public interface FluentMatcher<Value, Match>
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #xor() xor()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * Equivalent to {@link #xor() xor()}{@link #not() .not()}{@link #__(MatchValueAdapter) ._(adapter)}.
      * @param adapter the adapter
      * @return property fluent
      */
-    <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
+    <NextProperty> FluentProperty<NextProperty, ? extends FluentMatcher<Value, Match>> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter);
 
     /**
      * {@inheritDoc}
@@ -396,37 +395,43 @@ public interface FluentMatcher<Value, Match>
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.Both<Value, Value, Match> both(Matcher<? super Value> matcher);
+    Both<Value, ? extends FluentMatcher<Value, Match>> both(Matcher<? super Value> matcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.Either<Value, Value, Match> either(Matcher<? super Value>... matchers);
+    Either<Value, ? extends FluentMatcher<Value, Match>> either(Matcher<? super Value>... matchers);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.Neither<Value, Value, Match> neither(Matcher<? super Value>... matchers);
+    Neither<Value, ? extends FluentMatcher<Value, Match>> neither(Matcher<? super Value>... matchers);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.MatchesSome<Value, Value, Match> matches(int count);
+    MatchesSome<Value, ? extends FluentMatcher<Value, Match>> matches(int count);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.MatchesSome<Value, Value, Match> matches(Matcher<? super Integer> countMatcher);
+    MatchesSome<Value, ? extends FluentMatcher<Value, Match>> matches(Matcher<? super Integer> countMatcher);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    FluentPropertyMatcher.MatchesSome<Value, Value, Match> matches(ChainFactory chainType);
+    MatchesSome<Value, ? extends FluentMatcher<Value, Match>> matches(ChainFactory chainType);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <Property extends Value> FluentMatcher<Value, Match> isA(Class<Property> clazz);
     
     /**
      * {@inheritDoc}
@@ -434,9 +439,6 @@ public interface FluentMatcher<Value, Match>
     @Override
     <Property extends Value> FluentMatcher<Value, Match> isA(Class<Property> clazz, Matcher<? super Property> matcher);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    <Property extends Value> FluentPropertyMatcher.IsA<Value, Property, Match> isA(Class<Property> clazz);
+    <Value2 extends Value> FluentProperty<Value2, ? extends FluentMatcher<Value, Match>> as(Class<Value2> clazz);
 }

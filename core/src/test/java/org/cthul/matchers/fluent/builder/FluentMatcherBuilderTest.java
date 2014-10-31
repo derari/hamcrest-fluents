@@ -43,19 +43,19 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
     public void test_property_isA_message() {
         List<Object> list = Arrays.asList((Object) 1, 3, 5);
         fluent(list)
-                .__(eachItem()).isA(Integer.class)
-                        .that().is(lessThan(2))
+                .__(eachItem()).as(Integer.class)
+                        .is(lessThan(2))
                 .isNot(empty());
         apply();
         assertMismatch(
-                "each is an instance of java.lang.Integer and is a value less than <2>",
+                "each is a value less than <2>",
                 "#1 <3> was greater than <2>");
     }
     
     @Test
     public void test_isA_property() {
         current = matcher(Object.class)
-                .isA(List.class).that().has(size).__(lessThan(3))
+                .as(List.class).has(size).__(lessThan(3))
                 .or().is(0);
         
         
@@ -67,7 +67,7 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
         
         apply(Arrays.asList(1, 2, 3));
         assertMismatch(
-                "Expected: list is an instance of java.util.List and has size a value less than <3> or is <0>",
+                "Expected: list has size a value less than <3> or is <0>",
                 "<3> was equal to <3> and was <[1, 2, 3]>");
         
         apply(2);

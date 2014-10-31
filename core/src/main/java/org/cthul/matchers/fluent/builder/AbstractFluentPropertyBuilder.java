@@ -1,22 +1,18 @@
 package org.cthul.matchers.fluent.builder;
 
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.object.InstanceOf;
 import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnose;
-import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
-import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentProperty;
+import org.cthul.matchers.fluent.adapters.AsTypeAdapter;
 import org.cthul.matchers.fluent.ext.ExtendableFluentProperty;
 import org.cthul.matchers.fluent.ext.ExtendedAdapter;
 import org.cthul.matchers.fluent.ext.ExtendedAdapter.FluentPropertyFactory;
 import org.cthul.matchers.fluent.ext.ExtendedAdapter.Matchable;
-import org.cthul.matchers.fluent.intern.SwitchInvocationHandler;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -24,22 +20,18 @@ import org.hamcrest.core.IsEqual;
 
 /**
  * Base class for all fluent implementations.
- * @param <Value> base value type
  * @param <Property> property type
- * @param <ThisFluent> type of fluent this property belongs to
+ * @param <TheFluent> type of fluent this property belongs to
  * @param <This> fluent interface implemented by this class
  */
 public abstract class AbstractFluentPropertyBuilder
-                <Value, Property, ThisFluent extends Fluent<Value>,
-                 This extends AbstractFluentPropertyBuilder<Value, Property, ThisFluent, This>>
-                implements FluentProperty<Value, Property>,
-                ExtendableFluentProperty<Value, Property, ThisFluent, This> {
+                <Property, BaseFluent, TheFluent extends BaseFluent,
+                 This extends AbstractFluentPropertyBuilder<Property, BaseFluent, TheFluent, This>>
+                implements ExtendableFluentProperty<Property, BaseFluent, This> {
     
     private boolean negate = false;
     private String prefix = null;
     private String reason = null;
-    
-    private IsAMatcher isAMatcher = null;
     
     public AbstractFluentPropertyBuilder() {
     }
@@ -64,7 +56,7 @@ public abstract class AbstractFluentPropertyBuilder
         negate = !negate;
     }
 
-    protected ThisFluent _match(Matcher<? super Property> matcher) {
+    protected TheFluent _match(Matcher<? super Property> matcher) {
         String p = prefix;
         prefix = null;
         boolean n = negate;
@@ -72,37 +64,27 @@ public abstract class AbstractFluentPropertyBuilder
         return _apply(matcher, p, n);
     }
     
-    protected ThisFluent _apply(Matcher<? super Property> matcher, String prefix, boolean not) {
-        if (isAMatcher == null) {
-            return _applyMatcher(matcher, prefix, not);
-        } else {
-            Matcher<Object> m = isAMatcher.that(matcher, prefix, not);
-            isAMatcher = null;
-            return _updateMatcher(m, null, false);
-        }
+    protected TheFluent _apply(Matcher<? super Property> matcher, String prefix, boolean not) {
+        return _applyMatcher(matcher, prefix, not);
     }
     
-    protected ThisFluent _update(Matcher<? super Property> matcher, String prefix, boolean not) {
-        return _updateMatcher(matcher, prefix, not);
-    }
-    
-    protected ThisFluent _match(Property value) {
+    protected TheFluent _match(Property value) {
         if (value instanceof Matcher) {
             return _match(new AmbiguousValueMatcher<>(value));
         }
         return _match(IsEqual.equalTo(value));
     }
     
-    protected <P> ThisFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
+    protected <P> TheFluent _match(MatchValueAdapter<? super Property, P> adapter, Matcher<? super P> matcher) {
         return _match(adapter.adapt(matcher));
     }
     
-    protected <FP> FP _adapt(MatchValueAdapter<? super Property, ?> adapter) {
+    protected <P> FluentProperty<P, TheFluent> _adapt(MatchValueAdapter<? super Property, ? extends P> adapter) {
         String p = prefix;
         prefix = null;
         boolean n = negate;
         negate = false;
-        return (FP) _newProperty(adapter, p, n);
+        return _newProperty(adapter, p, n);
     }
     
     @SuppressWarnings("unchecked")
@@ -110,35 +92,30 @@ public abstract class AbstractFluentPropertyBuilder
         return (This) this;
     }
     
-    protected abstract ThisFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
+    protected abstract TheFluent _applyMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
     
-    protected abstract ThisFluent _updateMatcher(Matcher<? super Property> matcher, String prefix, boolean not);
-    
-    protected <P> FluentProperty<Value, P> _newProperty(MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
+    protected <P> FluentProperty<P, TheFluent> _newProperty(MatchValueAdapter<? super Property, ? extends P> adapter, String prefix, boolean not) {
         return _newProperty(matchable(adapter, prefix, not));
     }
     
-    protected <P, FlP> FlP _newProperty(FluentPropertyFactory<P, ThisFluent, FlP> factory, MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
+    protected <P, FlP> FlP _newProperty(FluentPropertyFactory<P, TheFluent, FlP> factory, MatchValueAdapter<? super Property, P> adapter, String prefix, boolean not) {
         return factory.create(matchable(adapter, prefix, not));
     }
     
-    protected <P, FlP> FlP _newProperty(ExtendedAdapter<Property, P, ThisFluent, FlP> adapter, String prefix, boolean not) {
+    protected <P, FlP> FlP _newProperty(ExtendedAdapter<Property, P, TheFluent, FlP> adapter, String prefix, boolean not) {
         return _newProperty(adapter.getFactory(), adapter.getAdapter(), prefix, not);
     }
     
-    protected abstract <P> FluentProperty<Value, P> _newProperty(Matchable<P, ThisFluent> matchable);
+    protected <P> FluentProperty<P, TheFluent> _newProperty(Matchable<? extends P, TheFluent> matchable) {
+        return new FluentPropertyBuilder<>(matchable);
+    }
     
-    protected <P> Matchable<P, ThisFluent> matchable(final MatchValueAdapter<? super Property, P> adapter, final String prefix, final boolean not) {
-        return new ExtendedAdapter.Matchable<P, ThisFluent>() {
+    protected <P> Matchable<P, TheFluent> matchable(final MatchValueAdapter<? super Property, P> adapter, final String prefix, final boolean not) {
+        return new ExtendedAdapter.Matchable<P, TheFluent>() {
             @Override
-            public ThisFluent apply(Matcher<? super P> matcher) {
+            public TheFluent apply(Matcher<? super P> matcher) {
                 Matcher<? super Property> m = adapter.adapt(matcher);
                 return _apply(m, prefix, not);
-            }
-            @Override
-            public ThisFluent update(Matcher<? super P> matcher) {
-                Matcher<? super Property> m = adapter.adapt(matcher);
-                return _update(m, prefix, not);
             }
         };
     }
@@ -174,178 +151,180 @@ public abstract class AbstractFluentPropertyBuilder
     }
 
     @Override
-    public ThisFluent __(Matcher<? super Property> matcher) {
+    public TheFluent __(Matcher<? super Property> matcher) {
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent is(Matcher<? super Property> matcher) {
+    public TheFluent is(Matcher<? super Property> matcher) {
         _is();
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent has(Matcher<? super Property> matcher) {
+    public TheFluent has(Matcher<? super Property> matcher) {
         _has();
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent not(Matcher<? super Property> matcher) {
+    public TheFluent not(Matcher<? super Property> matcher) {
         _not();
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent isNot(Matcher<? super Property> matcher) {
+    public TheFluent isNot(Matcher<? super Property> matcher) {
         _is();
         _not();
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent hasNot(Matcher<? super Property> matcher) {
+    public TheFluent hasNot(Matcher<? super Property> matcher) {
         _has();
         _not();
         return _match(matcher);
     }
 
     @Override
-    public ThisFluent equalTo(Property value) {
+    public TheFluent equalTo(Property value) {
         // don't use _match(value) this call is not ambiguous
         return _match(IsEqual.equalTo(value));
     }
 
     @Override
-    public ThisFluent is(Property value) {
+    public TheFluent is(Property value) {
         _is();
         return _match(value);
     }
 
     @Override
-    public ThisFluent not(Property value) {
+    public TheFluent not(Property value) {
         _not();
         return _match(value);
     }
 
     @Override
-    public ThisFluent isNot(Property value) {
+    public TheFluent isNot(Property value) {
         _is();
         _not();
         return _match(value);
     }
 
     @Override
-    public ThisFluent all(Matcher<? super Property>... matchers) {
+    public TheFluent all(Matcher<? super Property>... matchers) {
         return _match(AndChainMatcher.all(matchers));
     }
 
     @Override
-    public ThisFluent any(Matcher<? super Property>... matchers) {
+    public TheFluent any(Matcher<? super Property>... matchers) {
         return _match(OrChainMatcher.any(matchers));
     }
 
     @Override
-    public ThisFluent none(Matcher<? super Property>... matchers) {
+    public TheFluent none(Matcher<? super Property>... matchers) {
         return _match(NOrChainMatcher.none(matchers));
 //        _not();
 //        return _match(OrChainMatcher.or(matcher));
     }
 
     @Override
-    public ThisFluent matches(int count, Matcher<? super Property>... matchers) {
+    public TheFluent matches(int count, Matcher<? super Property>... matchers) {
         return _match(SomeOfChainMatcher.matches(count, matchers));
     }
 
     @Override
-    public ThisFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
+    public TheFluent matches(Matcher<? super Integer> countMatcher, Matcher<? super Property>... matchers) {
         return _match(SomeOfChainMatcher.matches(countMatcher, matchers));
     }
 
     @Override
-    public ThisFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
+    public TheFluent matches(ChainFactory chainType, Matcher<? super Property>... matchers) {
         return _match(chainType.create(matchers));
     }
 
     @Override
-    public <NextProperty> FluentProperty<Value, NextProperty> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, TheFluent> __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         return _adapt(adapter);
     }
     
     @Override
-    public <NextProperty> FluentProperty<Value, NextProperty> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, TheFluent> not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         _not();
         return _adapt(adapter);
     }
     
     @Override
-    public <NextProperty> FluentProperty<Value, NextProperty> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, TheFluent> has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         _has();
         return _adapt(adapter);
     }
     
     @Override
-    public <NextProperty> FluentProperty<Value, NextProperty> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, TheFluent> hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter) {
         _has();
         _not();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> ThisFluent __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> TheFluent __(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> ThisFluent has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> TheFluent has(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _has();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> ThisFluent not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> TheFluent not(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _not();
         return _match(adapter, matcher);
     }
 
     @Override
-    public <NextProperty> ThisFluent hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
+    public <NextProperty> TheFluent hasNot(MatchValueAdapter<? super Property, ? extends NextProperty> adapter, Matcher<? super NextProperty> matcher) {
         _has();
         _not();
         return _match(adapter, matcher);
     }
     
     @Override
-    public abstract FluentProperty.Both<Value, Property> both(Matcher<? super Property> matcher);
+    public FluentProperty.Both<Property, TheFluent> both(Matcher<? super Property> matcher) {
+        return new Both<>(this, matcher);
+    }
     
-    protected static class Both<Value, Property, 
-                                ThisFluent extends Fluent<Value>>
-                        implements FluentProperty.Both<Value, Property> {
+    protected static class Both<Property, TheFluent>
+                        implements FluentProperty.Both<Property, TheFluent> {
 
-        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property;
         private final Matcher<? super Property> first;
 
-        public Both(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property> first) {
+        public Both(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, Matcher<? super Property> first) {
             this.property = property;
             this.first = first;
         }
         
         @Override
-        public ThisFluent and(Matcher<? super Property> matcher) {
+        public TheFluent and(Matcher<? super Property> matcher) {
             return property.__(AndChainMatcher.both(first, matcher));
         }
     }
 
     @Override
-    public abstract FluentProperty.Either<Value, Property> either(Matcher<? super Property>... matchers);
+    public FluentProperty.Either<Property, TheFluent> either(Matcher<? super Property>... matchers) {
+        return new Either<>(this, matchers);
+    }
     
-    protected static class ChainDsl<Value, Property, 
-                                ThisFluent extends Fluent<Value>> {
+    protected static class ChainDsl<Property, TheFluent> {
         
-        protected final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        protected final AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property;
         private final Matcher<? super Property>[] matchers;
         
-        public ChainDsl(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+        public ChainDsl(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, Matcher<? super Property>... matchers) {
             this.property = property;
             this.matchers = Arrays.copyOf(matchers, matchers.length+1);
         }
@@ -359,193 +338,101 @@ public abstract class AbstractFluentPropertyBuilder
         }
     }
 
-    protected static class Either<Value, Property, 
-                                ThisFluent extends Fluent<Value>>
-                        extends ChainDsl<Value, Property, ThisFluent>
-                        implements FluentProperty.Either<Value, Property> {
+    protected static class Either<Property, TheFluent>
+                        extends ChainDsl<Property, TheFluent>
+                        implements FluentProperty.Either<Property, TheFluent> {
 
-        public Either(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+        public Either(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, Matcher<? super Property>... matchers) {
             super(property, matchers);
         }
         
         @Override
-        public ThisFluent or(Matcher<? super Property> matcher) {
+        public TheFluent or(Matcher<? super Property> matcher) {
             _add(matcher);
             return property.__(OrChainMatcher.or(_all()));
         }
         
         @Override
-        public ThisFluent xor(Matcher<? super Property> matcher) {
+        public TheFluent xor(Matcher<? super Property> matcher) {
             _add(matcher);
             return property.__(XOrChainMatcher.xor(_all()));
         }
     }
     
     @Override
-    public abstract FluentProperty.Neither<Value, Property> neither(Matcher<? super Property>... matchers);
+    public FluentProperty.Neither<Property, TheFluent> neither(Matcher<? super Property>... matchers) {
+        return new Neither<>(this, matchers);
+    }
 
-    protected static class Neither<Value, Property, 
-                                ThisFluent extends Fluent<Value>>
-                        extends ChainDsl<Value, Property, ThisFluent>
-                        implements FluentProperty.Neither<Value, Property> {
+    protected static class Neither<Property, TheFluent>
+                        extends ChainDsl<Property, TheFluent>
+                        implements FluentProperty.Neither<Property, TheFluent> {
 
-        public Neither(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Property>... matchers) {
+        public Neither(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, Matcher<? super Property>... matchers) {
             super(property, matchers);
         }
         
         @Override
-        public ThisFluent nor(Matcher<? super Property> matcher) {
+        public TheFluent nor(Matcher<? super Property> matcher) {
             _add(matcher);
             return property.__(NOrChainMatcher.nor(_all()));
         }
     }
     
     @Override
-    public abstract FluentProperty.MatchesSome<Value, Property> matches(int count);
+    public FluentProperty.MatchesSome<Property, TheFluent> matches(int count) {
+        return new MatchesSome<>(this, count);
+    }
 
     @Override
-    public abstract FluentProperty.MatchesSome<Value, Property> matches(Matcher<? super Integer> countMatcher);
+    public FluentProperty.MatchesSome<Property, TheFluent> matches(Matcher<? super Integer> countMatcher) {
+        return new MatchesSome<>(this, countMatcher);
+    }
 
     @Override
-    public abstract FluentProperty.MatchesSome<Value, Property> matches(ChainFactory chainType);
+    public FluentProperty.MatchesSome<Property, TheFluent> matches(ChainFactory chainType) {
+        return new MatchesSome<>(this, chainType);
+    }
     
-    protected static class MatchesSome<Value, Property,
-                            ThisFluent extends Fluent<Value>>
-                    implements FluentProperty.MatchesSome<Value, Property> {
+    protected static class MatchesSome<Property, TheFluent>
+                    implements FluentProperty.MatchesSome<Property, TheFluent> {
         
-        private final AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property;
+        private final AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property;
         private final ChainFactory chainType;
 
-        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, int count) {
+        public MatchesSome(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, int count) {
             this.property = property;
             this.chainType = SomeOfChainMatcher.factory(count);
         }
         
-        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, Matcher<? super Integer> countMatcher) {
+        public MatchesSome(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, Matcher<? super Integer> countMatcher) {
             this.property = property;
             this.chainType = SomeOfChainMatcher.factory(countMatcher);
         }
         
-        public MatchesSome(AbstractFluentPropertyBuilder<Value, Property, ThisFluent, ?> property, ChainFactory chainType) {
+        public MatchesSome(AbstractFluentPropertyBuilder<Property, ? super TheFluent, TheFluent, ?> property, ChainFactory chainType) {
             this.property = property;
             this.chainType = chainType;
         }
 
         @Override
-        public ThisFluent of(Matcher<? super Property>... matchers) {
+        public TheFluent of(Matcher<? super Property>... matchers) {
             return property.__(chainType.create(matchers));
         }
     }
     
     @Override
-    public <Property2 extends Property> ThisFluent isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
+    public <Property2 extends Property> TheFluent isA(Class<Property2> clazz, Matcher<? super Property2> matcher) {
         return _match(InstanceOf.isA(clazz).that(matcher));
     }
 
     @Override
-    public <Property2 extends Property> FluentProperty.IsA<Value, Property2> isA(Class<Property2> clazz) {
-        IsAImpl<Property> isA = new IsAImpl<>(clazz, this);
-        ThisFluent fluent = _match(isA.getInternalMatcher());
-        Class[] actualIface = { getIsAInterface() };
-        return (FluentProperty.IsA) Proxy.newProxyInstance(
-                IsAImpl.class.getClassLoader(), actualIface,
-                new SwitchInvocationHandler(fluent, isA));
+    public <Property2 extends Property> TheFluent isA(Class<Property2> clazz) {
+        return _match(InstanceOf.isA(clazz));
     }
-    
-    protected Class<?> getIsAInterface() {
-        try {
-            return (Class) getClass().getMethod("isA", Class.class).getReturnType();
-        } catch (NoSuchMethodException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-    
-    protected static class IsAImpl<Property> {
-        
-        private final IsAMatcher isAMatcher;
-        private final AbstractFluentPropertyBuilder<?, Property, ?, ?> property;
 
-        public IsAImpl(Class<?> clazz, AbstractFluentPropertyBuilder<?, Property, ?, ?> property) {
-            this.isAMatcher = new IsAMatcher<>(clazz);
-            this.property = property;
-        }
-        
-        public <T> IsAMatcher<T> getInternalMatcher() {
-            return isAMatcher;
-        }
-
-        public FluentProperty<?, Property> that() {
-            property.isAMatcher = isAMatcher;
-            return property;
-        }
-
-        public FluentProperty<?, Property> thatIs() {
-            return that().is();
-        }
-
-        public Fluent<?> that(Matcher<? super Property> matcher) {
-            return that().__(matcher);
-        }
-        
-        public Fluent<?> thatIs(Matcher<? super Property> matcher) {
-            return that().is(matcher);
-        }
-    }
-    
-    /**
-     * Used by {@link AbstractFluentPropertyBuilder#isA(java.lang.Class)}.
-     */
-    protected static class IsAMatcher<T> extends QuickDiagnosingMatcherBase<Object> {
-
-        private final InstanceOf<T> isA;
-        Matcher<Object> isA_that = null;
-
-        public IsAMatcher(Class<T> expectedType) {
-            isA = InstanceOf.isA(expectedType);
-        }
-        
-        public Matcher<Object> that(Matcher<T> nested, String prefix, boolean not) {
-            nested = CIs.wrap(prefix, not, nested);
-            this.isA_that = isA.that(nested);
-            return this;
-        }
-
-        @Override
-        public boolean matches(Object item, Description mismatch) {
-            if (isA_that != null) {
-                return quickMatch(isA_that, item, mismatch);
-            } else {
-                return quickMatch(isA, item, mismatch);
-            }
-        }
-
-        @Override
-        public boolean matches(Object item) {
-            if (isA_that != null) {
-                return isA_that.matches(item);
-            } else {
-                return isA.matches(item);
-            }
-        }
-
-        @Override
-        public void describeMismatch(Object item, Description mismatch) {
-            if (isA_that != null) {
-                isA_that.describeMismatch(item, mismatch);
-            } else {
-                isA.describeMismatch(item, mismatch);
-            }
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            if (isA_that != null) {
-                isA_that.describeTo(description);
-            } else {
-                description.appendText("is ");
-                isA.describeTo(description);
-            }
-        }       
+    protected <Property2 extends Property> FluentProperty<Property2, TheFluent> _as(Class<Property2> clazz) {
+        return _adapt(AsTypeAdapter.as(clazz));
     }
     
     private static class AmbiguousValueMatcher<T> extends NestedResultMatcher<T> {

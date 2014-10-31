@@ -8,8 +8,9 @@ import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
 import org.cthul.matchers.diagnose.nested.MatcherDescription;
 import org.cthul.matchers.diagnose.result.MatchResult;
+import org.cthul.matchers.fluent.Fluent;
 import org.cthul.matchers.fluent.FluentMatcher;
-import org.cthul.matchers.fluent.FluentPropertyMatcher;
+import org.cthul.matchers.fluent.FluentProperty;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.ext.ExtendableFluentMatcher;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
@@ -22,10 +23,9 @@ import org.hamcrest.*;
  * @param <This> fluent interface implemented by this class
  */
 public class FluentMatcherBuilder
-                <Value, Match, This extends FluentMatcherBuilder<Value, Match, This>>
-                extends AbstractPropertyMatcherBuilder<Value, Value, Match, This, This>
-                implements FluentMatcher<Value, Match>,
-                ExtendableFluentMatcher<Value, Match, This> {
+                <Value, Match, This extends FluentMatcherBuilder<Value, Match, This>> 
+                extends AbstractFluentBuilder<Value, This>
+                implements ExtendableFluentMatcher<Value, Match, This> {
     
     @Factory
     public static <V> FluentMatcher<V, V> match() {
@@ -93,12 +93,6 @@ public class FluentMatcherBuilder
     @Override
     protected This _applyMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
         matchers.add(CIs.wrap(prefix, not, matcher));
-        return _this();
-    }
-
-    @Override
-    protected This _updateMatcher(Matcher<? super Value> matcher, String prefix, boolean not) {
-        // ignore, matcher is in stored in list already
         return _this();
     }
 
@@ -199,39 +193,39 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> and(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> andNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _and();
         _not();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> or(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _or();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> orNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _or();
         _not();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> xor(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _xor();
         return _adapt(adapter);
     }
 
     @Override
-    public <NextProperty> FluentPropertyMatcher<Value, NextProperty, Match> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
+    public <NextProperty> FluentProperty<NextProperty, This> xorNot(MatchValueAdapter<? super Value, ? extends NextProperty> adapter) {
         _xor();
         _not();
         return _adapt(adapter);
@@ -277,8 +271,8 @@ public class FluentMatcherBuilder
     }
 
     @Override
-    public <Property extends Value> FluentPropertyMatcher.IsA<Value, Property, Match> isA(Class<Property> clazz) {
-        return (FluentPropertyMatcher.IsA) super.isA(clazz);
+    public <Value2 extends Value> FluentProperty<Value2, This> as(Class<Value2> clazz) {
+        return _as(clazz);
     }
 
     @Override
