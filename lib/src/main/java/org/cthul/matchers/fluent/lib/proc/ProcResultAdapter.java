@@ -3,9 +3,9 @@ package org.cthul.matchers.fluent.lib.proc;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.cthul.matchers.proc.Returns;
 import org.cthul.proc.Proc;
 import org.cthul.proc.Procs;
-import org.hamcrest.Description;
 import org.hamcrest.Factory;
 
 /**
@@ -71,23 +71,7 @@ public class ProcResultAdapter<T> extends SimpleAdapter<Proc, T> {
 
 
     public ProcResultAdapter() {
-        super("result", Proc.class);
-    }
-
-    @Override
-    protected boolean acceptValue(Proc value) {
-        return value.hasResult();
-    }
-
-    @Override
-    protected void describeExpectedToAccept(Proc value, Description description) {
-        description.appendText("a proc with result");
-    }
-
-    @Override
-    protected void describeMismatchOfUnaccapted(Proc value, Description description) {
-        description.appendText("threw ")
-                .appendValue(value.getException());
+        super("result", Returns.hasResult());
     }
 
     @Override

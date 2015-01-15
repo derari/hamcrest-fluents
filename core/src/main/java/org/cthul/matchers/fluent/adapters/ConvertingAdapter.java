@@ -3,7 +3,9 @@ package org.cthul.matchers.fluent.adapters;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.cthul.matchers.fluent.value.*;
+import org.cthul.matchers.object.InstanceOf;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
@@ -14,18 +16,30 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
 
     protected static final ReflectiveTypeFinder ADAPTED_TYPE_FINDER = new ReflectiveTypeFinder("adaptValue", 1, 0);
     
-    private final Class<?> valueType;
+    protected final Class<?> valueType;
+    private final Matcher<? super Value> precondition;
 
     public ConvertingAdapter(Class<?> valueType) {
         this.valueType = valueType;
+        this.precondition = InstanceOf.instanceOf(valueType);
     }
     
     protected ConvertingAdapter(ReflectiveTypeFinder typeFinder) {
         this.valueType = typeFinder.findExpectedType(getClass());
+        this.precondition = InstanceOf.instanceOf(valueType);
     }
 
     public ConvertingAdapter() {
         this(ADAPTED_TYPE_FINDER);
+    }
+
+    public ConvertingAdapter(Matcher<? super Value> precondition) {
+        this.valueType = null;
+        this.precondition = precondition;
+    }
+    
+    protected Matcher<? super Value> precondition() {
+        return precondition;
     }
     
     @Override
@@ -35,49 +49,10 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
     
     protected abstract Property adaptValue(Value v);
     
-    protected boolean acceptValue(Value value) {
-        return true;
-    }
-
-    protected void describeExpectedToAccept(Value value, Description description) {
-        description.appendText("a valid ")
-                .appendText(valueType.getSimpleName());
-    }
-
-    protected void describeMismatchOfUnaccapted(Value value, Description description) {
-        description.appendText("was ").appendValue(value);
-    }
-    
     protected class ConvertedMatchValue<V extends Value> extends AbstractAdaptedValue<V, Property> {
 
         public ConvertedMatchValue(Class<?> valueType, MatchValue<V> actualValue) {
             super(valueType, actualValue);
-        }
-
-        @Override
-        protected boolean acceptValue(Object value) {
-            if (super.acceptValue(value)) {
-                return ConvertingAdapter.this.acceptValue((Value) value);
-            }
-            return false;
-        }
-
-        @Override
-        protected void describeExpectedToAccept(Object value, Description description) {
-            if (super.acceptValue(value)) {
-                ConvertingAdapter.this.describeExpectedToAccept((Value) value, description);
-            } else {
-                super.describeExpectedToAccept(value, description);
-            }
-        }
-
-        @Override
-        protected void describeMismatchOfUnaccapted(Object value, Description description) {
-            if (super.acceptValue(value)) {
-                ConvertingAdapter.this.describeMismatchOfUnaccapted((Value) value, description);
-            } else {
-                super.describeMismatchOfUnaccapted(value, description);
-            }
         }
 
         @Override

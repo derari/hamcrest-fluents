@@ -67,6 +67,11 @@ public abstract class SimpleEachOfAdapter<Value, Item>
             description.appendText(" ").appendText(name);
         }
     }
+
+    @Override
+    protected void describeResult(SelfDescribing result, Description description) {
+        result.describeTo(description);
+    }
     
     protected abstract Iterable<? extends Item> getElements(Value value);
     

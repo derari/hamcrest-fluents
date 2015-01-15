@@ -12,7 +12,7 @@ public class FluentsTest {
     public void test_compiled() {
         List<Object> list = Arrays.asList((Object) 1, 2, 3);
         assertThat(eachOf(list))
-                .isA(Integer.class)
+                .hasType(Integer.class)
                 .and().is(lessThan(10));
     }
 }

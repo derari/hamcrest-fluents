@@ -3,9 +3,11 @@ package org.cthul.matchers.fluent.lib.object;
 import java.lang.reflect.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cthul.matchers.diagnose.QuickDiagnosingMatcherBase;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
 
 /**
  *
@@ -104,21 +106,30 @@ public class PropertyAdapter<Property> extends SimpleAdapter<Object, Property> {
     }
 
     @Override
-    protected boolean acceptValue(Object value) {
-        return getProperty(value.getClass()) != null;
-    }
+    protected Matcher<? super Object> precondition() {
+        return new QuickDiagnosingMatcherBase<Object>() {
 
-    @Override
-    protected void describeExpectedToAccept(Object value, Description description) {
-        description.appendText("a value with property '")
-                .appendText(name).appendText("'");
-    }
+            @Override
+            public boolean matches(Object item, Description mismatch) {
+                if (item == null) {
+                    mismatch.appendText("was null");
+                    return false;
+                }
+                if (getProperty(item.getClass()) != null) {
+                    return true;
+                }
+                mismatch.appendValue(item)
+                    .appendText(" had no property '")
+                    .appendText(name).appendText("'");
+                return false;
+            }
 
-    @Override
-    protected void describeMismatchOfUnaccapted(Object value, Description description) {
-        description.appendValue(value)
-                .appendText(" had no property '")
-                .appendText(name).appendText("'");
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("a value with property '")
+                        .appendText(name).appendText("'");
+            }
+        };
     }
 
     @Override

@@ -1,24 +1,37 @@
 <fluents>
+<!--    <cast type="java.lang.Integer" fluent="ComparableFluent{Integer,...}" />-->
+    
     <fluent name="ObjectFluent">
         <factory class="org.hamcrest.core.IsNull">
             <include>\(\)</include>
         </factory>
         <factory class="org.hamcrest.core.IsSame"/>
         <factory class="org.hamcrest.collection.IsIn"/>
-        
         <factory class="org.hamcrest.object.HasToString"/>
+        <factory class="org.cthul.matchers.fluent.adapters.LambdaAdapter">
+            <include>get\(</include>
+        </factory>
     </fluent>
     
     <fluent name="ClassFluent" type="java.lang.Class{?}">
+        <extends>ObjectFluent</extends>
         <factory class="org.hamcrest.object.IsCompatibleType">
             <disableTypeParameterMapping/>
         </factory>
     </fluent>
     
-    <fluent name="ComparableFluent" type="C" extraParams="C extends Comparable{C}">
+    <fluent name="ComparableFluent" type="C" extraParams="C extends java.lang.Comparable{C}">
         <extends>ObjectFluent</extends>
+        <adapter type="java.lang.Comparable"/>
         <factory class="org.hamcrest.number.OrderingComparison"/>
     </fluent>
+    
+    <fluent name="IntegerFluent" type="java.lang.Integer">
+        <extends>ComparableFluent{java.lang.Integer,...}</extends>
+    </fluent>
+    
+    <fluent type="java.lang.Long" impl="ComparableFluent{java.lang.Long,...}" />
+    <fluent type="java.lang.Float" impl="ComparableFluent{java.lang.Float,...}" />
     
     <fluent name="DoubleFluent" type="java.lang.Double">
         <extends>ComparableFluent{java.lang.Double,...}</extends>
@@ -44,7 +57,19 @@
             <exclude>containsInAnyOrder\(org.hamcrest.Matcher itemMatcher</exclude>
         </factory>
         <factory class="org.hamcrest.collection.IsIterableWithSize">
+            <exclude>Size.*Matcher</exclude>
             <rename from="iterableWith" to="has"/>
+        </factory>
+        <factory class="org.cthul.matchers.fluent.lib.collection.IterableSizeAdapter">
+            <include>size\(</include>
+        </factory>
+        <factory class="org.cthul.matchers.fluent.adapters.AnyOfAdapter">
+            <include>any\(\)</include>
+            <include>any(String|Boolean|Int|Long|Double)</include>
+        </factory>
+        <factory class="org.cthul.matchers.fluent.adapters.EachOfAdapter">
+            <include>each\(\)</include>
+            <include>each(String|Boolean|Int|Long|Double)</include>
         </factory>
     </fluent>
     
@@ -53,15 +78,32 @@
         <factory class="org.hamcrest.core.IsCollectionContaining">
             <disableTypeParameterMapping/>
         </factory>
-        <factory class="org.hamcrest.collection.IsCollectionWithSize"/>
+        <factory class="org.hamcrest.collection.IsCollectionWithSize">
+            <exclude>hasSize.*Matcher</exclude>
+        </factory>
         <factory class="org.hamcrest.collection.IsEmptyCollection">
             <exclude>emptyCollectionOf</exclude>
         </factory>
     </fluent>
     
+    <fluent type="java.util.Set{K}" impl="CollectionFluent{K,...}" />
+    <fluent type="java.util.Collection{V}" impl="CollectionFluent{V,...}" />
+    
     <fluent name="MapFluent" type="java.util.Map{K, V}" extraParams="K,V">
+        <extends>ObjectFluent</extends>
         <factory class="org.hamcrest.collection.IsMapContaining">
+            <exclude>\(.*Matcher</exclude>
             <disableTypeParameterMapping/>
+        </factory>
+        <factory class="org.cthul.matchers.fluent.lib.collection.MapAdapters">
+            <include>mapSize\(</include>
+            <include>mapKeys</include>
+            <include>mapValues</include>
+            <include>value.*key\)</include>
+            <include>(boolean|int|long|double|string)Value</include>
+            <rename from="mapSize" to="size" />
+            <rename from="mapKeys" to="keys" />
+            <rename from="mapValues" to="values" />
         </factory>
     </fluent>
     
@@ -75,11 +117,13 @@
     </fluent>
     
     <fluent name="ProcFluent" type="org.cthul.proc.Proc">
+        <extends>ObjectFluent</extends>
         <factory class="org.cthul.matchers.proc.Raises"/>
         <factory class="org.cthul.matchers.proc.Returns"/>
     </fluent>
     
     <fluent name="StringFluent" type="java.lang.String">
+        <extends>ComparableFluent{java.lang.String,...}</extends>
         <factory class="org.cthul.matchers.object.ContainsPattern">
             <rename from="matchesPattern" to="matches"/>
         </factory>
@@ -101,7 +145,6 @@
 </fluents>
 
 <!--
-
     <!- Text ->
 
     <!- Object ->
@@ -116,5 +159,4 @@
 
     <!- XML ->
     <factory class="org.hamcrest.xml.HasXPath"/>
-
 -->

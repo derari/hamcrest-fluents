@@ -88,7 +88,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
             description.appendDescriptionOf(this)
                        .appendText(" ");
         }
-        description.appendDescriptionOf(consumer);
+        consumer.describeTo(description);
     }
 
     /**
@@ -104,9 +104,25 @@ public abstract class MatchValueAdapterBase<Value, Property>
             description.appendDescriptionOf(this)
                        .appendText(" of ");
         }
-        description.appendDescriptionOf(producer);
+        producer.describeTo(description);
     }
     
+    /**
+     * Describes a result produced by this adapter.
+     * <p>
+     * By default, if this adapter {@linkplain  #hasDescription() has a description},
+     * it is written to {@code description} first.
+     * @param result
+     * @param description 
+     */
+    protected void describeResult(SelfDescribing result, Description description) {
+        if (hasDescription()) {
+            description.appendDescriptionOf(this)
+                       .appendText(" ");
+        }
+        result.describeTo(description);
+    }
+
     /**
      * Adapts values with two 
      * @param <Value>
@@ -333,8 +349,13 @@ public abstract class MatchValueAdapterBase<Value, Property>
             }
 
             @Override
+            protected boolean fastProxy() {
+                return false;
+            }
+
+            @Override
             public void describeMatch(Description description) {
-                adapter.describeConsumer(match().getMatchDescription(), description);
+                adapter.describeResult(match().getMatchDescription(), description);
             }
 
             @Override
@@ -344,7 +365,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
 
             @Override
             public void describeMismatch(Description description) {
-                adapter.describeConsumer(mismatch().getMismatchDescription(), description);
+                adapter.describeResult(mismatch().getMismatchDescription(), description);
             }
         }
     }

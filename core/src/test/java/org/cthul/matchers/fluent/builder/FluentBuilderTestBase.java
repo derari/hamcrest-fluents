@@ -109,7 +109,19 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
         apply();
         assertMismatch(
                 "a value less than <2>",
-                "#1 <3> was greater than <2>");
+                "but: #1 <3> was greater than <2>");
+    }
+    
+    @Test
+    public void test_fluent_property_isA_fail() {
+        List<Object> list = Arrays.asList((Object) 1, 3, 5);
+        fluent(eachItem().adapt(list))
+                .as(Integer.class)
+                        .is(lessThan(2));
+        apply();
+        assertMismatch(
+                "a value less than <2>",
+                "but: #1 <3> was greater than <2>");
     }
     
     @Test

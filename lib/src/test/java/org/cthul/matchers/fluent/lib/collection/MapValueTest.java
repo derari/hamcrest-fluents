@@ -4,7 +4,7 @@ import java.util.*;
 import org.junit.Test;
 
 import static org.cthul.matchers.fluent.CoreFluents.assertThat;
-import static org.cthul.matchers.fluent.lib.collection.MapValueAdapter.*;
+import static org.cthul.matchers.fluent.lib.collection.MapAdapters.*;
 import static org.hamcrest.Matchers.*;
 
 /**

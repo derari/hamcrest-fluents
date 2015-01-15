@@ -6,12 +6,11 @@
     <factory class="org.cthul.matchers.fluent.adapters.EachOfAdapter"/>
     <factory class="org.cthul.matchers.fluent.adapters.AnyOfAdapter"/>
     <!--<factory class="org.cthul.matchers.fluent.adapters.IdentityValue"/>-->
-    <factory class="org.cthul.matchers.fluent.adapters.LambdaAdapter"/>
+    <!-- <factory class="org.cthul.matchers.fluent.adapters.LambdaAdapter"/> -->
     
     <factory class="org.cthul.matchers.fluent.lib.collection.ArraySizeAdapter"/>
     <factory class="org.cthul.matchers.fluent.lib.collection.IterableSizeAdapter"/>
-    <factory class="org.cthul.matchers.fluent.lib.collection.MapSizeAdapter"/>
-    <factory class="org.cthul.matchers.fluent.lib.collection.MapValueAdapter"/>
+    <factory class="org.cthul.matchers.fluent.lib.collection.MapAdapters"/>
     
     <factory class="org.cthul.matchers.fluent.lib.object.PropertyAdapter"/>
     <factory class="org.cthul.matchers.fluent.lib.object.ThrowableAnyCauseAdapter"/>

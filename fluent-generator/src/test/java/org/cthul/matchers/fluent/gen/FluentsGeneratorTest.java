@@ -1,7 +1,6 @@
 package org.cthul.matchers.fluent.gen;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.cthul.matchers.fluent.gen.FluentsGenerator.FactoryConfig;
 import org.cthul.matchers.fluent.gen.FluentsGenerator.FluentConfig;
@@ -19,6 +18,8 @@ public class FluentsGeneratorTest {
         configs.add(flc);
         fac = new FactoryConfig("org.cthul.matchers.fluent.gen.test.Matcher1");
         fac.getIncludes().add("matcher1\\(");
+        flc.getFactories().add(fac);
+        fac = new FactoryConfig("org.cthul.matchers.fluent.gen.test.Adapter1");
         flc.getFactories().add(fac);
         
         flc = new FluentConfig("ListTestFluent", "java.util.List<?>");

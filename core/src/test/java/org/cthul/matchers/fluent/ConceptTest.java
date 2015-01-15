@@ -7,7 +7,6 @@ import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import static org.cthul.matchers.fluent.CoreFluents.*;
-import org.cthul.matchers.fluent.ext.ExtendableFluent;
 import static org.hamcrest.Matchers.*;
 
 /**
@@ -51,8 +50,8 @@ public class ConceptTest {
                 .and().not(hasItem(7));
         
         assertThat((Object) 1)
-                .as(Integer.class)
-                .is(lessThan(3))
+                .isA(Integer.class)
+                .andIs(lessThan(3))
                 .and(greaterThan(0));
         
         assertThat((Object) 1)

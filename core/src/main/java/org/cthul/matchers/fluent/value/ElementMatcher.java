@@ -6,7 +6,7 @@ import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 
 /**
- * A Hamcrest Matcher that accepts {@link Element}s of a type.
+ * A Hamcrest-like matcher that accepts {@link Element}s of a type.
  * <p>
  * The matcher accepts any type of element, 
  * the value type has to be checked explicitly.

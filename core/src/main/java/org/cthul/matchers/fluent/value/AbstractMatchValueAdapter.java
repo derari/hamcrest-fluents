@@ -2,20 +2,24 @@ package org.cthul.matchers.fluent.value;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.cthul.matchers.diagnose.QuickDiagnose;
 import org.cthul.matchers.diagnose.QuickResultMatcherBase;
-import org.cthul.matchers.diagnose.SelfDescribingBase;
 import org.cthul.matchers.diagnose.result.AbstractMatchResult;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultMismatch;
+import org.cthul.matchers.diagnose.result.MatchResultProxy;
 import org.cthul.matchers.diagnose.result.MatchResultSuccess;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.cthul.matchers.fluent.adapters.SimpleAnyOfAdapter;
 import org.cthul.matchers.fluent.adapters.SimpleEachOfAdapter;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
+import org.cthul.matchers.object.CIs;
+import org.cthul.matchers.object.InstanceOf;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
+import org.hamcrest.core.IsEqual;
 
 /**
  * Provides a framework for implementing {@link MatchValue}s that
@@ -79,6 +83,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
     protected abstract static class AbstractAdaptedValue<Value, Property> extends MatchValueBase<Property> {
         
         private final Class<?> valueType;
+        private final Matcher<? super Value> precondition;
         private final MatchValue<Value> sourceValue;
         
         private Map<Element<Value>, Object> cache = null;
@@ -87,47 +92,61 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
 
         public AbstractAdaptedValue(Class<?> valueType, MatchValue<Value> sourceValue) {
             this.valueType = valueType;
+            this.precondition = null;
+            this.sourceValue = sourceValue;
+        }
+
+        public AbstractAdaptedValue(Matcher<? super Value> precondition, MatchValue<Value> sourceValue) {
+            this.valueType = null;
+            this.precondition = precondition;
+            this.sourceValue = sourceValue;
+        }
+
+        public AbstractAdaptedValue(Class<?> valueType, Matcher<Object> precondition, MatchValue<Value> sourceValue) {
+            this.valueType = valueType;
+            this.precondition = precondition;
             this.sourceValue = sourceValue;
         }
         
         protected boolean acceptValue(Object value) {
-            return valueType.isInstance(value);
-        }
-        
-        protected void describeExpectedToAccept(Object value, Description description) {
-            description.appendText("an instance of ")
-                       .appendText(valueType.getCanonicalName());
-        }
-        
-        protected void describeMismatchOfUnaccapted(Object value, Description description) {
-            description.appendText("was ");
-            String s = String.valueOf(value);
-            String n = valueType.getSimpleName();
-            if (n != null && !s.contains(n)) {
-                description.appendText("(")
-                        .appendText(n)
-                        .appendText(") ");
+            if (valueType != null && !valueType.isInstance(value)) {
+                return false;
             }
-            description.appendValue(value);
+            if (precondition != null && !precondition.matches(value)) {
+                return false;
+            }
+            return true;
         }
+        
+        protected MatchResult<?> matchResultOfUnaccepted(Object value) {
+            if (valueType != null && !valueType.isInstance(value)) {
+                return InstanceOf.isA(valueType).matchResult(value);
+            }
+            if (precondition != null && !precondition.matches(value)) {
+                return QuickDiagnose.matchResult(precondition, value);
+            }
+            return CIs.isNot(IsEqual.equalTo(value)).matchResult(value);
+        }
+        
+//        protected void describeExpectedToAccept(Object value, Description description) {
+//            description.appendText("is an instance of ")
+//                       .appendText(valueType.getCanonicalName());
+//        }
+//        
+//        protected void describeMismatchOfUnaccapted(Object value, Description description) {
+//            description.appendText("was ");
+//            String s = String.valueOf(value);
+//            String n = valueType.getSimpleName();
+//            if (n != null && !s.contains(n)) {
+//                description.appendText("(")
+//                        .appendText(n)
+//                        .appendText(") ");
+//            }
+//            description.appendValue(value);
+//        }
         
         protected <I> ElementMatcher.Mismatch<I> matchResultOfUnaccepted(I element, final Object value, Matcher<?> m) {
-            return new MismatchBase<I>(element, m) {
-                @Override
-                public void describeExpected(ExpectationDescription description) {
-                    SelfDescribing sd = new SelfDescribingBase() {
-                        @Override
-                        public void describeTo(Description description) {
-                            describeExpectedToAccept(value, description);
-                        }
-                    };
-                    description.addExpected(-1, sd);
-                }
-                @Override
-                public void describeMismatch(Description description) {
-                    describeMismatchOfUnaccapted(value, description);
-                }
-            };
+            return new ResultProxy<>(matchResultOfUnaccepted(value), element, m);
         }
 
         protected MatchValue<Value> getSourceValue() {
@@ -173,7 +192,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             if (acceptValue(element.value())) {
                 return (ElementMatcher.Result) matchResultSafely((Element) element, adaptedMatcher, matcher);
             } else {
-                return matchResultOfUnaccepted(element, element.value(), adaptedMatcher);
+                return AbstractAdaptedValue.this.matchResultOfUnaccepted(element, element.value(), adaptedMatcher);
             }
         }
         
@@ -298,6 +317,24 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
     }
     
+    protected static class ResultProxy<Value>
+                    extends MatchResultProxy<Value, Matcher<?>>
+                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
+
+        public ResultProxy(MatchResult<?> result, Value value, Matcher<?> matcher) {
+            super(result, value, matcher);
+        }
+
+        @Override
+        public ElementMatcher.Mismatch<Value> getMismatch() {
+            return (ElementMatcher.Mismatch<Value>) super.getMismatch();
+        }
+
+        @Override
+        public void describeExpected(ExpectationDescription description) {
+            description.addExpected(-1, getExpectedDescription());
+        }
+    }
     /**
      * An {@link ElementMatcher} that delegates all calls to its {@link AbstractAdaptedValue}.
      * @param <Value>

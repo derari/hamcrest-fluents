@@ -49,7 +49,7 @@ public class FluentMatcherBuilderTest extends FluentBuilderTestBase {
         apply();
         assertMismatch(
                 "each is a value less than <2>",
-                "#1 <3> was greater than <2>");
+                ": #1 <3> was greater than <2>");
     }
     
     @Test

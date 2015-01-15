@@ -44,7 +44,4 @@ public class LambdaAdapter<Value, Property> extends SimpleAdapter<Value, Propert
         return getter.get(v);
     }
     
-    public static interface Getter<Value, Property> {
-        Property get(Value value);
-    }
 }

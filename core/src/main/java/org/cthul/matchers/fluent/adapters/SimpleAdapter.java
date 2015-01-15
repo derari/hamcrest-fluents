@@ -1,6 +1,7 @@
 package org.cthul.matchers.fluent.adapters;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.internal.ReflectiveTypeFinder;
 
 /**
@@ -23,6 +24,11 @@ public abstract class SimpleAdapter<Value, Property> extends ConvertingAdapter<V
 
     protected SimpleAdapter(String name, ReflectiveTypeFinder typeFinder) {
         super(typeFinder);
+        this.name = name;
+    }
+
+    public SimpleAdapter(String name, Matcher<? super Value> precondition) {
+        super(precondition);
         this.name = name;
     }
 
