@@ -7,6 +7,8 @@ import java.util.Set;
 import org.cthul.matchers.diagnose.SelfDescribingBase;
 import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
+import org.cthul.matchers.diagnose.nested.PrecedencedSelfDescribing;
+import org.cthul.matchers.diagnose.nested.PrecedencedSelfDescribingBase;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.diagnose.result.MatchResultProxy;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
@@ -164,31 +166,33 @@ public abstract class MatchValueAdapterBase<Value, Property>
      */
     protected static class SingleElementValue<Value> 
                     extends MatchValueBase<Value>
-                    implements Element<Object> {
+                    implements Element<Object>,
+                        MatchResult.Match<Value>, MatchResult.Mismatch<Value> {
 
         private static final ElementMatcher<Object> ANYTHING = new ElementMatcherWrapper<>(-1, IsAnything.anything("anything"));
         
         private final Object value;
         private boolean valid = true;
         private ElementMatcher<? super Value> last = ANYTHING;
-        private ElementMatcher.Result<?> internResult = null;
-        private Result matchResult = null;
+        private ElementMatcher.Result internResult = null;
         private String valueType = null;
 
         public SingleElementValue(Object value) {
             this.value = value;
         }
+        
+        public SingleElementValue(Object value, String valueType) {
+            this.value = value;
+            this.valueType = valueType;
+        }
 
         @Override
         public boolean matches(ElementMatcher<? super Value> matcher) {
             if (!valid) return false;
+            valid = matcher.matches(this);
             last = matcher;
             internResult = null;
-            if (matcher.matches(this)) {
-                return true;
-            }
-            valid = false;
-            return false;
+            return valid;
         }
         
         @Override
@@ -203,13 +207,17 @@ public abstract class MatchValueAdapterBase<Value, Property>
 
         @Override
         public void describeValueType(Description description) {
+            description.appendText(getValueType());
+        }
+
+        public String getValueType() {
             if (valueType == null) {
-                valueType = getValueType();
+                valueType = detectValueType();
             }
-            description.appendText(valueType);
+            return valueType;
         }
         
-        protected String getValueType() {
+        protected String detectValueType() {
             if (value != null) {
                 if (value instanceof Iterable) {
                     if (value instanceof List) {
@@ -233,7 +241,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
            return "value";
         }
 
-        private ElementMatcher.Result<?> result() {
+        private ElementMatcher.Result result() {
             if (internResult == null) {
                 internResult = last.matchResult(this);
             }
@@ -242,10 +250,7 @@ public abstract class MatchValueAdapterBase<Value, Property>
         
         @Override
         public MatchResult<?> matchResult() {
-            if (matchResult == null) {
-                matchResult = new Result();
-            }
-            return matchResult;
+            return this;
         }
 
         /**
@@ -257,52 +262,111 @@ public abstract class MatchValueAdapterBase<Value, Property>
             return value;
         }
         
-        /**
-         * MatchResult describing the current state.
-         * <p>
-         * Most calls are directly delegated to {@link SingleElementValue#result()}.
-         */
-        protected class Result extends MatchResultProxy<Value, Matcher<?>> {
+        // MatchResult interfaces implemented below
 
-            public Result() {
-                super(null);
-            }
+        @Override
+        public Value getValue() {
+            return (Value) value;
+        }
 
-            @Override
-            public Value getValue() {
-                return (Value) value;
+        @Override
+        public void describeTo(Description description) {
+            if (last == ANYTHING) {
+                super.describeTo(description);
+            } else {
+                result().describeTo(description);
             }
+        }
+        
+        @Override
+        public int getDescriptionPrecedence() {
+            return P_ATOMIC;
+        }
 
-            @Override
-            public boolean matched() {
-                return SingleElementValue.this.matched();
-            }
+        @Override
+        public Matcher<?> getMatcher() {
+            return ElementMatcherWrapper.asMatcher(last);
+        }
 
-            @Override
-            protected ElementMatcher.Result<?> result() {
-                return SingleElementValue.this.result();
-            }
+        @Override
+        public void describeMatcher(Description description) {
+            last.describeTo(description);
+        }
 
-            @Override
-            protected ElementMatcher.Mismatch<?> mismatch() {
-                return (ElementMatcher.Mismatch<?>) super.mismatch();
-            }
+        @Override
+        public int getMatcherPrecedence() {
+            return last.getDescriptionPrecedence();
+        }
 
-            /**
-             * Fills an {@link ElementMatcher.ExpectationDescription ExpectationDescription} 
-             * and writes it to {@code description}
-             * @param description 
-             */
-            @Override
-            public void describeExpected(Description description) {
-//                if (description instanceof ExpectationDescription) {
-//                    mismatch().describeExpected((ExpectationDescription) description);
-//                } else {
-                    ExpectationStringDescription ex = new ExpectationStringDescription();
-                    mismatch().describeExpected(ex);
-                    ex.describeTo(description);
-//                }
-            }
+        @Override
+        public PrecedencedSelfDescribing getMatcherDescription() {
+            return last;
+        }
+
+        @Override
+        public Match<Value> getMatch() {
+            return matched() ? this : null;
+        }
+
+        @Override
+        public void describeMatch(Description description) {
+            describeTo(description);
+        }
+
+        @Override
+        public PrecedencedSelfDescribing getMatchDescription() {
+            return this;
+        }
+
+        @Override
+        public int getMatchPrecedence() {
+            return getDescriptionPrecedence();
+        }
+
+        @Override
+        public Mismatch<Value> getMismatch() {
+            return matched() ? null : this;
+        }
+
+        @Override
+        public void describeExpected(Description description) {
+            ExpectationStringDescription exp = new ExpectationStringDescription();
+            result().describeExpected(exp);
+            exp.describeTo(description);
+        }
+
+        @Override
+        public int getExpectedPrecedence() {
+            return getDescriptionPrecedence();
+        }
+
+        @Override
+        public PrecedencedSelfDescribing getExpectedDescription() {
+            return new PrecedencedSelfDescribingBase() {
+                @Override
+                public void describeTo(Description description) {
+                    describeExpected(description);
+                }
+                @Override
+                public int getDescriptionPrecedence() {
+                    return getExpectedPrecedence();
+                }
+            };
+        }
+
+        @Override
+        public void describeMismatch(Description description) {
+            describeTo(description);
+        }
+
+        @Override
+        public int getMismatchPrecedence() {
+           return getDescriptionPrecedence();
+        }
+
+        @Override
+        public PrecedencedSelfDescribing getMismatchDescription() {
+            return this;
         }
     }
     
@@ -338,8 +402,9 @@ public abstract class MatchValueAdapterBase<Value, Property>
 
         @Override
         public <I> MatchResult<I> matchResult(I item) {
-            MatchResult<?> mr = adapter.adapt(item).matchResult(matcher);
-            return new AdaptedResult<>(mr, item);
+            MatchValue<Property> mv = adapter.adapt(item);
+            mv.matches(matcher);
+            return new AdaptedResult<>(mv.matchResult(), item);
         }
         
         class AdaptedResult<I> extends MatchResultProxy<I, AdaptingMatcher<?, ?>> {
@@ -367,6 +432,23 @@ public abstract class MatchValueAdapterBase<Value, Property>
             public void describeMismatch(Description description) {
                 adapter.describeResult(mismatch().getMismatchDescription(), description);
             }
+        }
+    }
+    
+    protected static abstract class InternalResult extends SelfDescribingBase implements ElementMatcher.Result {
+        private final boolean match;
+
+        public InternalResult() {
+            this.match = false;
+        }
+
+        public InternalResult(boolean match) {
+            this.match = match;
+        }
+
+        @Override
+        public boolean matched() {
+            return match;
         }
     }
 }

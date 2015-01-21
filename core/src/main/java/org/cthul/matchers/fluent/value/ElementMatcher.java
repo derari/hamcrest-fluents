@@ -1,6 +1,8 @@
 package org.cthul.matchers.fluent.value;
 
 import org.cthul.matchers.diagnose.QuickDiagnosingMatcher;
+import org.cthul.matchers.diagnose.SelfDescribingBase;
+import org.cthul.matchers.diagnose.nested.PrecedencedSelfDescribing;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
@@ -16,10 +18,11 @@ import org.hamcrest.SelfDescribing;
  * @param <Value> value type
  * @see org.cthul.matchers.fluent.value.ElementMatcher
  */
-public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMatcher.Element<?>> {
+public interface ElementMatcher<Value> extends PrecedencedSelfDescribing {
 
-    @Override
-    <I> Result<I> matchResult(I item);
+    boolean matches(Element<?> element);
+    
+    Result matchResult(Element<?> element);
     
     /**
      * A single element.
@@ -33,26 +36,16 @@ public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMat
     }
     
     /**
-     * A {@code MatchResult} that provides a specialized {@link Mismatch}.
-     * @param <Value> 
+     * A like a {@code MatchResult}, but for elements.
      */
-    interface Result<Value> extends MatchResult<Value> {
+    interface Result extends SelfDescribing {
         
+        public abstract boolean matched();
+
         @Override
-        ElementMatcher.Mismatch<Value> getMismatch();
-    }
-    
-    /**
-     * A {@link MatchResult.Mismatch} that can fill an {@link ExpectationDescription}.
-     * @param <Value> 
-     */
-    interface Mismatch<Value> extends Result<Value>, MatchResult.Mismatch<Value> {
+        public abstract void describeTo(Description description);
         
-        /**
-         * Describes what was expected of the value.
-         * @param description 
-         */
-        void describeExpected(ExpectationDescription description);
+        public abstract void describeExpected(ExpectationDescription description);
     }
     
     /**
@@ -67,7 +60,8 @@ public interface ElementMatcher<Value> extends QuickDiagnosingMatcher<ElementMat
          * written to the result. {@code -1} will append to the beginning.
          * @param index
          * @param expected 
+         * @return this
          */
-        void addExpected(int index, SelfDescribing expected);
+        ExpectationDescription addExpected(int index, SelfDescribing expected);
     }
 }

@@ -30,8 +30,13 @@ public class ExpectationStringDescription
         return current;
     }
 
+    public ExpectationStringDescription addExpected(ElementMatcher.Result result) {
+        result.describeExpected(this);
+        return this;
+    }
+
     @Override
-    public void addExpected(int index, SelfDescribing expected) {
+    public ExpectationStringDescription addExpected(int index, SelfDescribing expected) {
         if (index < 0) {
             if (unsorted == null) unsorted = new ArrayList<>();
             unsorted.add(expected);
@@ -42,6 +47,7 @@ public class ExpectationStringDescription
             sorted.set(index, expected);
         }
         current = null;
+        return this;
     }
 
     @Override

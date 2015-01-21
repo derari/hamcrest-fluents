@@ -3,17 +3,11 @@ package org.cthul.matchers.fluent.value;
 import java.util.HashMap;
 import java.util.Map;
 import org.cthul.matchers.diagnose.QuickDiagnose;
-import org.cthul.matchers.diagnose.QuickResultMatcherBase;
-import org.cthul.matchers.diagnose.result.AbstractMatchResult;
 import org.cthul.matchers.diagnose.result.MatchResult;
-import org.cthul.matchers.diagnose.result.MatchResultMismatch;
-import org.cthul.matchers.diagnose.result.MatchResultProxy;
-import org.cthul.matchers.diagnose.result.MatchResultSuccess;
 import org.cthul.matchers.fluent.adapters.SimpleAdapter;
 import org.cthul.matchers.fluent.adapters.SimpleAnyOfAdapter;
 import org.cthul.matchers.fluent.adapters.SimpleEachOfAdapter;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
-import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
 import org.cthul.matchers.object.CIs;
 import org.cthul.matchers.object.InstanceOf;
 import org.hamcrest.Description;
@@ -72,7 +66,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
      * <p>  
      * First, it rejects all elements whose values are not of an expected type.
      * Then, {@link #matchSafely(org.cthul.matchers.fluent.value.ElementMatcher.Element, org.cthul.matchers.fluent.value.ElementMatcher) #matchSafely()} 
-     * and {@link #matchResultSafely(org.cthul.matchers.fluent.value.ElementMatcher.Element, org.cthul.matchers.fluent.value.ElementMatcher, org.cthul.matchers.fluent.value.ElementMatcher) #matchResultSafely()} 
+     * and {@link #matchResultSafely(org.cthul.matchers.fluent.value.ElementMatcher.Element, org.cthul.matchers.fluent.value.ElementMatcher) #matchResultSafely()} 
      * do the actual adapting and apply element matchers respectively.
      * <p>
      * A {@linkplain #cachedItem(org.cthul.matchers.fluent.value.ElementMatcher.Element)  caching mechanism} allows to store state
@@ -108,6 +102,10 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             this.sourceValue = sourceValue;
         }
         
+        protected boolean acceptValue(Element<?> element) {
+            return acceptValue(element.value());
+        }
+        
         protected boolean acceptValue(Object value) {
             if (valueType != null && !valueType.isInstance(value)) {
                 return false;
@@ -128,25 +126,8 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
             return CIs.isNot(IsEqual.equalTo(value)).matchResult(value);
         }
         
-//        protected void describeExpectedToAccept(Object value, Description description) {
-//            description.appendText("is an instance of ")
-//                       .appendText(valueType.getCanonicalName());
-//        }
-//        
-//        protected void describeMismatchOfUnaccapted(Object value, Description description) {
-//            description.appendText("was ");
-//            String s = String.valueOf(value);
-//            String n = valueType.getSimpleName();
-//            if (n != null && !s.contains(n)) {
-//                description.appendText("(")
-//                        .appendText(n)
-//                        .appendText(") ");
-//            }
-//            description.appendValue(value);
-//        }
-        
-        protected <I> ElementMatcher.Mismatch<I> matchResultOfUnaccepted(I element, final Object value, Matcher<?> m) {
-            return new ResultProxy<>(matchResultOfUnaccepted(value), element, m);
+        protected ElementMatcher.Result matchResultOfUnaccepted(Element<?> element) {
+            return ElementMatcherWrapper.asElementResult(matchResultOfUnaccepted(element.value()));
         }
 
         protected MatchValue<Value> getSourceValue() {
@@ -170,7 +151,7 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
 
         @Override
         public MatchResult<?> matchResult() {
-            // will call #matchResult(Element, ElementMatcher, ElementMatcher)
+            // will call #matchResult(Element, ElementMatcher)
             return sourceValue.matchResult();
         }
         
@@ -188,11 +169,11 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         
         protected abstract boolean matchSafely(Element<Value> element, ElementMatcher<? super Property> matcher);
         
-        protected <I extends Element<?>> ElementMatcher.Result<I> matchResult(final I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher) {
-            if (acceptValue(element.value())) {
-                return (ElementMatcher.Result) matchResultSafely((Element) element, adaptedMatcher, matcher);
+        protected ElementMatcher.Result matchResult(final Element<?> element, ElementMatcher<? super Property> matcher) {
+            if (acceptValue(element)) {
+                return matchResultSafely((Element) element, matcher);
             } else {
-                return AbstractAdaptedValue.this.matchResultOfUnaccepted(element, element.value(), adaptedMatcher);
+                return matchResultOfUnaccepted(element);
             }
         }
         
@@ -200,15 +181,12 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
          * Returns a {@code MatchResult} that describes the {@code element}'s match.
          * <p>
          * The match result should have {@code element} as value and 
-         * {@code adaptedMatcher} as matcher. It is recommended to extend
-         * {@link MatchBase}, {@link MismatchBase}, or {@link ResultBase}.
-         * @param <I>
+         * {@code adaptedMatcher} as matcher.
          * @param element
-         * @param adaptedMatcher
          * @param matcher
-         * @return 
+         * @return result
          */
-        protected abstract <I extends Element<Value>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<Value> adaptedMatcher, ElementMatcher<? super Property> matcher);
+        protected abstract ElementMatcher.Result matchResultSafely(Element<Value> element, ElementMatcher<? super Property> matcher);
         
         /**
          * Allows to cache state for an element. 
@@ -255,93 +233,12 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
     }
     
-    protected abstract static class MismatchBase<Value> 
-                    extends MatchResultMismatch<Value, Matcher<?>>
-                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
-
-        public MismatchBase(Value value, Matcher<?> matcher) {
-            super(value, matcher);
-        }
-
-        @Override
-        public ElementMatcher.Mismatch<Value> getMismatch() {
-            return this;
-        }
-
-        @Override
-        public final void describeExpected(Description d) {
-            throw new UnsupportedOperationException("internal use only");
-        }
-    }
-    
-    protected abstract static class MatchBase<Value> 
-                    extends MatchResultSuccess<Value, Matcher<?>>
-                    implements ElementMatcher.Result<Value> {
-
-        public MatchBase(Value value, Matcher<?> matcher) {
-            super(value, matcher);
-        }
-
-        @Override
-        public ElementMatcher.Mismatch<Value> getMismatch() {
-            return null;
-        }
-    }
-    
-    protected abstract static class ResultBase<Value> 
-                    extends AbstractMatchResult<Value, Matcher<?>>
-                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
-
-        /**
-         * When this constructor is used, 
-         * {@link #matched()} should be overridden.
-         * @param value
-         * @param matcher 
-         */
-        public ResultBase(Value value, Matcher<?> matcher) {
-            super(value, matcher);
-        }
-
-        public ResultBase(Value value, Matcher<?> matcher, boolean success) {
-            super(value, matcher, success);
-        }
-
-        @Override
-        public ElementMatcher.Mismatch<Value> getMismatch() {
-            return (ElementMatcher.Mismatch<Value>) super.getMismatch();
-        }
-
-        @Override
-        public final void describeExpected(Description d) {
-            throw new UnsupportedOperationException("internal use only");
-        }
-    }
-    
-    protected static class ResultProxy<Value>
-                    extends MatchResultProxy<Value, Matcher<?>>
-                    implements ElementMatcher.Result<Value>, ElementMatcher.Mismatch<Value> {
-
-        public ResultProxy(MatchResult<?> result, Value value, Matcher<?> matcher) {
-            super(result, value, matcher);
-        }
-
-        @Override
-        public ElementMatcher.Mismatch<Value> getMismatch() {
-            return (ElementMatcher.Mismatch<Value>) super.getMismatch();
-        }
-
-        @Override
-        public void describeExpected(ExpectationDescription description) {
-            description.addExpected(-1, getExpectedDescription());
-        }
-    }
     /**
      * An {@link ElementMatcher} that delegates all calls to its {@link AbstractAdaptedValue}.
      * @param <Value>
      * @param <Property> 
      */
     protected static class InternalAdaptingMatcher<Value, Property> 
-                    extends QuickResultMatcherBase<Element<?>> 
                     implements ElementMatcher<Value> {
 
         private final AbstractAdaptedValue<Value, Property> adaptedValue;
@@ -353,9 +250,13 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
-        public boolean matches(Object item) {
-            Element<?> e = (Element) item;
-            return adaptedValue.matches(e, itemMatcher);
+        public boolean matches(Element<?> element) {
+            return adaptedValue.matches(element, itemMatcher);
+        }
+
+        @Override
+        public ElementMatcher.Result matchResult(Element<?> e) {
+            return adaptedValue.matchResult(e, itemMatcher);
         }
 
         @Override
@@ -366,21 +267,8 @@ public abstract class AbstractMatchValueAdapter<Value, Property> extends MatchVa
         }
 
         @Override
-        public <I> ElementMatcher.Result<I> matchResult(I item) {
-            final Element<?> e = (Element) item;
-            return (ElementMatcher.Result) adaptedValue.matchResult(e, this, itemMatcher);
-        }
-        
-        /**
-         * Use {@link #matchResult(java.lang.Object)} instead.
-         * <p>
-         * This matcher should never occur in a context 
-         * where this method needs to be called.
-         * @param description
-         */
-        @Override
-        public void describeMismatch(Object item, Description description) {
-            throw new UnsupportedOperationException("matcher for internal use only");
+        public int getDescriptionPrecedence() {
+            return P_UNARY_NO_PAREN;
         }
     }
 }

@@ -3,13 +3,12 @@ package org.cthul.matchers.fluent.adapters;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.cthul.matchers.diagnose.result.MatchResult;
+import org.cthul.matchers.diagnose.nested.Nested;
 import org.cthul.matchers.fluent.value.AbstractMatchValueAdapter;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.ElementMatcher;
 import org.cthul.matchers.fluent.value.ElementMatcher.Element;
 import org.cthul.matchers.fluent.value.ElementMatcher.ExpectationDescription;
-import org.cthul.matchers.fluent.value.ElementMatcher.Mismatch;
 import org.cthul.matchers.fluent.value.ElementMatcher.Result;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
@@ -93,77 +92,73 @@ public abstract class SimpleEachOfAdapter<Value, Item>
 
         @Override
         protected Object createItem(Element<V> key) {
-            return new EachItemIterable<>(getElements(key.value()));
+            return new SourceElements<>(getElements(key.value()));
         }
 
         @Override
         protected boolean matchSafely(Element<V> element, ElementMatcher<? super Item> matcher) {
-            EachItemIterable<Item> it = cachedItem(element);
-            if (it.invalid != null) return false;
-            E<Item> e = it.first();
-            while (e != null) {
+            SourceElements<Item> it = cachedItem(element);
+            return findInvalidItem(it, matcher) == null;
+        }
+        
+        protected E<Item> findInvalidItem(SourceElements<Item> elements, ElementMatcher<? super Item> matcher) {
+            if (elements.invalid != null) return elements.invalid;
+            for (E<Item> e: elements) {
                 if (!matcher.matches(e)) {
                     e.mismatch = matcher;
-                    it.invalid = e;
-                    return false;
+                    elements.invalid = e;
+                    return e;
                 }
-                e = it.next(e);
             }
-            return true;
+            return null;
         }
 
         @Override
-        protected <I extends Element<V>> Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Item> matcher) {
-            EachItemIterable<Item> it = cachedItem(element);
-            if (it.invalid != null) {
-                E<Item> invalid = it.invalid;
-                return failResult(element, adaptedMatcher, invalid.mismatch.matchResult(invalid).getMismatch());
+        protected Result matchResultSafely(Element<V> element, ElementMatcher<? super Item> matcher) {
+            SourceElements<Item> it = cachedItem(element);
+            E<Item> invalid = findInvalidItem(it, matcher);
+            if (invalid == null) {
+                return successResult(element, it, matcher);
+            } else {
+                return failResult(element, invalid);
             }
-            List<MatchResult.Match<E<Item>>> results = new ArrayList<>();
-            E<Item> e = it.first();
-            while (e != null) {
-                Result<E<Item>> mr = matcher.matchResult(e);
-                if (mr.matched()) {
-                    results.add(mr.getMatch());
-                } else {
-                    return failResult(element, adaptedMatcher, mr.getMismatch());
-                }
-                e = it.next(e);
-            }
-            return successResult(element, adaptedMatcher, results);
         }
         
-        protected <I extends Element<V>> Result<I> successResult(I element, ElementMatcher<V> adaptedMatcher, final List<MatchResult.Match<E<Item>>> matches) {
-            return new MatchBase<I>(element, adaptedMatcher) {
+        protected Result successResult(final Element<V> owner, final SourceElements<Item> it, final ElementMatcher<? super Item> matcher) {
+            return new InternalResult(true) {
+                List<Result> matches = null;
                 @Override
-                public void describeMatch(Description d) {
-                    V value = getValue().value();
-                    boolean first = true;
-                    for (MatchResult.Match<E<Item>> m: matches) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            d.appendText(", ");
+                public void describeTo(Description description) {
+                    if (matches == null) {
+                        matches = new ArrayList<>();
+                        for (E<Item> e: it) {
+                            matches.add(matcher.matchResult(e));
                         }
-                        E<Item> e = m.getValue();
-                        SimpleEachOfAdapter.this.describeElement(value, e.value(), e.i, d);
-                        m.describeMatch(d);
+                    }
+                    for (E<Item> e: Nested.collectDescriptions(it, description, ", ", ", and ", " and ")) {
+                        describeElement(owner.value(), e.value(), e.i, description);
+                        matches.get(e.i).describeTo(description);
+                    }
+                }
+                @Override
+                public void describeExpected(ExpectationDescription description) {
+                    for (E<Item> e: it) {
+                        e.mismatchResult().describeExpected(description);
                     }
                 }
             };
         }
         
-        protected <I extends Element<V>> Result<I> failResult(I element, ElementMatcher<V> adaptedMatcher, final Mismatch<E<Item>> mismatch) {
-            return new MismatchBase<I>(element, adaptedMatcher) {
+        protected Result failResult(final Element<V> owner, final E<Item> item) {
+            return new InternalResult(false) {
                 @Override
-                public void describeExpected(ExpectationDescription description) {
-                    mismatch.describeExpected(description);
+                public void describeTo(Description description) {
+                    describeElement(owner.value(), item.value(), item.i, description);
+                    item.mismatchResult().describeTo(description);
                 }
                 @Override
-                public void describeMismatch(Description d) {
-                    E<Item> e = mismatch.getValue();
-                    SimpleEachOfAdapter.this.describeElement(getValue().value(), e.value(), e.i, d);
-                    mismatch.describeMismatch(d);
+                public void describeExpected(ExpectationDescription description) {
+                    item.mismatchResult().describeExpected(description);
                 }
             };
         }
@@ -187,60 +182,38 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         protected void describeConsumer(SelfDescribing sd, Description d) {
             SimpleEachOfAdapter.this.describeConsumer(sd, d);
         }
-//
-//        @Override
-//        protected void describeMatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
-//            description.appendText("each is valid");
-//        }
-//
-//        @Override
-//        protected void describeExpectedSafely(Element<V> element, ElementMatcher<Item> matcher, ExpectationDescription description) {
-//            EachItemIterable<Item> it = cachedItem(element);
-//            E<Item> e = it.invalid;
-////          do we even care?
-////            assert e.mismatch == matcher : 
-////                    "The nested value should complain only about the matcher "
-////                    + "that caused this one to fail";
-//            matcher.describeExpected(e, description);
-//        }
-//
-//        @Override
-//        protected void describeMismatchSafely(Element<V> element, ElementMatcher<Item> matcher, Description description) {
-//            EachItemIterable<Item> it = cachedItem(element);
-//            E<Item> e = it.invalid;
-////          do we even care?            
-////            assert e.mismatch == matcher : 
-////                    "The nested value should complain only about the matcher "
-////                    + "that caused this one to fail";            
-//            describeElement(element.value(), e.value(), e.i, description);
-//            matcher.describeMismatch(e, description);
-//        }        
     }
     
-    protected static class EachItemIterable<Item> {
+    protected static class SourceElements<Item> implements Iterable<E<Item>> {
         
         private final Iterator<? extends Item> source;
-        private E<Item> first = null;
+        private final List<E<Item>> list = new ArrayList<>();
         E<Item> invalid = null;
         
-        public EachItemIterable(Iterable<? extends Item> iterable) {
+        public SourceElements(Iterable<? extends Item> iterable) {
             this.source = iterable.iterator();
         }
         
-        public E<Item> first() {
-            if (first == null) {
-                if (!source.hasNext()) return null;
-                first = new E<>(source.next(), 0);
-            }
-            return first;
-        }
-        
-        public E<Item> next(E<Item> e) {
-            if (e.next == null) {
-                if (!source.hasNext()) return null;
-                e.next = new E<>(source.next(), e.i+1);
-            }
-            return e.next;
+        @Override
+        public Iterator<E<Item>> iterator() {
+            return new Iterator<E<Item>>() {
+                Iterator<E<Item>> previous = list.iterator();
+                @Override
+                public boolean hasNext() {
+                    return (previous != null && previous.hasNext()) || source.hasNext();
+                }
+
+                @Override
+                public E<Item> next() {
+                    if (previous != null && previous.hasNext()) {
+                        return previous.next();
+                    }
+                    previous = null;
+                    E<Item> next = new E<>(source.next(), list.size());
+                    list.add(next);
+                    return next;
+                }
+            };
         }
     }
     
@@ -249,6 +222,7 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         private final Item value;
         final int i;
         ElementMatcher<? super Item> mismatch = null;
+        Result mismatchResult = null;
         E<Item> next = null;
 
         public E(Item value, int i) {
@@ -259,6 +233,13 @@ public abstract class SimpleEachOfAdapter<Value, Item>
         @Override
         public Item value() {
             return value;
+        }
+
+        public Result mismatchResult() {
+            if (mismatchResult == null) {
+                mismatchResult = mismatch.matchResult(this);
+            }
+            return mismatchResult;
         }
     }
 }

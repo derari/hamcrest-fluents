@@ -53,13 +53,13 @@ public interface MatchValue<Value> extends SelfDescribing {
      */
     boolean matches(ElementMatcher<? super Value> matcher);
     
-    /**
-     * @param matcher
-     * @return match result
-     * @see #matches(org.cthul.matchers.fluent.value.ElementMatcher) 
-     * @see #matchResult() 
-     */
-    MatchResult<?> matchResult(ElementMatcher<? super Value> matcher);
+//    /**
+//     * @param matcher
+//     * @return match result
+//     * @see #matches(org.cthul.matchers.fluent.value.ElementMatcher) 
+//     * @see #matchResult() 
+//     */
+//    MatchResult<?> matchResult(ElementMatcher<? super Value> matcher);
     
     /**
      * Returns whether the value is considered valid.

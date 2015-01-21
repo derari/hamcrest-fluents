@@ -63,7 +63,7 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
 
         @Override
         protected boolean matchSafely(Element<V> element, ElementMatcher<? super Property> matcher) {
-            return matcher.matches(cachedItem(element));
+            return matcher.matches((Element) cachedItem(element));
         }
 
         @Override
@@ -87,22 +87,8 @@ public abstract class ConvertingAdapter<Value, Property> extends AbstractMatchVa
         }
 
         @Override
-        protected <I extends Element<V>> ElementMatcher.Result<I> matchResultSafely(I element, ElementMatcher<V> adaptedMatcher, ElementMatcher<? super Property> matcher) {
-            final ElementMatcher.Result<?> mr = matcher.matchResult(cachedItem(element));
-            return new ResultBase<I>(element, adaptedMatcher, mr.matched()) {
-                @Override
-                public void describeMatch(Description d) {
-                    mr.getMatch().describeMatch(d);
-                }
-                @Override
-                public void describeExpected(ExpectationDescription description) {
-                    mr.getMismatch().describeExpected(description);
-                }
-                @Override
-                public void describeMismatch(Description d) {
-                    mr.getMismatch().describeMismatch(d);
-                }
-            };
+        protected ElementMatcher.Result matchResultSafely(Element<V> element, ElementMatcher<? super Property> matcher) {
+            return matcher.matchResult((Element) cachedItem(element));
         }
     }
     

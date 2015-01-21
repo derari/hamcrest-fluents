@@ -42,15 +42,15 @@ public abstract class MatchValueBase<Value>
         return matchResult();
     }
 
-    /**
-     * Calls {@link #matches(ElementMatcher)} and returns the result of
-     * {@link #matchResult()}.
-     */
-    @Override
-    public MatchResult<?> matchResult(ElementMatcher<? super Value> matcher) {
-        matches(matcher);
-        return matchResult();
-    }
+//    /**
+//     * Calls {@link #matches(ElementMatcher)} and returns the result of
+//     * {@link #matchResult()}.
+//     */
+//    @Override
+//    public MatchResult<?> matchResult(ElementMatcher<? super Value> matcher) {
+//        matches(matcher);
+//        return matchResult();
+//    }
 
     /**
      * Calls {@link MatchValueAdapter#adapt(MatchValue) adapter.adapt(this)}.

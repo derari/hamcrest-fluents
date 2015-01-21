@@ -802,6 +802,10 @@ public class FluentsGenerator {
             return adapterType;
         }
     }
+    
+    public static class AssertConfig {
+        
+    }
 
     private static <T> Stream<T> nonEmptyStream(Stream<T> stream, Supplier<T> defaultValue) {
         List<T> list = stream.collect(Collectors.toList());

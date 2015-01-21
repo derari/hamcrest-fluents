@@ -56,7 +56,7 @@ public class MatchValueTest {
     public void test_eachOf_match() {
         MatchResult.Match<?> match = each456.matchResult(gt3_or_lt1).getMatch();
         assertThat(match.toString(),
-                   is("#0 was a value greater than <3>, #1 was a value greater than <3>, #2 was a value greater than <3>"));
+                   is("#0 was a value greater than <3>, #1 was a value greater than <3>, and #2 was a value greater than <3>"));
     }
     
     @Test
