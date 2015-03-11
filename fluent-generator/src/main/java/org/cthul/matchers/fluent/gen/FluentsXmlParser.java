@@ -4,12 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import org.cthul.matchers.fluent.gen.FluentsGenerator.AssertConfig;
 import org.cthul.matchers.fluent.gen.FluentsGenerator.FluentConfig;
 
 public class FluentsXmlParser {
     
-    public List<FluentConfig> parse(XMLStreamReader xml) throws XMLStreamException {
-        List<FluentConfig> factories = new ArrayList<>();
+    private List<FluentConfig> factories = new ArrayList<>();
+    private List<AssertConfig> asserts = new ArrayList<>();
+
+    public List<FluentConfig> getFactories() {
+        return factories;
+    }
+
+    public List<AssertConfig> getAsserts() {
+        return asserts;
+    }
+    
+    public void parse(XMLStreamReader xml) throws XMLStreamException {    
         try {
             xml.nextTag();
             xml.require(XMLStreamReader.START_ELEMENT, null, "fluents");
@@ -19,7 +30,7 @@ public class FluentsXmlParser {
                         factories.add(readFluentConfig(xml));
                         break;
                     case "assert":
-
+                        asserts.add(readAssertConfig(xml));
                         break;
                     default:
                         throw new XMLStreamException(
@@ -35,7 +46,6 @@ public class FluentsXmlParser {
         } finally {
             xml.close();
         }
-        return factories;
     }
     
     private FluentConfig readFluentConfig(XMLStreamReader xml) throws XMLStreamException {
@@ -115,6 +125,14 @@ public class FluentsXmlParser {
              }
         }
         return fac;
+    }
+
+    private AssertConfig readAssertConfig(XMLStreamReader xml) throws XMLStreamException {
+        String name = xml.getAttributeValue(null, "name");
+        AssertConfig asc = new AssertConfig(name);
+        xml.nextTag();
+        xml.require(XMLStreamReader.END_ELEMENT, null, "assert");
+        return asc;
     }
 
     private static String genericFix(String s) {

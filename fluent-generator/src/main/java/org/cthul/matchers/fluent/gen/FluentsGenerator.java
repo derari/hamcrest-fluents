@@ -17,6 +17,7 @@ import com.thoughtworks.qdox.model.impl.DefaultJavaTypeVariable;
 import com.thoughtworks.qdox.model.impl.DefaultJavaWildcardType;
 import com.thoughtworks.qdox.model.impl.DefaultJavaWildcardType.BoundType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,15 +39,18 @@ import org.cthul.strings.JavaNames;
 
 public class FluentsGenerator {
     
-    private final List<FluentConfig> configs;
+    private final List<FluentConfig> fluents;
+    private final List<AssertConfig> asserts;
     private JavaClass matcherClass = null;
     private JavaClass adapterClass = null;
     private JavaClass valueClass = null;
+    private JavaClass assertBuilderClass = null;
     private Exception suppressed = null;
     private Map<JavaType, FluentConfig> fluentTypeMap = null;
 
-    public FluentsGenerator(List<FluentConfig> configs) {
-        this.configs = configs;
+    public FluentsGenerator(List<FluentConfig> fluents, List<AssertConfig> asserts) {
+        this.fluents = fluents;
+        this.asserts = asserts;
     }
     
     private boolean isMatcherFactory(JavaMethod jm) {
@@ -84,17 +88,22 @@ public class FluentsGenerator {
             matcherClass = asClass("org.hamcrest.Matcher");
             adapterClass = asClass("org.cthul.matchers.fluent.value.MatchValueAdapter");
             valueClass = asClass("org.cthul.matchers.fluent.value.MatchValue");
+            assertBuilderClass = asClass("org.cthul.matchers.fluent.builder.FluentAssertBuilder");
             initFluentTypeMap();
             
-            for (FluentConfig fc: configs) {
+            for (FluentConfig fc: fluents) {
                 generateFluent(fc, api);
+            }
+            
+            for (AssertConfig ac: asserts) {
+                generateAssert(ac, api);
             }
         });
     }
     
     private void initFluentTypeMap() {
         fluentTypeMap = new HashMap<>();
-        for (FluentConfig fc: configs) {
+        for (FluentConfig fc: fluents) {
             JavaType jt = asClass(fc.getType());
             fluentTypeMap.put(jt, fc);
         }
@@ -108,7 +117,7 @@ public class FluentsGenerator {
         GeneratedClass iBase = fc.getName() == null ?
                 generatedInterface(api) : generatedInterface(api, fc.getName());
         GeneratedClass iOrChain = nestedInterface(iBase, "OrChain");
-        GeneratedClass iStep = nestedClass(iBase, "Step");
+        GeneratedClass cStep = nestedClass(iBase, "Step");
         
         
 //        interface OrChain<Value, TheFluent, This extends OrChain<Value, TheFluent, This>> 
@@ -120,7 +129,7 @@ public class FluentsGenerator {
         List<String> typeParameters = new ArrayList<>();
         
         configureTypeParameters(fc, iBase, typeArguments, typeParameters);
-        setStepTypeParamters(iStep, typeArguments, typeParameters);
+        setStepTypeParamters(cStep, typeArguments, typeParameters);
         setChainTypeParamters(iOrChain, typeArguments, typeParameters);
         
         add(iBase.getInterfaces(),
@@ -129,13 +138,13 @@ public class FluentsGenerator {
                 "org.cthul.matchers.fluent.ext.ExtensibleFluentStep.OrChain<Value, TheFluent, This>");
         iOrChain.getInterfaces().add(asTheFluent(iBase, typeArguments));
         
-        iStep.setSuperClass(
+        cStep.setSuperClass(
                 withArgs(
                     asClass("org.cthul.matchers.fluent.builder.FluentStepBuilder"),
                             "Value", "TheFluent", "This"));
-        iStep.getInterfaces().add(asStepFluent(iBase, typeArguments));
+        cStep.getInterfaces().add(asStepFluent(iBase, typeArguments));
         
-        GeneratedConstructor newStep = constructor(iStep, "public (org.cthul.matchers.fluent.builder.Matchable<Value, TheFluent> matchable)");
+        GeneratedConstructor newStep = constructor(cStep, "public (org.cthul.matchers.fluent.builder.Matchable<Value, TheFluent> matchable)");
         newStep.setSourceCode("super(matchable);");
         
         for (String sup: fc.getExtends()) {
@@ -221,15 +230,15 @@ public class FluentsGenerator {
             });
         }
 
-        addChainMethods(iBase, iStep, iOrChain, typeArguments, "either", "or");
+        addChainMethods(iBase, cStep, iOrChain, typeArguments, "either", "or");
         
-        DefaultJavaField fXAdapter = field(iStep, "private static final org.cthul.matchers.fluent.ext.ExtensibleStepAdapter X_ADAPTER");
+        DefaultJavaField fXAdapter = field(cStep, "private static final org.cthul.matchers.fluent.ext.ExtensibleStepAdapter X_ADAPTER");
         fXAdapter.setInitializationExpression(
                 "org.cthul.matchers.fluent.ext.ExtensibleStepAdapter.New.forType(" +
                 fc.getAdapterTypeName() + ".class, " +
                 "Step::new);");
         
-        GeneratedMethod mAdapter = method(iStep, "adapter");
+        GeneratedMethod mAdapter = method(cStep, "adapter");
         mAdapter.getModifiers().add("public static");
         mAdapter.getTypeParameters().addAll(fc.getExtraParams());
         mAdapter.getTypeParameters().add("TheFluent");
@@ -336,6 +345,11 @@ public class FluentsGenerator {
         a.set(i+1, "TheFluent");
         a.set(a.size()-1, "?");
         return (JavaClass) withArgs(clazz, a);
+    }
+    
+    private List<String> parametersToArgs(List<String> list) {
+        return list.stream().map(this::parameterToArg)
+                .collect(Collectors.toList());
     }
     
     private String parameterToArg(String s) {
@@ -477,7 +491,7 @@ public class FluentsGenerator {
         return classes;
     }
     
-    private void addChainMethods(GeneratedClass iBase, GeneratedClass iStep, GeneratedClass iChain, List<String> typeArgs, String name, String terminal) {
+    private void addChainMethods(GeneratedClass iBase, GeneratedClass cStep, GeneratedClass iChain, List<String> typeArgs, String name, String terminal) {
         String chainType = iChain.getName(); // JavaNames.CamelCase(terminal + " chain");
         JavaClass chainClass = chainFluent(iChain, typeArgs); //chainFluent(chainType, typeArgs);
         JavaClass chainTerminal = chainTerminal(iBase, typeArgs);
@@ -501,19 +515,42 @@ public class FluentsGenerator {
         setReturns(gm, "TheFluent");
         setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
         
-        chainType = iBase.getName() + "." + chainType;
+        addChainImplementation(iBase, cStep, typeArgs, "Value", chainType, name);
+////        chainClass = chainFluent(chainType, typeArgs);
+//        gm = method(cStep, name);
+//        gm.getAnnotations().add("Override");
+//        gm.getModifiers().add("public");
+//        gm.setReturns(chainClass);
+//        gm.setSourceCode("return (" + chainType + ") super." + name + "();");
+//        
+//        gm = method(cStep, name);
+//        gm.getAnnotations().add("Override");
+//        gm.getModifiers().add("public");
+//        gm.setReturns(chainClass);
+//        setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
+//        gm.setSourceCode("return (" + chainType + ") super." + name + "(matcher);");
+    }
+    
+    private void addChainImplementation(JavaClass iBase, GeneratedClass cStep, List<String> typeArgs, String valueType, String chainType, String name) {
+        String baseName = iBase.getFullyQualifiedName();
+        chainType = (baseName.contains("<") ? baseName.substring(0, baseName.indexOf('<')) : baseName) + "." + chainType;
+//        String chainType = iChain.getName(); // JavaNames.CamelCase(terminal + " chain");
+        JavaClass iChain = asClass(chainType);
+        JavaClass chainClass = chainFluent(iChain, typeArgs); //chainFluent(chainType, typeArgs);
+        
+        GeneratedMethod gm;
 //        chainClass = chainFluent(chainType, typeArgs);
-        gm = method(iStep, name);
-        gm.getAnnotations().add("Override");
+        gm = method(cStep, name);
+        gm.getAnnotations().addAll("Override", "SuppressWarnings(\"unchecked\")");
         gm.getModifiers().add("public");
         gm.setReturns(chainClass);
         gm.setSourceCode("return (" + chainType + ") super." + name + "();");
         
-        gm = method(iStep, name);
-        gm.getAnnotations().add("Override");
+        gm = method(cStep, name);
+        gm.getAnnotations().addAll("Override", "SuppressWarnings(\"unchecked\")");
         gm.getModifiers().add("public");
         gm.setReturns(chainClass);
-        setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
+        setSignature(gm, "org.hamcrest.Matcher<? super " + valueType + "> matcher");
         gm.setSourceCode("return (" + chainType + ") super." + name + "(matcher);");
     }
     
@@ -579,7 +616,7 @@ public class FluentsGenerator {
         String typeString = valueClass.getGenericFullyQualifiedName();
         JavaClass bestMatch = null;
         FluentConfig stepConfig = null;
-        for (FluentConfig cfg: configs) {
+        for (FluentConfig cfg: fluents) {
             if (cfg.getType().equals(typeString)) {
                 stepConfig = cfg;
                 break;
@@ -595,6 +632,71 @@ public class FluentsGenerator {
             }
         }
         return stepConfig;
+    }
+    
+    private void generateAssert(AssertConfig cfg, Api1 api) {
+        GeneratedClass cAssert = generatedClass(api, cfg.getName());
+        
+        for (FluentConfig fc: fluents) {
+            if (fc.isImplemented()) continue;
+            List<String> extraParams = fc.getExtraParams();
+            List<String> extraArgs = parametersToArgs(extraParams);
+            String fluentClassName = fc.getAdapterTypeName();
+            fluentClassName = fluentClassName.substring(fluentClassName.lastIndexOf('.')+1) + "Assert";
+            GeneratedClass cAssertFluent = nestedClass(cAssert, fluentClassName);
+            JavaClass cAssertFluentArg = extraParams.isEmpty() ? cAssertFluent : (JavaClass) withArgs(cAssertFluent, extraArgs);
+            JavaClass iFluentStep = getFluentType(cAssertFluentArg, fc);
+            cAssertFluent.getModifiers().add("public static");
+            cAssertFluent.setSuperClass(withArgs(assertBuilderClass, fc.getType(), cAssertFluentArg));
+            cAssertFluent.getInterfaces().add(iFluentStep);
+            cAssertFluent.getTypeParameters().addAll(extraParams);
+            
+            
+            GeneratedConstructor constructor = constructor(cAssertFluent);
+            setSignature(constructor, 
+                    "org.cthul.matchers.fluent.builder.FailureHandler handler, " +
+                    withArgs(valueClass, fc.getType()).getGenericFullyQualifiedName() + " value");
+            constructor.setSourceCode("super(handler, value);");
+            constructor = constructor(cAssertFluent);
+            setSignature(constructor, 
+                    "org.cthul.matchers.fluent.builder.FailureHandler handler, " +
+                    fc.getType() + " value");
+            constructor.setSourceCode("super(handler, value);");
+            List<String> chainParams = new ArrayList<>(extraArgs);
+            
+            JavaClass cAssertFluentWithArgs = (JavaClass) withArgs(cAssertFluent, extraArgs);
+            chainParams.addAll(Arrays.asList("BaseFluent", 
+                    fc.getType(), 
+                    cAssertFluentWithArgs.getGenericCanonicalName(), 
+                    "?"));
+            addChainImplementation(iFluentStep, cAssertFluent, chainParams, fc.getType(), "OrChain", "either");
+            
+            
+            
+            
+            GeneratedMethod mAssert = method(cAssert, "assertThat");
+            mAssert.getModifiers().add("public static");
+            setSignature(mAssert, fc.getType() + " value");
+            mAssert.setReturns(cAssertFluentArg);
+            mAssert.getTypeParameters().addAll(extraParams);
+            
+            mAssert.setBody(
+                    "return new " +
+                        cAssertFluent.getName() + (extraParams.isEmpty() ? "" : "<>") +
+                        "(org.cthul.matchers.fluent.builder.AssertionErrorHandler.instance(), " +
+                        "value);");
+            
+        }
+    }
+    
+    private JavaClass getFluentType(JavaClass impl, FluentConfig fc) {
+        JavaType cFluent = withArgs(asClass("org.cthul.matchers.fluent.Fluent"), fc.getType());
+        List<Object> args = new ArrayList<>();
+        args.addAll(parametersToArgs(fc.getExtraParams()));
+        args.addAll(Arrays.asList(fc.getType(), cFluent, impl, impl));
+        return (JavaClass) withArgs(
+                asClass(fc.getName()), 
+                args);
     }
     
     public static class FluentConfig {
@@ -648,7 +750,7 @@ public class FluentsGenerator {
 
         public JavaClass getValueClass() {
             if (valueClass == null) {
-                valueClass = (JavaClass) asType(getType());
+                valueClass = asType(getType());
             }
             return valueClass;
         }
@@ -804,6 +906,18 @@ public class FluentsGenerator {
     }
     
     public static class AssertConfig {
+        
+        private final String name;
+
+        public AssertConfig(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        
         
     }
 

@@ -1,7 +1,9 @@
 package org.cthul.matchers.fluent.gen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.cthul.matchers.fluent.gen.FluentsGenerator.AssertConfig;
 import org.cthul.matchers.fluent.gen.FluentsGenerator.FactoryConfig;
 import org.cthul.matchers.fluent.gen.FluentsGenerator.FluentConfig;
 import org.cthul.matchers.fluent.gen.test.TestConfiguration;
@@ -29,7 +31,9 @@ public class FluentsGeneratorTest {
         fac.getIncludes().add("list");
         flc.getFactories().add(fac);
         
-        new FluentsGenerator(configs).generate(
+        AssertConfig asc = new AssertConfig("MyAssert");
+        
+        new FluentsGenerator(configs, Arrays.asList(asc)).generate(
                 TestConfiguration.getWithSource(), 
                 "test/t1");
     }

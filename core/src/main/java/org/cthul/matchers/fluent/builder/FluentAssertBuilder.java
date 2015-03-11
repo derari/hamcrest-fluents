@@ -21,39 +21,39 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     
     @Factory
     public static <T> FluentAssert<T> assertThat(T object) {
-        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, object);
+        return new FluentAssertBuilder<>(AssertionErrorHandler.instance(), object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(MatchValue<T> object) {
-        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, object);
+        return new FluentAssertBuilder<>(AssertionErrorHandler.instance(), object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, T object) {
 //        return assertThat(object).as(reason);
-        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.INSTANCE, object);
+        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.instance(), object);
     }
 
     @Factory
     public static <T> FluentAssert<T> assertThat(String reason, MatchValue<T> object) {
 //        return assertThat(object).as(reason);
-        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.INSTANCE, object);
+        return new FluentAssertBuilder<>(reason, AssertionErrorHandler.instance(), object);
     }
     
     @Factory
     public static <V, T> FluentAssert<T> assertThat(MatchValueAdapter<? super V, T> adapter, V object) {
-        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+        return new FluentAssertBuilder<>(AssertionErrorHandler.instance(), adapter.adapt(object));
     }
     
     @Factory
     public static <V, T> FluentAssert<T> assertThat(V object, MatchValueAdapter<? super V, T> adapter) {
-        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+        return new FluentAssertBuilder<>(AssertionErrorHandler.instance(), adapter.adapt(object));
     }
     
     @Factory
     public static <V, T> FluentAssert<T> assertThat(MatchValue<? extends V> object, MatchValueAdapter<? super V, T> adapter) {
-        return new FluentAssertBuilder<>(AssertionErrorHandler.INSTANCE, adapter.adapt(object));
+        return new FluentAssertBuilder<>(AssertionErrorHandler.instance(), adapter.adapt(object));
     }
     
     @Factory

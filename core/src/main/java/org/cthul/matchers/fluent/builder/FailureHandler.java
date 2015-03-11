@@ -8,7 +8,7 @@ import org.cthul.matchers.fluent.value.ElementMatcher;
  */
 public interface FailureHandler {
 
-    public static final AssertionErrorHandler ASSERT = AssertionErrorHandler.INSTANCE;
+//    public static final AssertionErrorHandler ASSERT = AssertionErrorHandler.INSTANCE;
 
     <T> void mismatch(String reason, MatchValue<T> item, ElementMatcher<T> matcher);
 }

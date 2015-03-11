@@ -140,17 +140,14 @@
         <factory class="org.hamcrest.text.StringContainsInOrder">
             <rename from="stringC" to="c"/>
         </factory>
-
     </fluent>
+    
+    <assert name="FluentAssert">
+        
+    </assert>
 </fluents>
 
 <!--
-    <!- Text ->
-
-    <!- Object ->
-    <factory class="org.hamcrest.object.HasToString"/>
-    <factory class="org.hamcrest.object.IsCompatibleType"/>
-    <factory class="org.hamcrest.object.IsEventFrom"/>
 
     <!- Beans ->
     <factory class="org.hamcrest.beans.HasProperty"/>

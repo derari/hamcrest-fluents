@@ -313,6 +313,10 @@ public abstract class SimpleAnyOfAdapter<Value, Item>
                 public E<Item> next() {
                     return current = new E<>(source.next(), invalidElements.size());
                 }
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
             };
         }
     }

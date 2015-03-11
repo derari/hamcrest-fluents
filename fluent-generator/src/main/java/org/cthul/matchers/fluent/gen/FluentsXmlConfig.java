@@ -1,13 +1,11 @@
 package org.cthul.matchers.fluent.gen;
 
 import java.io.InputStream;
-import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import org.cthul.api4j.Api4JConfiguration;
 import org.cthul.api4j.xml.XmlConfiguration;
 import org.cthul.api4j.xml.XmlHandler;
-import org.cthul.matchers.fluent.gen.FluentsGenerator.FluentConfig;
 
 public class FluentsXmlConfig implements XmlConfiguration {
 
@@ -30,8 +28,10 @@ public class FluentsXmlConfig implements XmlConfiguration {
         @Override
         public void handle(Api4JConfiguration cfg, String path, InputStream in) throws Exception {            
             XMLStreamReader xml = f.createXMLStreamReader(in);
-            List<FluentConfig> factories = new FluentsXmlParser().parse(xml);
-            new FluentsGenerator(factories).generate(cfg, path);
+            FluentsXmlParser parser = new FluentsXmlParser();
+            parser.parse(xml);
+            new FluentsGenerator(parser.getFactories(), parser.getAsserts())
+                    .generate(cfg, path);
         }
     }
 }
