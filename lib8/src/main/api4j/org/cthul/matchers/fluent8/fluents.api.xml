@@ -1,5 +1,4 @@
 <fluents>
-<!--    <cast type="java.lang.Integer" fluent="ComparableFluent{Integer,...}" />-->
     
     <fluent name="ObjectFluent">
         <factory class="org.hamcrest.core.IsNull">
@@ -86,7 +85,7 @@
         </factory>
     </fluent>
     
-    <fluent type="java.util.Set{K}" impl="CollectionFluent{K,...}" />
+    <fluent type="java.util.Set{K}" impl="CollectionFluent{K,...}" extraParams="K" />
     <fluent type="java.util.Collection{V}" impl="CollectionFluent{V,...}" />
     
     <fluent name="MapFluent" type="java.util.Map{K, V}" extraParams="K,V">
@@ -146,14 +145,3 @@
         
     </assert>
 </fluents>
-
-<!--
-
-    <!- Beans ->
-    <factory class="org.hamcrest.beans.HasProperty"/>
-    <factory class="org.hamcrest.beans.HasPropertyWithValue"/>
-    <factory class="org.hamcrest.beans.SamePropertyValuesAs"/>
-
-    <!- XML ->
-    <factory class="org.hamcrest.xml.HasXPath"/>
--->

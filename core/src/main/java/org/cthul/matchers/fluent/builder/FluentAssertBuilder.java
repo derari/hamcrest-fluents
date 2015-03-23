@@ -1,12 +1,18 @@
 package org.cthul.matchers.fluent.builder;
 
+import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentAssert;
 import org.cthul.matchers.fluent.adapters.IdentityValue;
 import org.cthul.matchers.fluent.ext.ExtensibleFluentAssert;
+import org.cthul.matchers.fluent.ext.ExtensionFactory;
+import org.cthul.matchers.fluent.ext.FluentFactory;
+import org.cthul.matchers.fluent.ext.StepFactory;
 import org.cthul.matchers.fluent.value.ElementMatcher;
 import org.cthul.matchers.fluent.value.ElementMatcherWrapper;
 import org.cthul.matchers.fluent.value.MatchValue;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
+import org.cthul.matchers.fluent.value.MatchValueBase;
+import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
@@ -70,10 +76,12 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     private String reason = null;
     private final MatchValue<Value> matchValue;
     private final FailureHandler failureHandler;
+    private final Matchable<? extends Value, ?> matchable;
 
     public FluentAssertBuilder(FailureHandler failureHandler, MatchValue<Value> matchValues) {
         this.matchValue = matchValues;
         this.failureHandler = failureHandler;
+        this.matchable = null;
     }
 
     public FluentAssertBuilder(FailureHandler failureHandler, Value item) {
@@ -90,6 +98,38 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
         this.reason = reason;
     }
     
+    protected FluentAssertBuilder(Matchable<? extends Value, ?> matchable) {
+        this.failureHandler = null;
+        this.matchable = matchable;
+        this.matchValue = new MatchValueBase<Value>() {
+            @Override
+            public boolean matches(ElementMatcher<? super Value> matcher) {
+                if (!(matcher instanceof ElementMatcherWrapper)) {
+                    throw new UnsupportedOperationException("object for internal use only");
+                }
+                ElementMatcherWrapper<? super Value> w = (ElementMatcherWrapper) matcher;
+                FluentAssertBuilder.this.matchable.apply(w.getActualMatcher());
+                return true;
+            }
+            @Override
+            public boolean matched() {
+                return true;
+            }
+            @Override
+            public MatchResult<?> matchResult() {
+                throw new UnsupportedOperationException("object for internal use only");
+            }
+            @Override
+            public void describeValue(Description description) {
+                description.appendText(FluentAssertBuilder.this.matchable.toString());
+            }
+            @Override
+            public void describeValueType(Description description) {
+                description.appendText("value");
+            }
+        };
+    }
+
     @Override
     protected void _and() {}
     
@@ -103,14 +143,26 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
 
     @Override
     public String toString() {
-        return matchValue.toString();
+        return (matchable != null ? matchable: matchValue).toString();
     }
 
+    protected FailureHandler _failureHandler() {
+        return failureHandler;
+    }
+
+    protected MatchValue<Value> _matchValue() {
+        return matchValue;
+    }
+    
     @Override
     protected This _apply(Matcher<? super Value> matcher, String prefix, boolean not) {
-        ElementMatcher<Value> m = new ElementMatcherWrapper<>(matcherCounter++, matcher, prefix, not);
-        if (!matchValue.matches(m)) {
-            failureHandler.mismatch(getReason(), matchValue, m);
+        if (matchable != null) {
+            matchable.apply(matcher);
+        } else {
+            ElementMatcher<Value> m = new ElementMatcherWrapper<>(matcherCounter++, matcher, prefix, not);
+            if (!matchValue.matches(m)) {
+                failureHandler.mismatch(getReason(), matchValue, m);
+            }
         }
         return _this();
     }
@@ -118,5 +170,18 @@ public class FluentAssertBuilder<Value, This extends FluentAssertBuilder<Value, 
     @Override
     public <Value2 extends Value> FluentAssert<Value2> isA(Class<Value2> clazz) {
         return (FluentAssert) hasType(clazz);
+    }
+
+    @Override
+    public <Step> Step as(StepFactory<? super Value, This, Step> adapter) {
+        return super.as(adapter);
+    }
+
+    private <NextFluent> NextFluent is(FluentFactory<? super Value, NextFluent> adapter) {
+        return asFluent(adapter);
+    }
+    
+    public <NextFluent,S> NextFluent as(ExtensionFactory<? super Value, NextFluent, This, S> adapter) {
+        return is(adapter.getFluentFactory());
     }
 }

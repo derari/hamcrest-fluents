@@ -1,8 +1,6 @@
 package org.cthul.matchers.fluent;
 
 import org.cthul.matchers.fluent.ext.ExtensibleFluent;
-import org.cthul.matchers.fluent.ext.ExtensibleFluentStep;
-import org.cthul.matchers.fluent.ext.ExtensibleStepAdapter;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Matcher;
 
@@ -31,6 +29,18 @@ public interface FluentStep<Value, TheFluent> {
      * @return this
      */
     FluentStep<Value, ? extends TheFluent> not();
+    
+/**
+     * Equivalent to {@link #is() is()}{@link #not() .not()}.
+     * @return this
+     */
+    FluentStep<Value, ? extends TheFluent> isNot();
+
+    /**
+     * Equivalent to {@link #has() has()}{@link #not() .not()}.
+     * @return this
+     */
+    FluentStep<Value, ? extends TheFluent> hasNot();
 
     /**
      * Applies a matcher and returns to the original fluent chain.

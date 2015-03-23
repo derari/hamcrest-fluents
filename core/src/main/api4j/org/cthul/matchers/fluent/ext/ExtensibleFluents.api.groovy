@@ -60,10 +60,9 @@ api1 {
             }
         }
 
-        method("Step as(ExtensibleStepAdapter<? super Value, Value2, TheFluent, Step> adapter)") {
-            typeParameters << ["Value2", "Step"]
+        method("Step as(StepFactory<? super Value, TheFluent, Step> adapter)") {
+            typeParameters << "Step"
             comment = "Returns a fluent step that adapts the value before applying a matcher."
-            tags << "param <Value2> adapted value type"
             tags << "param <Step> step type"
             tags << "param adapter extensible step adapter"
             tags << "return step"

@@ -1,6 +1,5 @@
 package org.cthul.matchers.fluent.builder;
 
-import java.lang.reflect.Method;
 import org.cthul.matchers.object.InstanceOf;
 import org.cthul.matchers.chain.*;
 import org.cthul.matchers.diagnose.QuickDiagnose;
@@ -9,10 +8,9 @@ import org.cthul.matchers.diagnose.nested.NestedResultMatcher;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.FluentStep;
 import org.cthul.matchers.fluent.adapters.AsTypeAdapter;
-import org.cthul.matchers.fluent.adapters.IdentityValue;
-import org.cthul.matchers.fluent.ext.ExtensibleStepAdapter;
-import org.cthul.matchers.fluent.ext.NewStep;
 import org.cthul.matchers.fluent.ext.ExtensibleFluentStep;
+import org.cthul.matchers.fluent.ext.FluentFactory;
+import org.cthul.matchers.fluent.ext.StepFactory;
 import org.cthul.matchers.fluent.value.MatchValueAdapter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -32,8 +30,6 @@ public abstract class AbstractFluentStepBuilder
     
     private boolean negate = false;
     private String prefix = null;
-    private Class<?> orChainClass = null;
-    private Class<?> andChainClass = null;
     
     public AbstractFluentStepBuilder() {
     }
@@ -49,13 +45,21 @@ public abstract class AbstractFluentStepBuilder
     protected void _not() {
         negate = !negate;
     }
-
-    protected TheFluent _match(Matcher<? super Value> matcher) {
+    
+    protected String _prefix() {
         String p = prefix;
         prefix = null;
+        return p;
+    }
+    
+    protected boolean _negation() {
         boolean n = negate;
         negate = false;
-        return _apply(matcher, p, n);
+        return n;
+    }
+
+    protected TheFluent _match(Matcher<? super Value> matcher) {
+        return _apply(matcher, _prefix(), _negation());
     }
     
     protected TheFluent _match(Value value) {
@@ -70,19 +74,13 @@ public abstract class AbstractFluentStepBuilder
     }
     
     protected <P> FluentStep<P, TheFluent> _adapt(MatchValueAdapter<? super Value, ? extends P> adapter) {
-        String p = prefix;
-        prefix = null;
-        boolean n = negate;
-        negate = false;
-        return _step(adapter, p, n);
+        // equivalent, but creates a lot of wrapper overhead
+//        return _adapt(FluentStepBuilder.<Value, P, TheFluent>adapter(adapter).asFactory());
+        return _step(adapter, _prefix(), _negation());
     }
     
-    protected <Next, Step> Step _adapt(ExtensibleStepAdapter<? super Value, Next, TheFluent, Step> adapter) {
-        String p = prefix;
-        prefix = null;
-        boolean n = negate;
-        negate = false;
-        return _step(adapter, p, n);
+    protected <Step> Step _adapt(StepFactory<? super Value, TheFluent, Step> factory) {
+        return _step(factory, _prefix(), _negation());
     }
     
     @SuppressWarnings("unchecked")
@@ -90,25 +88,10 @@ public abstract class AbstractFluentStepBuilder
         return (This) this;
     }
     
-    protected <Chain> Chain _chain(Class<Chain> chainClass, ChainFactory chainFactory, String completionToken) {
-        String p = prefix;
-        prefix = null;
-        boolean n = negate;
-        negate = false;
-        Matchable<Value, TheFluent> m = _matchable(IdentityValue.<Value>value(), p, n);
-        if (chainClass == FluentStep.OrChain.class) {
-            return (Chain) new BasicOrChain<>(m, chainFactory);
-        } else {
-            return ExtensibleChainBuilder.create(chainClass, m, chainFactory, completionToken);
-        }
-    }
-    
-    protected <Chain> Chain _conjunction(Class<Chain> chainClass) {
-        return _chain(chainClass, AndChainMatcher.all(), "and");
-    }
-    
-    protected <Chain> Chain _disjunction(Class<Chain> chainClass) {
-        return _chain(chainClass, OrChainMatcher.any(), "or");
+    protected <Chain> Chain _chain(Class<Chain> chainClass, StepFactory<? super Value, ?, ?> stepFactory, ChainFactory chainFactory, String completionToken) {
+        StepFactory<? super Value, TheFluent, Chain> factory;
+        factory = ExtensibleChainBuilder.factory(chainClass, stepFactory, chainFactory, completionToken);
+        return _adapt(factory);
     }
     
     protected abstract TheFluent _apply(Matcher<? super Value> matcher, String prefix, boolean not);
@@ -117,16 +100,25 @@ public abstract class AbstractFluentStepBuilder
         return _step(_matchable(adapter, prefix, not));
     }
     
-    protected <Next, Step> Step _step(NewStep<Next, TheFluent, Step> factory, MatchValueAdapter<? super Value, Next> adapter, String prefix, boolean not) {
-        return factory.create(_matchable(adapter, prefix, not));
-    }
-    
-    protected <Next, Step> Step _step(ExtensibleStepAdapter<? super Value, Next, TheFluent, Step> adapter, String prefix, boolean not) {
-        return _step(adapter.getStepFactory(), adapter.getAdapter(), prefix, not);
+    protected <Step> Step _step(StepFactory<? super Value, TheFluent, Step> factory, String prefix, boolean not) {
+        return factory.newStep(_matchable(prefix, not));
     }
     
     protected <Next, Fl> FluentStep<Next, Fl> _step(Matchable<? extends Next, Fl> matchable) {
         return new FluentStepBuilder<>(matchable);
+    }
+    
+    protected Matchable<Value, TheFluent> _matchable(final String prefix, final boolean not) {
+        return new Matchable<Value, TheFluent>() {
+            @Override
+            public TheFluent apply(Matcher<? super Value> matcher) {
+                return _apply(matcher, prefix, not);
+            }
+            @Override
+            public String toString() {
+                return AbstractFluentStepBuilder.this.toString();
+            }
+        };
     }
     
     protected <Next> Matchable<Next, TheFluent> _matchable(final MatchValueAdapter<? super Value, Next> adapter, final String prefix, final boolean not) {
@@ -135,6 +127,10 @@ public abstract class AbstractFluentStepBuilder
             public TheFluent apply(Matcher<? super Next> matcher) {
                 Matcher<? super Value> m = adapter.adapt(matcher);
                 return _apply(m, prefix, not);
+            }
+            @Override
+            public String toString() {
+                return AbstractFluentStepBuilder.this.toString();
             }
         };
     }
@@ -153,6 +149,20 @@ public abstract class AbstractFluentStepBuilder
 
     @Override
     public This not() {
+        _not();
+        return _this();
+    }
+
+    @Override
+    public This isNot() {
+        _is();
+        _not();
+        return _this();
+    }
+
+    @Override
+    public This hasNot() {
+        _has();
         _not();
         return _this();
     }
@@ -196,7 +206,7 @@ public abstract class AbstractFluentStepBuilder
 
     @Override
     public TheFluent equalTo(Value value) {
-        // don't use _match(value) this call is not ambiguous
+        // don't use _match(value), this call is not ambiguous
         return _match(IsEqual.equalTo(value));
     }
 
@@ -444,55 +454,93 @@ public abstract class AbstractFluentStepBuilder
     }
 
     @Override
-    public <Value2, Step> Step as(ExtensibleStepAdapter<? super Value, Value2, TheFluent, Step> adapter) {
+    public <Step> Step as(StepFactory<? super Value, TheFluent, Step> adapter) {
         return _adapt(adapter);
     }
-
-    @Override
-    public AndChain<Value, TheFluent, ?> all() {
-        return _conjunction(AndChain.class);
+    
+    protected <NextFluent> NextFluent asFluent(FluentFactory<? super Value, NextFluent> adapter) {
+        if (_negation()) {
+            throw new IllegalStateException(
+                    "Negation not supported for fluent type cast");
+        }
+        return adapter.newFluent(_matchable(_prefix(), false));
     }
 
     @Override
-    public AndChain<Value, TheFluent, ?> both() {
+    public AndChain<Value, ? extends TheFluent, ?> all() {
+        return this._adapt(AbstractFluentStepBuilder.<Value, TheFluent>andChainFactory());
+    }
+
+    protected <Chain> Chain _both(Class<Chain> chainClass, StepFactory<? super Value, ?, ?> stepFactory) {
+        return _chain(chainClass, stepFactory, AndChainMatcher.all(), "and");
+    }
+    
+    @Override
+    public AndChain<Value, ? extends TheFluent, ?> both() {
         return all();
     }
 
     @Override
-    public AndChain<Value, TheFluent, ?> both(Matcher<? super Value> matcher) {
+    public AndChain<Value, ? extends TheFluent, ?> both(Matcher<? super Value> matcher) {
         return both().__(matcher);
     }
     
-    protected Class<?> _orChainClass() {
-        if (orChainClass == null) {
-            orChainClass = _detectOrChainClass();
-        }
-        return orChainClass;
+    protected <Chain> Chain _all(Class<Chain> chainClass, StepFactory<? super Value, ?, ?> stepFactory) {
+        return _both(chainClass, stepFactory);
     }
     
-    protected Class<?> _detectOrChainClass() {
-        try {
-            Method m = getClass().getMethod("either");
-            return m.getReturnType();
-        } catch (NoSuchMethodException e) {
-            throw new AssertionError(
-                    "Missing method: #either()");
+    private static <Value, TheFluent> StepFactory<Value, TheFluent, AndChain<Value, ? extends TheFluent, ?>> andChainFactory() {
+        return AND_CHAIN_FACTORY;
+    }
+    
+    private static final StepFactory AND_CHAIN_FACTORY = new StepFactory() {
+        @Override
+        public Object newStep(Matchable matchable) {
+            return new BasicAndChain(matchable, AndChainMatcher.all());
+        }
+    };
+    
+    protected static class BasicAndChain<Value, TheFluent> extends FluentChainBuilder<Value, TheFluent, BasicAndChain<Value, TheFluent>> implements AndChain<Value, TheFluent, BasicAndChain<Value, TheFluent>> {
+
+        public BasicAndChain(Matchable<Value, TheFluent> matchable, ChainFactory chainFactory) {
+            super(matchable, chainFactory);
+        }
+
+        @Override
+        public FluentStep<Value, TheFluent> and() {
+            return _terminate();
+        }
+
+        @Override
+        public TheFluent and(Matcher<? super Value> matcher) {
+            return and().__(matcher);
         }
     }
-
-    protected <C> C _disjunction() {
-        return (C) _disjunction(_orChainClass());
+    
+    protected <Chain> Chain _either(Class<Chain> chainClass, StepFactory<? super Value, ?, ?> stepFactory) {
+        return _chain(chainClass, stepFactory, OrChainMatcher.any(), "or");
     }
     
     @Override
     public OrChain<Value, ? extends TheFluent, ?> either() {
-        return _disjunction();
+        return this._adapt(AbstractFluentStepBuilder.<Value, TheFluent>orChainFactory());
     }
 
     @Override
     public OrChain<Value, ? extends TheFluent, ?> either(Matcher<? super Value> matcher) {
         return either().__(matcher);
     }
+    
+    private static <Value, TheFluent> StepFactory<Value, TheFluent, OrChain<Value, ? extends TheFluent, ?>> orChainFactory() {
+        return OR_CHAIN_FACTORY;
+    }
+    
+    private static final StepFactory OR_CHAIN_FACTORY = new StepFactory() {
+        @Override
+        public Object newStep(Matchable matchable) {
+            return new BasicOrChain(matchable, OrChainMatcher.any());
+        }
+    };
     
     protected static class BasicOrChain<Value, TheFluent> extends FluentChainBuilder<Value, TheFluent, BasicOrChain<Value, TheFluent>> implements OrChain<Value, TheFluent, BasicOrChain<Value, TheFluent>> {
 

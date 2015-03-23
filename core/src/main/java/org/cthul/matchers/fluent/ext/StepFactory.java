@@ -4,11 +4,11 @@ import org.cthul.matchers.fluent.builder.Matchable;
 
 /**
  * Factory for {@link ExtensibleFluentStep}s.
- * @param <NextValue> value type of step
+ * @param <Value> value type of step
  * @param <TheFluent> original fluent type
  * @param <TheStep> step type
  */
-public interface NewStep<NextValue, TheFluent, TheStep> {
+public interface StepFactory<Value, TheFluent, TheStep> {
 
-    TheStep create(Matchable<NextValue, TheFluent> matchable);
+    TheStep newStep(Matchable<? extends Value, TheFluent> matchable);
 }

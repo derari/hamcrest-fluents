@@ -9,8 +9,8 @@ import org.cthul.matchers.fluent.gen.FluentsGenerator.FluentConfig;
 
 public class FluentsXmlParser {
     
-    private List<FluentConfig> factories = new ArrayList<>();
-    private List<AssertConfig> asserts = new ArrayList<>();
+    private final List<FluentConfig> factories = new ArrayList<>();
+    private final List<AssertConfig> asserts = new ArrayList<>();
 
     public List<FluentConfig> getFactories() {
         return factories;
@@ -130,7 +130,15 @@ public class FluentsXmlParser {
     private AssertConfig readAssertConfig(XMLStreamReader xml) throws XMLStreamException {
         String name = xml.getAttributeValue(null, "name");
         AssertConfig asc = new AssertConfig(name);
-        xml.nextTag();
+        
+        while (xml.nextTag() == XMLStreamReader.START_ELEMENT) {
+            switch (xml.getLocalName()) {
+                case "extends":
+                    asc.getExtends().add(genericFix(xml.getElementText()));
+                    break;
+             }
+        }
+        
         xml.require(XMLStreamReader.END_ELEMENT, null, "assert");
         return asc;
     }
