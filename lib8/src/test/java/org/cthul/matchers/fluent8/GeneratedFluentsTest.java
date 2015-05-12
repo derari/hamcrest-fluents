@@ -29,7 +29,7 @@ public class GeneratedFluentsTest {
                 .either()
                     .nullValue()
                     .lessThan(3d)
-                .or().greaterThan(5d)
+                    .or().greaterThan(5d)
             .complete();
         assertThat(complete, Is.is(true));
         assertThat(null, matcher);

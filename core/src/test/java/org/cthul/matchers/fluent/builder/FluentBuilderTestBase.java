@@ -74,7 +74,7 @@ public abstract class FluentBuilderTestBase extends FluentTestBase {
                 .as(Integer.class)
                 .is(lessThan(5));
         apply();
-        assertMismatch("is an instance of java.lang.Integer",
+        assertMismatch("an instance of Byte or Short or Integer",
                        "but: \"\" is a java.lang.String");
     }
     

@@ -31,11 +31,13 @@ import java.util.stream.Stream;
 import org.cthul.api4j.Api4JConfiguration;
 import org.cthul.api4j.api.Template;
 import org.cthul.api4j.api1.Api1;
-import static org.cthul.api4j.api1.QdoxTools.*;
+import org.cthul.api4j.api1.GeneralTools;
 import org.cthul.api4j.gen.GeneratedClass;
 import org.cthul.api4j.gen.GeneratedConstructor;
 import org.cthul.api4j.gen.GeneratedMethod;
 import org.cthul.strings.JavaNames;
+import static org.cthul.api4j.api1.GeneralTools.*;
+import static org.cthul.api4j.api1.QdoxTools.*;
 
 /**
  * Generates continuous fluents and assert methods.
@@ -44,12 +46,18 @@ public class FluentsGenerator {
     
     private final List<FluentConfig> fluents;
     private final List<AssertConfig> asserts;
+    
+    /** Last exception that was caught and ignored */
+    private Exception suppressed = null;
+    
+    /** Map value type -> fluent configuration */
+    private Map<JavaType, FluentConfig> fluentTypeMap = null;
+
+    // constants for quick use, 
     private JavaClass matcherClass = null;
     private JavaClass adapterClass = null;
     private JavaClass valueClass = null;
-    private Exception suppressed = null;
-    private Map<JavaType, FluentConfig> fluentTypeMap = null;
-
+    
     public FluentsGenerator(List<FluentConfig> fluents, List<AssertConfig> asserts) {
         this.fluents = fluents;
         this.asserts = asserts;
@@ -103,104 +111,70 @@ public class FluentsGenerator {
      * @param path target path
      */
     public void generate(Api4JConfiguration cfg, String path) {
-        new Api1(cfg.getRootContext().subcontext(path)).run((api) -> {
-            matcherClass = asClass("org.hamcrest.Matcher");
-            adapterClass = asClass("org.cthul.matchers.fluent.value.MatchValueAdapter");
-            valueClass = asClass("org.cthul.matchers.fluent.value.MatchValue");
-            initFluentTypeMap();
-            
-            for (FluentConfig fc: fluents) {
-                generateFluent(fc, api);
-            }
-            
-            for (AssertConfig ac: asserts) {
-                generateAssert(ac, api);
-            }
-        });
+        new Api1(cfg.getContext(path)).run(this::generate);
+    }
+    
+    /**
+     * Generates the configured fluents and asserts.
+     * @param api 
+     */
+    private void generate(Api1 api) {
+        matcherClass = asClass("org.hamcrest.Matcher");
+        adapterClass = asClass("org.cthul.matchers.fluent.value.MatchValueAdapter");
+        valueClass = asClass("org.cthul.matchers.fluent.value.MatchValue");
+        initFluentTypeMap();
+
+        for (FluentConfig fc: fluents) {
+            generateFluent(fc, api);
+        }
+
+        for (AssertConfig ac: asserts) {
+            generateAssert(ac, api);
+        }
     }
     
     private void initFluentTypeMap() {
         fluentTypeMap = new HashMap<>();
         for (FluentConfig fc: fluents) {
-            JavaType jt = asClass(fc.getType());
-            fluentTypeMap.put(jt, fc);
+            fluentTypeMap.put(fc.getValueClass(), fc);
         }
     }
 
+    /**
+     * Generates a fluent interface and a step and assert implementation.
+     * @param fc
+     * @param api 
+     */
     private void generateFluent(FluentConfig fc, Api1 api) {
         if (fc.isImplemented()) return;
-        
         Template staticCall = api.getTemplate("staticCall");
         Map<String, Object> argMap = new HashMap<>();
+        
+        // create classes and interfaces
+        
         GeneratedClass iBase = fc.getName() == null ?
                 generatedInterface(api) : generatedInterface(api, fc.getName());
         GeneratedClass iOrChain = nestedInterface(iBase, "OrChain");
         GeneratedClass iAndChain = nestedInterface(iBase, "AndChain");
-//        GeneratedClass iDownCast = nestedInterface(iBase, "DownCast");
-//        GeneratedClass iStep = nestedInterface(iBase, "Step");
         GeneratedClass cStep = nestedClass(iBase, "Step");
         GeneratedClass cAssert = nestedClass(iBase, "Assert");
-                
+        
+        // intermediate values, initialized by configureTypeParameters
         List<String> typeArguments = new ArrayList<>();
         List<String> typeParameters = new ArrayList<>();
         
-        configureTypeParameters(fc, iBase, typeArguments, typeParameters);
-        setChainTypeParamters(iOrChain, typeArguments, typeParameters);
-        setChainTypeParamters(iAndChain, typeArguments, typeParameters);
-        setImplTypeParamters(cStep, typeArguments, typeParameters);
-        cAssert.getTypeParameters().addAll(fc.getExtraParams());
-        cAssert.getTypeParameters().add("Value extends " + fc.getType());
+        configureTypeParameters(fc, iBase, iOrChain, iAndChain, cStep, cAssert, typeArguments, typeParameters);
         
         List<String> assertArgs = parametersToArgs(fc.getExtraParams());
         assertArgs.add("Value");
-        String cAssertWithArgs = "Assert<" + String.join(",", assertArgs) + ">";
+        String cAssertWithArgs = "Assert" + toGenericSig(assertArgs);
 
-        iBase.getInterfaces().add(
-                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep<Value, BaseFluent, TheFluent, This>");
-        iOrChain.getInterfaces().add(
-                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep.OrChain<Value, TheFluent, This>");
-        iOrChain.getInterfaces().add(asTheFluent(iBase, typeArguments));
-        iAndChain.getInterfaces().add(
-                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep.AndChain<Value, TheFluent, This>");
-        iAndChain.getInterfaces().add(asTheFluent(iBase, typeArguments));
-        cStep.getInterfaces().add(asStepFluent(iBase, typeArguments));
-        cStep.setSuperClass(
-                withArgs(
-                    asClass("org.cthul.matchers.fluent.builder.FluentStepBuilder"),
-                            "Value", "TheFluent", "This"));
-        cAssert.getInterfaces().add(asTheFluent(iBase, typeArguments, cAssertWithArgs));
-        cAssert.setSuperClass(
-                withArgs(
-                    asClass("org.cthul.matchers.fluent.builder.FluentAssertBuilder"),
-                            "Value", cAssertWithArgs));
+        configureSuperClasses(
+                iBase, iOrChain, iAndChain, cStep, cAssert, typeArguments, cAssertWithArgs);
+        fc.getExtends().stream().forEach(
+                extendz -> configureAdditionalSuperClass(extendz, iBase, iOrChain, iAndChain));
         
-        GeneratedConstructor newStep = constructor(cStep, "public (org.cthul.matchers.fluent.builder.Matchable<? extends Value, TheFluent> matchable)");
-        newStep.setSourceCode("super(matchable);");
-        GeneratedConstructor newAssertPublic = constructor(cAssert);
-        setSignature(newAssertPublic, 
-                "org.cthul.matchers.fluent.builder.FailureHandler handler, " +
-                withArgs(valueClass, "Value").getGenericFullyQualifiedName() + " value");
-        newAssertPublic.setSourceCode("super(handler, value);");
-        GeneratedConstructor newAssertPrivate = constructor(cAssert, "protected");
-        setSignature(newAssertPrivate, 
-                "org.cthul.matchers.fluent.builder.Matchable<? extends Value, ?> value");
-        newAssertPrivate.setSourceCode("super(value);");
-
-        for (String sup: fc.getExtends()) {
-            sup = sup.replace("...", "Value, BaseFluent, TheFluent, This");
-            if (!sup.contains("<")) {
-                sup += "<Value, BaseFluent, TheFluent, This>";
-            }
-            add(iBase.getInterfaces(), sup);
-            
-            int iGen = sup.indexOf('<');
-            String supName = sup.substring(0, iGen);
-            String genSig = sup.substring(iGen).replace("BaseFluent, ", "");
-            String supOr = supName + ".OrChain" + genSig;
-            add(iOrChain.getInterfaces(), supOr);
-            String supAnd = supName + ".AndChain" + genSig;
-            add(iAndChain.getInterfaces(), supAnd);
-        }
+        generateImplementationConstructors(cStep, cAssert);
         
         for (FactoryConfig fac: fc.getFactories()) {
             Map<Pattern, String> renameMap = fac.getRenamePatternMap();
@@ -222,7 +196,7 @@ public class FluentsGenerator {
                                     ");");
                     flMethod.getTags().removeAll(flMethod.getTagsByName("return"));
                     flMethod.getTags().add("return fluent");
-                    fixTypeParameters(fac, flMethod, typeArguments);
+                    mapTypeParameters(fac, flMethod, typeArguments);
                     
                 } else if (isAdapterFactory(factory)) {
                     JavaType adaptedType = resolveReturnTypeArgument(factory, adapterClass, 1);
@@ -282,10 +256,8 @@ public class FluentsGenerator {
         addChainImplementation(iBase, cStep, typeArguments, "TheFluent", "Value", "AndChain", "both");
         addChainImplementation(iBase, cAssert, typeArguments, cAssertWithArgs, "Value", "AndChain", "both");
         addChainMethods(iBase, iAndChain, typeArguments, "all");
-        addChainImplementation(iBase, cStep, typeArguments, "TheFluent", "Value", "AndChain", "all", false);
-        addChainImplementation(iBase, cAssert, typeArguments, cAssertWithArgs, "Value", "AndChain", "all", false);
-        
-        
+        addChainImplementation(iBase, cStep, typeArguments, "TheFluent", "AndChain", "all");
+        addChainImplementation(iBase, cAssert, typeArguments, cAssertWithArgs, "AndChain", "all");
         
         Set<String> castingMethods = new HashSet<>();
         for (FluentConfig subFc: fluents) {
@@ -301,17 +273,8 @@ public class FluentsGenerator {
                 name += subFc.getCastMethodName();  
             }
             if (!castingMethods.add(name)) continue;
-                
-                //JavaType adaptedType = resolveReturnTypeArgument(factory, adapterClass, 1);
-                //Map<String,String> typeParamMap = fc.getTypeParameterMap(castMethod);
-//                if (adaptedType.getFullyQualifiedName().contains(" extends")) {
-//                    String[] parts = adaptedType.getFullyQualifiedName().split(" extends ", 2);
-//                    if (fac.getTypeParameterMap().isEmpty()) {
-//                        typeParamMap = new HashMap<>(typeParamMap);
-//                        typeParamMap.put(parts[0], parts[0]);
-//                    }
-//                }
-            String stepType = getFluentStepType(subFc, subFc.getType(), "TheFluent,?");
+
+            String stepType = getFluentStepType(subFc, subFc.getType());
             int iGeneric = stepType.indexOf('<');
             String subFcClass = iGeneric < 0 ? stepType : stepType.substring(0, iGeneric);
 
@@ -350,37 +313,127 @@ public class FluentsGenerator {
         mAdapter.setReturns(getAdapterType(cStep, cAssert));
         mAdapter.setSourceCode("return X_ADAPTER;");
     }
-    
-    private void configureTypeParameters(FluentConfig fc, GeneratedClass cg) {
-        configureTypeParameters(fc, cg, new ArrayList<>(), new ArrayList<>());
+
+    private void configureAdditionalSuperClass(String sup, GeneratedClass iBase, GeneratedClass iOrChain, GeneratedClass iAndChain) {
+        sup = sup.replace("...", "Value, BaseFluent, TheFluent, This");
+        if (!sup.contains("<")) {
+            sup += "<Value, BaseFluent, TheFluent, This>";
+        }
+        add(iBase.getInterfaces(), sup);
+        
+        int iGen = sup.indexOf('<');
+        String supName = sup.substring(0, iGen);
+        String genSig = sup.substring(iGen).replace("BaseFluent, ", "");
+        String supOr = supName + ".OrChain" + genSig;
+        add(iOrChain.getInterfaces(), supOr);
+        String supAnd = supName + ".AndChain" + genSig;
+        add(iAndChain.getInterfaces(), supAnd);
     }
 
+    private void generateImplementationConstructors(GeneratedClass cStep, GeneratedClass cAssert) {
+        GeneratedConstructor newStep = constructor(cStep, "public (org.cthul.matchers.fluent.builder.Matchable<? extends Value, TheFluent> matchable)");
+        newStep.setSourceCode("super(matchable);");
+        GeneratedConstructor newAssertPublic = constructor(cAssert);
+        setSignature(newAssertPublic,
+                "org.cthul.matchers.fluent.builder.FailureHandler handler, " +
+                        withArgs(valueClass, "Value").getGenericFullyQualifiedName() + " value");
+        newAssertPublic.setSourceCode("super(handler, value);");
+        GeneratedConstructor newAssertPrivate = constructor(cAssert, "protected");
+        setSignature(newAssertPrivate,
+                "org.cthul.matchers.fluent.builder.Matchable<? extends Value, ?> value");
+        newAssertPrivate.setSourceCode("super(value);");
+    }
+
+    private void configureSuperClasses(GeneratedClass iBase, GeneratedClass iOrChain, GeneratedClass iAndChain, GeneratedClass cStep, GeneratedClass cAssert, List<String> typeArguments, String cAssertWithArgs) {
+        iBase.getInterfaces().add(
+                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep<Value, BaseFluent, TheFluent, This>");
+        iOrChain.getInterfaces().add(
+                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep.OrChain<Value, TheFluent, This>");
+        iOrChain.getInterfaces().add(asTheFluent(iBase, typeArguments));
+        iAndChain.getInterfaces().add(
+                "org.cthul.matchers.fluent.ext.ExtensibleFluentStep.AndChain<Value, TheFluent, This>");
+        iAndChain.getInterfaces().add(asTheFluent(iBase, typeArguments));
+        cStep.getInterfaces().add(asStepFluent(iBase, typeArguments));
+        cStep.setSuperClass(
+                withArgs(
+                        asClass("org.cthul.matchers.fluent.builder.FluentStepBuilder"),
+                        "Value", "TheFluent", "This"));
+        cAssert.getInterfaces().add(asTheFluent(iBase, typeArguments, cAssertWithArgs));
+        cAssert.setSuperClass(
+                withArgs(
+                        asClass("org.cthul.matchers.fluent.builder.FluentAssertBuilder"),
+                        "Value", cAssertWithArgs));
+    }
+
+    /**
+     * Initializes type arguments and parameter lists and 
+     * configures type parameters for all classes.
+     * @param fc
+     * @param iBase
+     * @param iOrChain
+     * @param iAndChain
+     * @param cStep
+     * @param cAssert
+     * @param typeArguments
+     * @param typeParameters 
+     */
+    private void configureTypeParameters(FluentConfig fc, GeneratedClass iBase, GeneratedClass iOrChain, GeneratedClass iAndChain, GeneratedClass cStep, GeneratedClass cAssert, List<String> typeArguments, List<String> typeParameters) {
+        configureTypeParameters(fc, iBase, typeArguments, typeParameters);
+        setChainTypeParamters(iOrChain, typeArguments, typeParameters);
+        setChainTypeParamters(iAndChain, typeArguments, typeParameters);
+        setStepTypeParamters(cStep, typeArguments, typeParameters);
+        setAssertTypeParameters(cAssert, fc);
+    }
+
+    /**
+     * The assertion implementation has all extra parameters and the value type.
+     * @param cAssert
+     * @param fc 
+     */
+    private void setAssertTypeParameters(GeneratedClass cAssert, FluentConfig fc) {
+        cAssert.getTypeParameters().addAll(fc.getExtraParams());
+        cAssert.getTypeParameters().add("Value extends " + fc.getType());
+    }
+    
+    /**
+     * Initializes type arguments and parameter lists and 
+     * configures the type parameters of the main class.
+     * @param fc
+     * @param cg
+     * @param typeArguments
+     * @param typeParameters 
+     */
     private void configureTypeParameters(FluentConfig fc, GeneratedClass cg, List<String> typeArguments, List<String> typeParameters) {
-        List<String> afterValue = new ArrayList<>();
+        // If a type parameter references `Value`,
+        // all remaining parameters will be inserted after the `Value` parameter
+        List<String> afterValue = null;
         Pattern pValue = Pattern.compile("\\bValue\\b");
         for (String extra: fc.getExtraParams()) {
             if (pValue.matcher(extra).find()) {
-                afterValue.add(extra);
-            } else {
+                afterValue = new ArrayList<>();
+            }
+            if (afterValue == null) {
                 typeParameters.add(extra);
+            } else {
+                afterValue.add(extra);
             }
         }
         
         typeParameters.add(fc.getType() == null ? "Value" : "Value extends " + fc.getType());
-        typeParameters.addAll(afterValue);
+        if (afterValue != null) typeParameters.addAll(afterValue);
         typeParameters.add("BaseFluent");
         typeParameters.add("TheFluent extends BaseFluent");
-        typeParameters.stream()
-                .map(this::parameterToArg)
-                .forEach(typeArguments::add);
         
+        typeArguments.addAll(parametersToArgs(typeParameters));
         typeArguments.add("This");
+        
         typeParameters.add("This extends " + cg.getName() + toGenericSig(typeArguments));
         
         cg.getTypeParameters().addAll(typeParameters);
     }
     
     private String toGenericSig(List<String> params) {
+        if (params.isEmpty()) throw new IllegalArgumentException("No generic arguments");
         StringBuilder sb = new StringBuilder();
         sb.append('<');
         params.forEach(s -> sb.append(s).append(','));
@@ -388,7 +441,14 @@ public class FluentsGenerator {
         return sb.toString();
     }
     
-    private void setImplTypeParamters(GeneratedClass cStep, List<String> typeArgs, List<String> typeParams) {
+    /**
+     * Configures type parameters of step implementation.
+     * @param cStep
+     * @param typeArgs
+     * @param typeParams 
+     */
+    private void setStepTypeParamters(GeneratedClass cStep, List<String> typeArgs, List<String> typeParams) {
+        // `BaseFluent` is removed and `TheFluent` now stands on its own.
         int i = typeArgs.indexOf("BaseFluent");
         List<String> a = new ArrayList<>(typeArgs);
         a.remove(i);
@@ -399,21 +459,33 @@ public class FluentsGenerator {
         cStep.getTypeParameters().addAll(p);
     }
     
-    private void setChainTypeParamters(GeneratedClass gc, List<String> typeArgs, List<String> typeParams) {
-        int i = typeArgs.indexOf("BaseFluent");
-        List<String> a = new ArrayList<>(typeArgs);
-        a.remove(i);
-        List<String> p = new ArrayList<>(typeParams);
-        p.remove(i);
-        p.set(i, "TheFluent");
-        p.set(p.size()-1, "This extends " + gc.getName() + toGenericSig(a));
-        gc.getTypeParameters().addAll(p);
+    /**
+     * Configures type parameters of sub-chain interfaces.
+     * @param cChain
+     * @param typeArgs
+     * @param typeParams 
+     */
+    private void setChainTypeParamters(GeneratedClass cChain, List<String> typeArgs, List<String> typeParams) {
+        setStepTypeParamters(cChain, typeArgs, typeParams);
     }
     
+    /**
+     * Returns the class parameterized as a fluent.
+     * @param clazz
+     * @param typeArgs
+     * @return fluent type
+     */
     private JavaClass asTheFluent(JavaClass clazz, List<String> typeArgs) {
         return asTheFluent(clazz, typeArgs, "This");
     }
     
+    /**
+     * Returns the class parameterized as a fluent.
+     * @param clazz
+     * @param typeArgs
+     * @param thisArg
+     * @return fluent type
+     */
     private JavaClass asTheFluent(JavaClass clazz, List<String> typeArgs, String thisArg) {
         int i = typeArgs.indexOf("BaseFluent");
         List<String> a = new ArrayList<>(typeArgs);
@@ -423,6 +495,12 @@ public class FluentsGenerator {
         return (JavaClass) withArgs(clazz, a);
     }
     
+    /**
+     * Returns the class parameterized as a fluent step.
+     * @param clazz
+     * @param typeArgs
+     * @return fluent step type
+     */
     private JavaClass asStepFluent(JavaClass clazz, List<String> typeArgs) {
         int i = typeArgs.indexOf("BaseFluent");
         List<String> a = new ArrayList<>(typeArgs);
@@ -431,7 +509,14 @@ public class FluentsGenerator {
         return (JavaClass) withArgs(clazz, a);
     }
     
-    private JavaClass chainFluent(JavaClass clazz, List<String> typeArgs, String theFluentArg) {
+    /**
+     * Returns the class parameterized as a chain fluent.
+     * @param clazz
+     * @param typeArgs
+     * @param theFluentArg
+     * @return chain fluent type
+     */
+    private JavaClass asChainFluent(JavaClass clazz, List<String> typeArgs, String theFluentArg) {
         int i = typeArgs.indexOf("BaseFluent");
         List<String> a = new ArrayList<>(typeArgs);
         a.remove(i);
@@ -440,7 +525,13 @@ public class FluentsGenerator {
         return (JavaClass) withArgs(clazz, a);
     }
     
-    private JavaClass chainTerminal(JavaClass clazz, List<String> typeArgs) {
+    /**
+     * Returns the class parameterized as terminal step of a sub-chain.
+     * @param clazz
+     * @param typeArgs
+     * @return chain terminal type
+     */
+    private JavaClass asChainTerminal(JavaClass clazz, List<String> typeArgs) {
         int i = typeArgs.indexOf("BaseFluent");
         List<String> a = new ArrayList<>(typeArgs);
         a.set(i, "TheFluent");
@@ -449,28 +540,33 @@ public class FluentsGenerator {
         return (JavaClass) withArgs(clazz, a);
     }
     
-    private List<String> parametersToArgs(List<String> list) {
-        return list.stream().map(this::parameterToArg)
-                .collect(Collectors.toList());
-    }
-    
-    private String parameterToArg(String s) {
-        int iSpace = s.indexOf(' ');
-        if (iSpace < 0) return s;
-        return s.substring(0, iSpace);
-    }
-    
-    private void fixTypeParameters(FactoryConfig fac, GeneratedMethod flMethod, List<String> typeParameters) {
+    /**
+     * Applies the type parameter mapping of a factory configuration to a method.
+     * @param fac
+     * @param flMethod
+     * @param typeParameters 
+     */
+    private void mapTypeParameters(FactoryConfig fac, GeneratedMethod flMethod, List<String> typeParameters) {
         fixTypeParameters(flMethod, typeParameters, fac.getTypeParameterMap(flMethod));
     }
     
+    /**
+     * Applies a type parameter mapping to a method.
+     * @param flMethod
+     * @param typeParameters
+     * @param map 
+     */
     private void fixTypeParameters(GeneratedMethod flMethod, List<String> typeParameters, Map<String, String> map) {
+        // apply the mapping
         List<JavaTypeVariable<JavaMethod>> tParams = flMethod.getTypeParameters();
         tParams = replaceTypeParameterList(tParams, map);
+        
         if (tParams == null) {
-            removeClassParameters(flMethod.getTypeParameters(), typeParameters);
+            // nothing was replaced, but remove all class parameters
+            removeParameters(flMethod.getTypeParameters(), typeParameters);
         } else {
-            removeClassParameters(tParams, typeParameters);
+            // remove class parameters and duplicates
+            removeParameters(tParams, typeParameters);
             flMethod.getTypeParameters().clear();
             Set<String> paramNames = new HashSet<>();
             for (JavaTypeVariable<JavaMethod> v: tParams) {
@@ -479,6 +575,7 @@ public class FluentsGenerator {
                 }
             }
 
+            // adjust method parameter types
             for (int i = 0; i < flMethod.getParameters().size(); i++) {
                 JavaParameter p = flMethod.getParameters().get(i);
                 JavaClass newType = replaceTypeParameter(p.getType(), map);
@@ -488,42 +585,60 @@ public class FluentsGenerator {
                 }
             }
         }
+        // fix doc tags like `@param <T>`
         for (DocletTag tag: flMethod.getTagsByName("param")) {
-            String v = tag.getValue();
-            if (v == null || v.isEmpty()) continue;
-            int iOpen = v.indexOf('<');
-            int iClose = v.indexOf('>');
+            String tagValue = tag.getValue();
+            if (tagValue == null || tagValue.isEmpty()) continue;
+            int iOpen = tagValue.indexOf('<');
+            int iClose = tagValue.indexOf('>');
             if (iOpen < 0 || iClose < 0 || iClose < iOpen) continue;
-            String p = v.substring(iOpen+1, iClose);
-            String r = map.get(p);
-            if (r == null) continue;
-            if (typeParameters.contains(r)) {
+            String paramName = tagValue.substring(iOpen+1, iClose);
+            String mappedName = map.get(paramName);
+            if (mappedName == null) continue;
+            if (typeParameters.contains(mappedName)) {
+                // class parameter, removed
                 flMethod.getTags().remove(tag);
             } else {
-                v = v.substring(0, iOpen+1) + r + v.substring(iClose);
+                // replace new name
+                tagValue = tagValue.substring(0, iOpen+1) + mappedName + tagValue.substring(iClose);
                 int tagIndex = flMethod.getTags().indexOf(tag);
-                tag = new DefaultDocletTag("param", v);
+                tag = new DefaultDocletTag("param", tagValue);
                 flMethod.getTags().set(tagIndex, tag);
             }
         }
     }
     
-    private void removeClassParameters(List<JavaTypeVariable<JavaMethod>> params, List<String> classParams) {
+    /**
+     * Removes all parameters from `params` who appear in `exclude`.
+     * @param params
+     * @param exclude 
+     */
+    private void removeParameters(List<JavaTypeVariable<JavaMethod>> params, List<String> exclude) {
         params.removeIf(p -> {
-            return classParams.stream().anyMatch(
+            return exclude.stream().anyMatch(
                     c -> (c.equals(p.getName()) || c.startsWith(p.getName() + " ")));
         });
     }
     
-    private JavaClass replaceTypeParameter(JavaType clazz, Map<String, String> map) {
-        String replacement = map.get(clazz.getCanonicalName());
-        if (clazz instanceof JavaWildcardType) {
-            String n = clazz.getGenericFullyQualifiedName();
+    /**
+     * Applies parameter mapping to a type. Returns null if nothing was changed.
+     * @param type
+     * @param map
+     * @return adjusted type or null
+     */
+    private JavaClass replaceTypeParameter(JavaType type, Map<String, String> map) {
+        String replacement = map.get(type.getCanonicalName());
+        if (type instanceof JavaWildcardType) {
+            // something like `? super ...`
+            // 1. apply map with string replacement
+            String n = type.getGenericFullyQualifiedName();
             String n2 = n;
             for (Map.Entry<String, String> e: map.entrySet()) {
                 n2 = n.replaceAll("\\b"+e.getKey()+"\\b", e.getValue());
             }
             if (!n.equals(n2)) {
+                // 2. if something was changed, determine bound type
+                // and return new wildcard type
                 BoundType bt;
                 int iExt = n2.indexOf(" extends ");
                 if (iExt < 0) {
@@ -533,13 +648,16 @@ public class FluentsGenerator {
                     bt = BoundType.EXTENDS;
                     iExt += " extends ".length();
                 }
-                clazz = asClass(n2.substring(iExt));
-                DefaultJavaWildcardType fixed = new DefaultJavaWildcardType(clazz, bt);
+                type = asClass(n2.substring(iExt));
+                DefaultJavaWildcardType fixed = new DefaultJavaWildcardType(type, bt);
                 return fixed;
             }
         }
-        if (clazz instanceof JavaTypeVariable) {
-            JavaTypeVariable<?> jtv = (JavaTypeVariable) clazz;
+        if (type instanceof JavaTypeVariable) {
+            // type variable, like `T extends ...`
+            // if name is replaced or bounds are replaced recursively,
+            // return new variable
+            JavaTypeVariable<?> jtv = (JavaTypeVariable) type;
             List<JavaType> types = replaceTypeParameterList(jtv.getBounds(), map);
             if (types != null || replacement != null) {
                 DefaultJavaTypeVariable<?> fixed = new DefaultJavaTypeVariable<>(
@@ -549,9 +667,12 @@ public class FluentsGenerator {
                 return fixed;
             }
         }
-        if (clazz instanceof JavaParameterizedType) {
-            JavaParameterizedType jpt = (JavaParameterizedType) clazz;
-            int dim = ((DefaultJavaType) clazz).getDimensions();
+        if (type instanceof JavaParameterizedType) {
+            // parameterized type, like `Collection<...>`
+            // if name is replaced or arguments are replaced recursively,
+            // return new type
+            JavaParameterizedType jpt = (JavaParameterizedType) type;
+            int dim = ((DefaultJavaType) type).getDimensions();
             List<JavaType> types = jpt.getActualTypeArguments();
             types = replaceTypeParameterList(types, map);
             if (types != null || replacement != null) {
@@ -578,6 +699,14 @@ public class FluentsGenerator {
         return null;
     }
     
+    /**
+     * Applies parameter mapping to a list of types. 
+     * Returns null if nothing was changed.
+     * @param <JT>
+     * @param classes
+     * @param map
+     * @return adjusted types or null
+     */
     private <JT extends JavaType> List<JT> replaceTypeParameterList(List<JT> classes, Map<String, String> map) {
         if (classes == null) return null;
         boolean original = true;
@@ -593,18 +722,41 @@ public class FluentsGenerator {
         return classes;
     }
     
+    /**
+     * Adds a chain method without matcher argument to the fluent interface.
+     * @param iBase
+     * @param iChain
+     * @param typeArgs
+     * @param name 
+     */
     private void addChainMethods(GeneratedClass iBase, GeneratedClass iChain, List<String> typeArgs, String name) {
         addChainMethods(iBase, iChain, typeArgs, name, null, false);
     }
     
+    /**
+     * Adds chain methods to the fluent interface, with and without matcher argument.
+     * @param iBase fluent interface
+     * @param iChain chain interface
+     * @param typeArgs type arguments of `iBase`
+     * @param name name of the chain method
+     * @param terminal if given, terminal methods are added to the chain interface
+     */
     private void addChainMethods(GeneratedClass iBase, GeneratedClass iChain, List<String> typeArgs, String name, String terminal) {
         addChainMethods(iBase, iChain, typeArgs, name, terminal, true);
     }
     
+    /**
+     * Adds chain methods to the fluent interface.
+     * @param iBase fluent interface
+     * @param iChain chain interface
+     * @param typeArgs type arguments of `iBase`
+     * @param name name of the chain method
+     * @param terminal if given, terminal methods are added to the chain interface
+     * @param matcherMethod if true, chain method with matcher argument is added
+     */
     private void addChainMethods(GeneratedClass iBase, GeneratedClass iChain, List<String> typeArgs, String name, String terminal, boolean matcherMethod) {
-        String chainType = iChain.getName(); // JavaNames.CamelCase(terminal + " chain");
-        JavaClass chainClass = chainFluent(iChain, typeArgs, "TheFluent"); //chainFluent(chainType, typeArgs);
-        JavaClass chainTerminal = chainTerminal(iBase, typeArgs);
+        JavaClass chainClass = asChainFluent(iChain, typeArgs, "TheFluent");
+        JavaClass chainTerminal = asChainTerminal(iBase, typeArgs);
         GeneratedMethod gm;
         
         gm = method(iBase, name);
@@ -616,8 +768,8 @@ public class FluentsGenerator {
             gm.getAnnotations().add("Override");
             gm.setReturns(chainClass);
             setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
-
         }
+        
         if (terminal != null) {
             gm = method(iChain, terminal);
             gm.getAnnotations().add("Override");
@@ -628,59 +780,77 @@ public class FluentsGenerator {
             setReturns(gm, "TheFluent");
             setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
         }
-////        chainClass = chainFluent(chainType, typeArgs);
-//        gm = method(cStep, name);
-//        gm.getAnnotations().add("Override");
-//        gm.getModifiers().add("public");
-//        gm.setReturns(chainClass);
-//        gm.setSourceCode("return (" + chainType + ") super." + name + "();");
-//        
-//        gm = method(cStep, name);
-//        gm.getAnnotations().add("Override");
-//        gm.getModifiers().add("public");
-//        gm.setReturns(chainClass);
-//        setSignature(gm, "org.hamcrest.Matcher<? super Value> matcher");
-//        gm.setSourceCode("return (" + chainType + ") super." + name + "(matcher);");
     }
     
+    /**
+     * Adds chain method implementations with and without matcher argument 
+     * to the implementation class.
+     * @param iBase fluent interface
+     * @param cImpl implementation class
+     * @param typeArgs type arguments of `iBase`
+     * @param theFluentArg `TheFluent` argument value
+     * @param valueType fluent value type
+     * @param chainType chain type
+     * @param name name of the chain method
+     */
     private void addChainImplementation(JavaClass iBase, GeneratedClass cStep, List<String> typeArgs, String theFluentArg, String valueType, String chainType, String name) {
-        addChainImplementation(iBase, cStep, typeArgs, theFluentArg, valueType, chainType, name, true);
+        addChainImplementation(iBase, cStep, typeArgs, theFluentArg, chainType, name, valueType, true);
     }
     
-    private void addChainImplementation(JavaClass iBase, GeneratedClass cStep, List<String> typeArgs, String theFluentArg, String valueType, String chainType, String name, boolean withMatcherArg) {
+    /**
+     * Adds a chain method implementations without matcher argument 
+     * to the implementation class.
+     * @param iBase fluent interface
+     * @param cImpl implementation class
+     * @param typeArgs type arguments of `iBase`
+     * @param theFluentArg `TheFluent` argument value
+     * @param chainType chain type
+     * @param name name of the chain method
+     */
+    private void addChainImplementation(JavaClass iBase, GeneratedClass cImpl, List<String> typeArgs, String theFluentArg, String chainType, String name) {
+        addChainImplementation(iBase, cImpl, typeArgs, theFluentArg, chainType, name, null, false);
+    }
+    
+    /**
+     * Adds chain method implementations to the implementation class.
+     * @param iBase fluent interface
+     * @param cImpl implementation class
+     * @param typeArgs type arguments of `iBase`
+     * @param theFluentArg `TheFluent` argument value
+     * @param valueType fluent value type, only for matcher method
+     * @param chainType chain type
+     * @param name name of the chain method
+     * @param matcherMethod if true, chain method with matcher argument is added
+     */
+    private void addChainImplementation(JavaClass iBase, GeneratedClass cImpl, List<String> typeArgs, String theFluentArg, String chainType, String name, String valueType, boolean matcherMethod) {
         String baseName = iBase.getFullyQualifiedName();
         chainType = (baseName.contains("<") ? baseName.substring(0, baseName.indexOf('<')) : baseName) + "." + chainType;
-//        String chainType = iChain.getName(); // JavaNames.CamelCase(terminal + " chain");
         JavaClass iChain = asClass(chainType);
-        JavaClass chainClass = chainFluent(iChain, typeArgs, theFluentArg); //chainFluent(chainType, typeArgs);
+        JavaClass chainClass = asChainFluent(iChain, typeArgs, theFluentArg);
         
         GeneratedMethod gm;
-//        chainClass = chainFluent(chainType, typeArgs);
-        gm = method(cStep, name);
+        gm = method(cImpl, name);
         gm.getAnnotations().addAll("Override");
         gm.getModifiers().add("public");
         gm.setReturns(chainClass);
         gm.setSourceCode("return _" + name + "(" +
                     chainType + ".class, Step.adapter());");
-//        gm.getAnnotations().addAll("Override", "SuppressWarnings(\"unchecked\")");
-//        gm.getModifiers().add("public");
-//        gm.setReturns(chainClass);
-//        gm.setSourceCode("return (" + chainType + ") super." + name + "();");
         
-        if (withMatcherArg) {
-            gm = method(cStep, name);
+        if (matcherMethod) {
+            gm = method(cImpl, name);
             gm.getAnnotations().addAll("Override");
             gm.getModifiers().add("public");
             gm.setReturns(chainClass);
             gm.setSourceCode("return " + name + "().__(matcher);");
-    //        gm.getAnnotations().addAll("Override", "SuppressWarnings(\"unchecked\")");
-    //        gm.getModifiers().add("public");
-    //        gm.setReturns(chainClass);
-    //        gm.setSourceCode("return (" + chainType + ") super." + name + "(matcher);");
             setSignature(gm, "org.hamcrest.Matcher<? super " + valueType + "> matcher");
         }
     }
     
+    /**
+     * Build the return type of a fluent's `Step.adapter()` method.
+     * @param fc
+     * @return extension factory type
+     */
     private JavaClass getAdapterType(FluentConfig fc) {
         List<String> args = new ArrayList<>();
         args.addAll(parametersToArgs(fc.getExtraParams()));
@@ -692,6 +862,12 @@ public class FluentsGenerator {
         return getAdapterType(cStep, cAssert);
     }
     
+    /**
+     * Build the return type of a fluent's `Step.adapter()` method.
+     * @param cStep
+     * @param cFluent
+     * @return extension factory type
+     */
     private JavaClass getAdapterType(JavaClass cStep, JavaClass cFluent) {
         List<String> args = new ArrayList<>();
         args.add("java.lang.Object");
@@ -712,30 +888,55 @@ public class FluentsGenerator {
         return (JavaClass) withArgs(asClass("org.cthul.matchers.fluent.ext.ExtensionFactory"), args);
     }
     
+    /**
+     * Returns the fluent step type for a value type.
+     * The fluent interface is selected by {@link #findConfigFor(com.thoughtworks.qdox.model.JavaClass)}.
+     * @param valueType
+     * @return step type
+     */
     private String getFluentStepType(JavaType valueType) {
         String typeName = valueType.getGenericFullyQualifiedName();
         String typeArg = typeName;
         if (typeName.contains(" extends ")) {
             String[] parts = typeName.split(" extends ", 2);
             typeArg = parts[0];
-//            typeName = parts[1];
         }
         
         FluentConfig stepConfig = findConfigFor((JavaClass) valueType);
         if (stepConfig == null) {
             stepConfig = findConfigFor(asClass("java.lang.Object"));
         }
-        return getFluentStepType(stepConfig, typeArg, "TheFluent,?");
+        return getFluentStepType(stepConfig, typeArg);
     }
     
-    private String getFluentStepType(FluentConfig stepConfig, String typeArg, String moreArgs) {
-        return getFluentStepType(stepConfig, ".Step", typeArg, moreArgs);
+    /**
+     * Returns a fluent assert type.
+     * @param stepConfig
+     * @param typeArg argument to `Value` parameter
+     * @return 
+     */
+    private String getFluentStepType(FluentConfig stepConfig, String typeArg) {
+        return getFluentStepType(stepConfig, ".Step", typeArg, "TheFluent,?");
     }
     
+    /**
+     * Returns a fluent assert type.
+     * @param stepConfig
+     * @param typeArg argument to `Value` parameter
+     * @return assert type
+     */
     private String getFluentAssertType(FluentConfig stepConfig, String typeArg) {
         return getFluentStepType(stepConfig, ".Assert", typeArg, "");
     }
     
+    /**
+     * Returns a fluent step type.
+     * @param stepConfig if null, cthul's `ObjectFluent` will be default.
+     * @param implClass
+     * @param typeArg argument to `Value` parameter
+     * @param moreArgs additional type arguments
+     * @return step type
+     */
     private String getFluentStepType(FluentConfig stepConfig, String implClass, String typeArg, String moreArgs) {
         if (!moreArgs.isEmpty()) moreArgs = "," + moreArgs;
         String fluent;
@@ -766,6 +967,12 @@ public class FluentsGenerator {
         return fluent;
     }
     
+    /**
+     * Returns best matching configuration for a value class, or null
+     * if none matched and no configuration for Object was found.
+     * @param valueClass
+     * @return fluent configuration
+     */
     private FluentConfig findConfigFor(JavaClass valueClass) {
         String typeString = valueClass.getGenericFullyQualifiedName();
         JavaClass bestMatch = null;
@@ -830,16 +1037,6 @@ public class FluentsGenerator {
                         "org.cthul.matchers.fluent.adapters.IdentityValue.value" +
                         "(value));");
         }
-    }
-    
-    private JavaClass getFluentType(JavaClass impl, FluentConfig fc) {
-        JavaType cFluent = withArgs(asClass("org.cthul.matchers.fluent.Fluent"), fc.getType());
-        List<Object> args = new ArrayList<>();
-        args.addAll(parametersToArgs(fc.getExtraParams()));
-        args.addAll(Arrays.asList(fc.getType(), cFluent, impl, impl));
-        return (JavaClass) withArgs(
-                asClass(fc.getName()), 
-                args);
     }
     
     public static class FluentConfig {
