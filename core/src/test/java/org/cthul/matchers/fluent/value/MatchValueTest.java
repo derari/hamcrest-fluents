@@ -2,7 +2,6 @@ package org.cthul.matchers.fluent.value;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.cthul.matchers.diagnose.result.MatchResult;
 import org.cthul.matchers.fluent.adapters.AnyOfAdapter;
 import org.cthul.matchers.fluent.adapters.EachOfAdapter;

@@ -10,7 +10,7 @@
     <artifactId>cthul-fluent-matchers-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-    <name>Cthul Fluents Matchers POM</name>
+    <name>Cthul Fluent Matchers /POM</name>
     <url>http://cthul.org/fluent-matchers</url>
     <description>
         Fluents for Hamcrest -- Parent POM

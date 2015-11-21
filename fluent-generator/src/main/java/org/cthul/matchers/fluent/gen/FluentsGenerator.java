@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import org.cthul.api4j.Api4JConfiguration;
 import org.cthul.api4j.api.Template;
 import org.cthul.api4j.api1.Api1;
-import org.cthul.api4j.api1.GeneralTools;
 import org.cthul.api4j.gen.GeneratedClass;
 import org.cthul.api4j.gen.GeneratedConstructor;
 import org.cthul.api4j.gen.GeneratedMethod;
@@ -57,6 +56,7 @@ public class FluentsGenerator {
     private JavaClass matcherClass = null;
     private JavaClass adapterClass = null;
     private JavaClass valueClass = null;
+    private Template staticCall = null;
     
     public FluentsGenerator(List<FluentConfig> fluents, List<AssertConfig> asserts) {
         this.fluents = fluents;
@@ -122,22 +122,23 @@ public class FluentsGenerator {
         matcherClass = asClass("org.hamcrest.Matcher");
         adapterClass = asClass("org.cthul.matchers.fluent.value.MatchValueAdapter");
         valueClass = asClass("org.cthul.matchers.fluent.value.MatchValue");
+        staticCall = api.getTemplate("staticCall");
         initFluentTypeMap();
 
-        for (FluentConfig fc: fluents) {
+        fluents.forEach(fc -> {
             generateFluent(fc, api);
-        }
+        });
 
-        for (AssertConfig ac: asserts) {
+        asserts.forEach(ac -> {
             generateAssert(ac, api);
-        }
+        });
     }
     
     private void initFluentTypeMap() {
         fluentTypeMap = new HashMap<>();
-        for (FluentConfig fc: fluents) {
+        fluents.forEach(fc -> {
             fluentTypeMap.put(fc.getValueClass(), fc);
-        }
+        });
     }
 
     /**
@@ -147,8 +148,6 @@ public class FluentsGenerator {
      */
     private void generateFluent(FluentConfig fc, Api1 api) {
         if (fc.isImplemented()) return;
-        Template staticCall = api.getTemplate("staticCall");
-        Map<String, Object> argMap = new HashMap<>();
         
         // create classes and interfaces
         
@@ -171,83 +170,29 @@ public class FluentsGenerator {
 
         configureSuperClasses(
                 iBase, iOrChain, iAndChain, cStep, cAssert, typeArguments, cAssertWithArgs);
-        fc.getExtends().stream().forEach(
+        fc.getExtends().forEach(
                 extendz -> configureAdditionalSuperClass(extendz, iBase, iOrChain, iAndChain));
         
         generateImplementationConstructors(cStep, cAssert);
         
-        for (FactoryConfig fac: fc.getFactories()) {
-            Map<Pattern, String> renameMap = fac.getRenamePatternMap();
-            fac.factoryMethods().forEach((factory) -> {
+        fc.getFactories().forEach(factoryConfig -> {
+            Renamer renamer = factoryConfig.getRenamer();
+            factoryConfig.factoryMethods().forEach(factory -> {
                 suppressed = null;
                 GeneratedMethod flMethod = method(iBase, factory);
-                renameMap.entrySet().forEach(e -> {
-                    String s = e.getKey().matcher(flMethod.getName())
-                            .replaceAll(e.getValue());
-                    flMethod.setName(s);
-                });
+                renamer.applyToName(flMethod);
                 if (isMatcherFactory(factory)) {
-                    setReturns(flMethod, "TheFluent");
-                    setModifiers(flMethod, "default");
-                    argMap.put("method", factory);
-                    setBody(flMethod,
-                            "return __(" +
-                                    staticCall.generate(argMap) +
-                                    ");");
-                    flMethod.getTags().removeAll(flMethod.getTagsByName("return"));
-                    flMethod.getTags().add("return fluent");
-                    mapTypeParameters(fac, flMethod, typeArguments);
-                    
+                    configureMatcherFluent(flMethod, factory, factoryConfig, typeArguments);
                 } else if (isAdapterFactory(factory)) {
-                    JavaType adaptedType = resolveReturnTypeArgument(factory, adapterClass, 1);
-                    Map<String,String> typeParamMap = fac.getTypeParameterMap(flMethod);
-                    if (adaptedType.getFullyQualifiedName().contains(" extends")) {
-                        String[] parts = adaptedType.getFullyQualifiedName().split(" extends ", 2);
-                        if (fac.getTypeParameterMap().isEmpty()) {
-                            typeParamMap = new HashMap<>(typeParamMap);
-                            typeParamMap.put(parts[0], parts[0]);
-                        }
-                    }
-                    String stepType = getFluentStepType(adaptedType);
-                    int iGeneric = stepType.indexOf('<');
-                    String stepClass = iGeneric < 0 ? stepType : stepType.substring(0, iGeneric);
-                    
-                    setReturns(flMethod, stepType);
-                    setModifiers(flMethod, "default");
-                    argMap.put("method", factory);
-//                    setBody(flMethod,
-//                            "return org.cthul.matchers.fluent.ext.ExtensibleStepAdapter.New.__adapt(" +
-//                                    "this, " +
-//                                    staticCall.generate(argMap) + ", " + 
-//                                    stepClass + ".Impl.adapter());");
-                    setBody(flMethod,
-                            "return as(org.cthul.matchers.fluent.ext.Extensions.uncheckedFactory(" +
-                                    staticCall.generate(argMap) + ", " + 
-                                    stepClass + ".Step.adapter()));");
-                    flMethod.getTags().removeAll(flMethod.getTagsByName("return"));
-                    flMethod.getTags().add("return " + JavaNames.under_score(stepClass).replace('_', ' ') + " step");
-                    fixTypeParameters(flMethod, typeParameters, typeParamMap);
+                    configureAdapterFluent(flMethod, factory, factoryConfig, typeParameters);
                 } else if (isValueFactory(factory)) {
                     // skip, nothing to do here
                     iBase.getMethods().remove(flMethod);
                 } else {
-                    String methodName;
-                    try {
-                        methodName = factory.toString();
-                    } catch (Exception e) {
-                        try {
-                            methodName = factory.getCallSignature();
-                        } catch (Exception e2) {
-                            methodName = factory.getName();
-                        }
-                    }
-                    String msg = "Can't create fluent for\n    " + methodName;
-//                    System.err.println(msg);
-//                    iBase.getMethods().remove(flMethod);
-                    throw new RuntimeException(msg, suppressed);
+                    invalidFactoryMethod(factory);
                 }
             });
-        }
+        });
         
         addChainMethods(iBase, iOrChain, typeArguments, "either", "or");
         addChainImplementation(iBase, cStep, typeArguments, "TheFluent", "Value", "OrChain", "either");
@@ -261,8 +206,7 @@ public class FluentsGenerator {
         
         Set<String> castingMethods = new HashSet<>();
         for (FluentConfig subFc: fluents) {
-            JavaClass subValueClass = subFc.getValueClass();
-            if (subFc == fc || !subValueClass.isA(fc.getValueClass())) continue;
+            if (!subFc.isValueSubclass(fc)) continue;
             String name = "as";
             if (subFc.isImplemented()) {
                 String type = subFc.getType();
@@ -547,7 +491,7 @@ public class FluentsGenerator {
      * @param typeParameters 
      */
     private void mapTypeParameters(FactoryConfig fac, GeneratedMethod flMethod, List<String> typeParameters) {
-        fixTypeParameters(flMethod, typeParameters, fac.getTypeParameterMap(flMethod));
+        fixTypeParameters(flMethod, typeParameters, fac.getTypeParameterMapping(flMethod));
     }
     
     /**
@@ -723,6 +667,76 @@ public class FluentsGenerator {
     }
     
     /**
+     * Configures `flMethod` as a fluent that applies a matcher.
+     * @param flMethod
+     * @param factory
+     * @param factoryConfig
+     * @param typeArguments 
+     */
+    private void configureMatcherFluent(GeneratedMethod flMethod, JavaMethod factory, FactoryConfig factoryConfig, List<String> typeArguments) {
+        setReturns(flMethod, "TheFluent");
+        setModifiers(flMethod, "default");
+        setBody(flMethod, "return __(%s);", 
+                staticCall.generate("method", factory));
+        flMethod.getTags().removeAll("return");
+        flMethod.getTags().add("return fluent");
+        mapTypeParameters(factoryConfig, flMethod, typeArguments);
+    }
+    
+    /**
+     * Configures `flMethod` as a fluent that applies an adapter step.
+     * @param flMethod
+     * @param factory
+     * @param factoryConfig
+     * @param typeParameters  
+     */
+    protected void configureAdapterFluent(GeneratedMethod flMethod, JavaMethod factory, FactoryConfig factoryConfig, List<String> typeParameters) {
+        // Determine target type
+        JavaType adaptedType = resolveReturnTypeArgument(factory, adapterClass, 1);
+        Map<String,String> typeParamMap = factoryConfig.getTypeParameterMapping(flMethod);
+        if (adaptedType.getFullyQualifiedName().contains(" extends") &&
+                factoryConfig.getTypeParameterMap().isEmpty()) {
+            // if target type is a type variable and no mapping is configured,
+            // add it to mapping as a default
+            String[] parts = adaptedType.getFullyQualifiedName().split(" extends ", 2);
+            typeParamMap = new HashMap<>(typeParamMap);
+            typeParamMap.put(parts[0], parts[0]);
+        }
+        
+        // determine the step implementation
+        String stepType = getFluentStepType(adaptedType);
+        int iGeneric = stepType.indexOf('<');
+        String stepClass = iGeneric < 0 ? stepType : stepType.substring(0, iGeneric);
+        
+        // configure the method
+        setReturns(flMethod, stepType);
+        setModifiers(flMethod, "default");
+        setBody(flMethod,
+                "return as(org.cthul.matchers.fluent.ext.Extensions.uncheckedFactory(%s, %s.Step.adapter()));",
+                staticCall.generate("method", factory), stepClass);
+        flMethod.getTags().removeAll("return");
+        flMethod.getTags().add("return " + JavaNames.under_score(stepClass).replace('_', ' ') + " step");
+        fixTypeParameters(flMethod, typeParameters, typeParamMap);
+    }
+    
+    protected void invalidFactoryMethod(JavaMethod factory) throws RuntimeException {
+        String methodName;
+        try {
+            methodName = factory.toString();
+        } catch (Exception e) {
+            try {
+                methodName = factory.getCallSignature();
+            } catch (Exception e2) {
+                methodName = factory.getName();
+            }
+        }
+        String msg = "Can't create fluent for\n    " + methodName;
+//                    System.err.println(msg);
+//                    iBase.getMethods().remove(flMethod);
+        throw new RuntimeException(msg, suppressed);
+    }
+
+    /**
      * Adds a chain method without matcher argument to the fluent interface.
      * @param iBase
      * @param iChain
@@ -830,7 +844,7 @@ public class FluentsGenerator {
         
         GeneratedMethod gm;
         gm = method(cImpl, name);
-        gm.getAnnotations().addAll("Override");
+        gm.getAnnotations().add("Override");
         gm.getModifiers().add("public");
         gm.setReturns(chainClass);
         gm.setSourceCode("return _" + name + "(" +
@@ -838,7 +852,7 @@ public class FluentsGenerator {
         
         if (matcherMethod) {
             gm = method(cImpl, name);
-            gm.getAnnotations().addAll("Override");
+            gm.getAnnotations().add("Override");
             gm.getModifiers().add("public");
             gm.setReturns(chainClass);
             gm.setSourceCode("return " + name + "().__(matcher);");
@@ -1002,16 +1016,8 @@ public class FluentsGenerator {
         Set<String> names = new HashSet<>();
         for (FluentConfig fc: fluents) {
             if (fc.isImplemented()) continue;
-            String name = fc.getName();
-            if (name.endsWith("Fluent")) name = name.substring(0, name.length() - 6);
-            if (names.contains(name)) {
-                name = fc.getType();
-                if (name.contains("<")) name = name.substring(0, name.indexOf('<'));
-                name = name.substring(name.lastIndexOf('.')+1);
-            }
-            name = JavaNames.CamelCase(name);
-            if (!names.add(name)) continue;
-            String adapterName = (name.matches("([AEIOU]).*") ? "an" : "a") + name;
+            String adapterName = getAdapterName(fc, names);
+            if (adapterName == null) continue;
             
             GeneratedMethod mAdapter = method(iAssert, adapterName);
             mAdapter.getModifiers().add("public static");
@@ -1031,12 +1037,25 @@ public class FluentsGenerator {
             mAssert.getTypeParameters().addAll(extraParams);
             
             mAssert.setBody(
-                    "return new " +
-                        fluentClassName + "<>" +
+                    "return new %s<>" +
                         "(org.cthul.matchers.fluent.builder.AssertionErrorHandler.instance(), " +
                         "org.cthul.matchers.fluent.adapters.IdentityValue.value" +
-                        "(value));");
+                        "(value));", fluentClassName);
         }
+    }
+
+    protected String getAdapterName(FluentConfig fc, Set<String> names) {
+        String name = fc.getName();
+        if (name.endsWith("Fluent")) name = name.substring(0, name.length() - 6);
+        if (names.contains(name)) {
+            name = fc.getType();
+            if (name.contains("<")) name = name.substring(0, name.indexOf('<'));
+            name = name.substring(name.lastIndexOf('.')+1);
+        }
+        name = JavaNames.CamelCase(name);
+        if (!names.add(name)) return null;
+        String adapterName = (name.matches("([AEIOU]).*") ? "an" : "a") + name;
+        return adapterName;
     }
     
     public static class FluentConfig {
@@ -1134,6 +1153,11 @@ public class FluentsGenerator {
             if (cast.endsWith("Fluent")) cast = cast.substring(0, cast.length() - "Fluent".length());
             return cast;
         }
+        
+        public boolean isValueSubclass(FluentConfig other) {
+            return this != other &&
+                    getValueClass().isA(other.getValueClass());
+        }
     }
     
     public static class FactoryConfig {
@@ -1168,12 +1192,14 @@ public class FluentsGenerator {
             return typeParameterMap;
         }
 
-        public Map<String, String> getTypeParameterMap(JavaMethod jm) {
+        public Map<String, String> getTypeParameterMapping(JavaMethod jm) {
             Map<String, String> map = getTypeParameterMap();
             List<JavaTypeVariable<JavaMethod>> tParams = jm.getTypeParameters();
             if (map.isEmpty() && !tParams.isEmpty()) {
                 map = new HashMap<>();
                 map.put(tParams.get(0).getName(), "Value");
+            } else {
+                map = new HashMap<>(map);
             }
             return map;
         }
@@ -1186,6 +1212,10 @@ public class FluentsGenerator {
             Map<Pattern, String> result = new HashMap<>();
             renameMap.entrySet().forEach(e -> result.put(Pattern.compile(e.getKey()), e.getValue()));
             return result;
+        }
+        
+        public Renamer getRenamer() {
+            return new Renamer(getRenamePatternMap());
         }
         
         Stream<JavaMethod> factoryMethods() {
@@ -1277,6 +1307,26 @@ public class FluentsGenerator {
         return list.stream();
     }
 
+    public static class Renamer {
+        
+        final Map<Pattern, String> renameMap;
+
+        public Renamer(Map<Pattern, String> renameMap) {
+            this.renameMap = renameMap;
+        }
+        
+        public String apply(String s) {
+            for (Map.Entry<Pattern, String> e: renameMap.entrySet()) {
+                s = e.getKey().matcher(s).replaceAll(e.getValue());
+            }
+            return s;
+        }
+        
+        public void applyToName(GeneratedMethod m) {
+            m.setName(apply(m.getName()));
+        }
+    }
+    
     
 //    private static <T> Stream<T> nonEmptyStream(Stream<T> stream, Supplier<T> defaultValue) {
 //        return StreamSupport.stream(new NonEmptySpliterator<>(stream, defaultValue), stream.isParallel());
